@@ -1,128 +1,4 @@
-// https://www.maths.tcd.ie/~fionn/misc/mt.php
-// http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/ARTICLES/mt.pdf
-
-class MT19937{
-    private static final int W = 32,
-                             N = 624,
-                             M = 397,
-                             R = 31,
-                             A = 0x9908B0DF,
-                             U = 11,
-                             D = 0xFFFFFFFF,
-                             S = 7,
-                             B = 0x9D2C5680,
-                             T = 15,
-                             C = 0xEFC60000,
-                             L = 18;
-    private static final long F = 1812433253;
-
-    private static final int lower_mask = (1 << R) - 1;
-    private static final int upper_mask = ~lower_mask;
-
-    private int[] state;
-    private int index;
-
-    public MT19937(int seed) {
-        state = new int[N]; index = N;
-        state[0] = seed;
-
-        for (int i = 1; i < N; i++) {
-            int x = state[i-1];
-            state[i] = (int)(F *(x^(x >>> (W - 2))) + i);
-        }
-    }
-
-    public int nextInt() {
-        if (index >= N)
-            twist();
-
-        int x = state[index];
-        int y = x^((x >>> U) & D);
-        y = y^((y << S) & B);
-        y = y^((y << T) & C);
-        index++;
-
-        return y^(y >>> L);
-    }
-
-    private void twist() {
-        for (int i = 0; i < N; i++) {
-            state[i] = state[(i+ M)% N]^xA(concatenate(state[i], state[(i+1)% N]));
-        }
-        index = 0;
-    }
-    private int concatenate(int a, int b) {
-        return (upper_mask & a)^(lower_mask & b);
-    }
-    private int xA(int x) {
-        if (x%2 == 0)
-            return x >>> 1;
-        return (x >>> 1)^ A;
-    }
-}
-
-class LCG{
-    private long z;
-    // m = 2147483647; a = 2147483629; c = 2147483587;
-    // m = 2147483647; a = 742938285; c = 0;
-    // m = 2147483647; a = 48271; c = 0;
-    // m = 2147483647; a = 16807; c = 0;
-    private static final int m = 2147483647;
-    private static final int a = 2147483629;
-    private static final int c = 2147483587;
-
-    public LCG(long seed) {
-        z = seed;
-    }
-
-    public int nextInt() {
-        z = (a*z + c)%m;
-        return (int)z;
-    }
-}
-
-class XORshift_32{
-    private int state;
-
-    public XORshift_32(int seed) {
-        state = seed;
-    }
-
-    public int nextInt() {
-        state ^= state << 13;
-        state ^= state >> 17;
-        state ^= state << 5;
-        return state;
-    }
-}
-
-class XORshift_128{
-    private int a;
-    private int b;
-    private int c;
-    private int d;
-
-    public XORshift_128(int seed) {
-        a = seed;
-        b = seed + 1;
-        c = seed + 2;
-        d = seed + 3;
-    }
-
-    public int nextInt() {
-        int t = d;
-
-        d = c;
-        c = b;
-        b = a;
-
-        t ^= t << 11;
-        t ^= t >> 8;
-        a = t^a^(a >> 19);
-
-        return a;
-    }
-}
+import java.util.Random;
 
 // https://mzucker.github.io/html/perlin-noise-math-faq.html
 
@@ -130,10 +6,10 @@ class Perlin_1985 {
     private static final int TABLE_SIZE = 256, TABLE_MASK = 255;
     private final int[] P = new int[2*TABLE_SIZE];
     private final double[][] G = new double[TABLE_SIZE][2];
-    private MT19937 generator;
+    private Random generator;
 
-    public Perlin_1985(int seed) {
-        generator = new MT19937(seed);
+    public Perlin_1985() {
+        generator = new Random();
         init();
     }
 
@@ -231,10 +107,10 @@ class Perlin_2002 {
                                          {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1},
                                          {1, 1, 0}, {-1, 1, 0}, {0, -1, 1}, {0, -1, -1}};
 
-    private MT19937 generator;
+    private Random generator;
 
-    public Perlin_2002(int seed) {
-        generator = new MT19937(seed);
+    public Perlin_2002() {
+        generator = new Random();
         init();
     }
 
