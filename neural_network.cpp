@@ -33,8 +33,8 @@ struct Layer {
 	double *A; // Activations
 	double *B; // Biases
 	double *W; // Weights
-	double *dB; // Derivatives of the loss function with respect to biases
-	double *dW; // Derivatives of the loss function with respect to weights
+	double *dB; // Derivatives of the cost function with respect to biases
+	double *dW; // Derivatives of the cost function with respect to weights
 			
 	int SIZE; int MATRIX;
 		
@@ -152,7 +152,7 @@ struct Softmax:public Layer {
 class NeuralNetwork {
 	protected:
 		vector<Layer *> layers;
-		double *dA; // Derivatives of the loss function with respect to activations
+		double *dA; // Derivatives of the cost function with respect to activations
 		int L;
 		
 		void get_output(double *input) {
@@ -161,20 +161,18 @@ class NeuralNetwork {
 				layers[L]->activate(layers[L-1]);
 			}
 		}
-		// cost function C
+		
 		virtual double cost(double *label)=0;
 		
-		// dC/da_j for the last layer.
 		virtual void get_dA(double *label)=0;
-			
-		// dC/da_k for every k in the layer L.
+		
 		void get_dA() {
 			int size = layers[L]->SIZE;
 			int next_size = layers[L+1]->SIZE;
 			double *result = new double[size];
 			
 			for (int k = 0; k < size; k++) {
-				double sum = 0; 							// dC/da_k
+				double sum = 0;
 				for (int j = 0; j < next_size; j++) {
 			    	sum += layers[L+1]->W[j*size+k]*
 			    		   layers[L+1]->activation_func_derivative(j)*
@@ -313,25 +311,6 @@ class CrossEntropyNetwork:public NeuralNetwork {
 	}
 	public: CrossEntropyNetwork(int input_size):NeuralNetwork(input_size) {}
 };
-
-double *get_vec(double a, double b, double c, double d) {
-	double *result = new double[4];
-	result[0] = a; result[1] = b; result[2] = c; result[3] = d;
-	return result;
-}
-
-void print_vec(double *array, int size) {
-	cout<<"["; int i = 0;
-	for (; i < size - 1; i++) {
-		cout << array[i]<<", ";
-	}
-	cout << array[i] << "]";
-}
-
-void del_vec(vector<double *>& vec) {
-	for (int i = 0; i < vec.size(); i++)
-		delete[] vec[i];
-}
 
 int main() {
 	srand(time(NULL));
