@@ -59,8 +59,11 @@ class Perlin_1985 {
     }
 
     public double noise(double x, double y) {
-        int floor_x = floor(x); double unit_x = x - floor_x;
-        int floor_y = floor(y); double unit_y = y - floor_y;
+        int floor_x = floor(x);
+        int floor_y = floor(y);
+        
+        double unit_x = x - floor_x;
+        double unit_y = y - floor_y;
 
         int x_0 = floor_x & TABLE_MASK;
         int y_0 = floor_y & TABLE_MASK;
@@ -102,11 +105,6 @@ class Perlin_1985 {
 class Perlin_2002 {
     private static final int TABLE_SIZE = 256, TABLE_MASK = 255;
     private final int[] P = new int[2*TABLE_SIZE];
-    private static final double[][] G = {{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0},
-                                         {1, 0, 1}, {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1},
-                                         {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1},
-                                         {1, 1, 0}, {-1, 1, 0}, {0, -1, 1}, {0, -1, -1}};
-
     private Random generator;
 
     public Perlin_2002() {
@@ -143,16 +141,36 @@ class Perlin_2002 {
     }
 
     private double influence(int grid_x, int grid_y, int grid_z, double vec_x, double vec_y, double vec_z) {
-        double[] gradient = G[(P[P[P[grid_x] + grid_y] + grid_z]) & 15];
-        return gradient[0]*vec_x +
-               gradient[1]*vec_y +
-               gradient[2]*vec_z;
+        int hash = P[P[P[grid_x] + grid_y] + grid_z] & 15;
+        switch (hash) {
+            case 0: return    vec_x + vec_y;
+            case 1: return    vec_x + vec_z;
+            case 2: return    vec_z + vec_y;
+            case 3: return  - vec_x + vec_y;
+            case 4: return  - vec_x + vec_z;
+            case 5: return  - vec_z + vec_y;
+            case 6: return    vec_x - vec_y;
+            case 7: return    vec_x - vec_z;
+            case 8: return    vec_z - vec_y;
+            case 9: return  - vec_x - vec_y;
+            case 10: return - vec_x - vec_z;
+            case 11: return - vec_z - vec_y;
+            case 12: return   vec_x + vec_y;
+            case 13: return - vec_x + vec_y;
+            case 14: return - vec_z + vec_y;
+            case 15: return - vec_z - vec_y;
+        }
+        return 0;
     }
 
     public double noise(double x, double y, double z) {
-        int floor_x = floor(x); double unit_x = x - floor_x;
-        int floor_y = floor(y); double unit_y = y - floor_y;
-        int floor_z = floor(z); double unit_z = z - floor_z;
+        int floor_x = floor(x); 
+        int floor_y = floor(y); 
+        int floor_z = floor(z);
+        
+        double unit_x = x - floor_x;
+        double unit_y = y - floor_y;
+        double unit_z = z - floor_z;
 
         int x_0 = floor_x & TABLE_MASK;
         int y_0 = floor_y & TABLE_MASK;
