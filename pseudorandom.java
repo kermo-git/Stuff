@@ -71,7 +71,7 @@ class LCG{
     }
 
     public int nextInt() {
-        Z = (A * Z + C)% M;
+        Z = (A*Z + C)%M;
         return (int) Z;
     }
 }
