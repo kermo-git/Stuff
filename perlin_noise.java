@@ -1,31 +1,20 @@
 import java.util.Random;
 
 // https://mzucker.github.io/html/perlin-noise-math-faq.html
+// https://www.scratchapixel.com/lessons/procedural-generation-virtual-worlds/perlin-noise-part-2
 
 class Perlin_1985 {
     private static final int TABLE_SIZE = 256, TABLE_MASK = 255;
     private final int[] P = new int[2*TABLE_SIZE];
     private final double[][] G = new double[TABLE_SIZE][2];
-    private Random generator;
+    private Random generator = new Random();
 
     public Perlin_1985() {
-        generator = new Random();
-        init();
-    }
-
-    private void normalize(double[] vec) {
-        double x = vec[0], y = vec[1];
-        double s = Math.sqrt(x*x + y*y);
-        vec[0] = x/s;
-        vec[1] = y/s;
-    }
-
-    private void init() {
         int i, k, j;
         for (i = 0; i < TABLE_SIZE; i++) {
             for (j = 0; j < 2; j++) {
-                k = Math.abs(generator.nextInt());
-                G[i][j] = (k%(2*TABLE_SIZE) - TABLE_SIZE)*1.0/TABLE_SIZE;
+                k = generator.nextInt() & (2*TABLE_SIZE-1);
+                G[i][j] = (k - TABLE_SIZE)*1.0/TABLE_SIZE;
             }
             normalize(G[i]);
             P[i] = i;
@@ -41,44 +30,48 @@ class Perlin_1985 {
         }
     }
 
-    private static double s_curve(double x) {
-        return x*x*(3 - 2*x);
+    private static void normalize(double[] vec) {
+        double x = vec[0], y = vec[1];
+        double s = Math.sqrt(x*x + y*y);
+        vec[0] = x/s;
+        vec[1] = y/s;
     }
 
-    private static double lerp(double x, double a, double b) {
-        return a + x*(b - a);
+    private static double fade(double t) {
+        return t*t*(3 - 2*t);
     }
 
-    private static int floor(double x) {
-        return (x >= 0)? (int)x : (int)x - 1;
+    private static double lerp(double t, double a, double b) {
+        return a + t*(b - a);
     }
 
-    private double influence(int grid_x, int grid_y, double vec_x, double vec_y) {
-        double[] gradient = G[P[P[grid_x] + grid_y]];
-        return gradient[0]*vec_x + gradient[1]*vec_y;
+    private static int floor(double t) {
+        return (t >= 0)? (int)t : (int)t - 1;
+    }
+
+    private double influence(int Xi, int Yi, double x, double y) {
+        double[] grad = G[P[P[Xi] + Yi]];
+        return grad[0]*x + grad[1]*y;
     }
 
     public double noise(double x, double y) {
-        int floor_x = floor(x);
-        int floor_y = floor(y);
-        
-        double unit_x = x - floor_x;
-        double unit_y = y - floor_y;
+        int X0 = floor(x) & TABLE_MASK;
+        int Y0 = floor(y) & TABLE_MASK;
+        int X1 = (X0 + 1) & TABLE_MASK;
+        int Y1 = (Y0 + 1) & TABLE_MASK;
 
-        int x_0 = floor_x & TABLE_MASK;
-        int y_0 = floor_y & TABLE_MASK;
-        int x_1 = (x_0 + 1) & TABLE_MASK;
-        int y_1 = (y_0 + 1) & TABLE_MASK;
+        x -= floor(x);
+        y -= floor(y);
 
-        double s = influence(x_0, y_0, unit_x,   unit_y);
-        double t = influence(x_1, y_0, unit_x-1, unit_y);
-        double u = influence(x_0, y_1, unit_x,   unit_y-1);
-        double v = influence(x_1, y_1, unit_x-1, unit_y-1);
+        double s = influence(X0, Y0, x,   y);
+        double t = influence(X1, Y0, x-1, y);
+        double u = influence(X0, Y1, x,   y-1);
+        double v = influence(X1, Y1, x-1, y-1);
 
-        double S_x = s_curve(unit_x);
-        double S_y = s_curve(unit_y);
+        double Sx = fade(x);
+        double Sy = fade(y);
 
-        return lerp(S_y, lerp(S_x, s, t), lerp(S_x, u, v));
+        return lerp(Sy, lerp(Sx, s, t), lerp(Sx, u, v));
     }
 
     public double octave_noise(double x, double y, int octaves, double persistence) {
@@ -90,9 +83,7 @@ class Perlin_1985 {
         for (int i = 0; i < octaves; i++) {
             double noise = (noise(frequency*x, frequency*y) + 1)/2;
             total += amplitude*noise;
-
             max_value += amplitude;
-
             amplitude *= persistence;
             frequency *= 2;
         }
@@ -101,18 +92,14 @@ class Perlin_1985 {
 }
 
 // https://mrl.nyu.edu/~perlin/paper445.pdf
+// https://flafla2.github.io/2014/08/09/perlinnoise.html
 
 class Perlin_2002 {
     private static final int TABLE_SIZE = 256, TABLE_MASK = 255;
     private final int[] P = new int[2*TABLE_SIZE];
-    private Random generator;
+    private Random generator = new Random();
 
     public Perlin_2002() {
-        generator = new Random();
-        init();
-    }
-
-    private void init() {
         int i, k, j;
         for (i = 0; i < TABLE_SIZE; i++) {
             P[i] = i;
@@ -128,73 +115,69 @@ class Perlin_2002 {
         }
     }
 
-    private double s_curve(double x) {
-        return x*x*x*(x*(x*6 - 15) + 10);
+    private static double fade(double t) {
+        return t*t*t*(t*(t*6 - 15) + 10);
     }
 
-    private double lerp(double x, double a, double b) {
-        return a + x*(b - a);
+    private static double lerp(double t, double a, double b) {
+        return a + t*(b - a);
     }
 
-    private static int floor(double x) {
-        return (x >= 0)? (int)x : (int)x - 1;
+    private static int floor(double t) {
+        return (t >= 0)? (int)t : (int)t - 1;
     }
 
-    private double influence(int grid_x, int grid_y, int grid_z, double vec_x, double vec_y, double vec_z) {
-        int hash = P[P[P[grid_x] + grid_y] + grid_z] & 15;
+    private double influence(int Xi, int Yi, int Zi, double x, double y, double z) {
+        int hash = P[P[P[Xi] + Yi] + Zi] & 15;
         switch (hash) {
-            case 0: return    vec_x + vec_y;
-            case 1: return    vec_x + vec_z;
-            case 2: return    vec_z + vec_y;
-            case 3: return  - vec_x + vec_y;
-            case 4: return  - vec_x + vec_z;
-            case 5: return  - vec_z + vec_y;
-            case 6: return    vec_x - vec_y;
-            case 7: return    vec_x - vec_z;
-            case 8: return    vec_z - vec_y;
-            case 9: return  - vec_x - vec_y;
-            case 10: return - vec_x - vec_z;
-            case 11: return - vec_z - vec_y;
-            case 12: return   vec_x + vec_y;
-            case 13: return - vec_x + vec_y;
-            case 14: return - vec_z + vec_y;
-            case 15: return - vec_z - vec_y;
+            case 0:  return   x + y;
+            case 1:  return - x + y;
+            case 2:  return   x - y;
+            case 3:  return - x - y;
+            case 4:  return   x + z;
+            case 5:  return - x + z;
+            case 6:  return   x - z;
+            case 7:  return - x - z;
+            case 8:  return   y + z;
+            case 9:  return - y + z;
+            case 10: return   y - z;
+            case 11: return - y - z;
+            case 12: return   y + x;
+            case 13: return - y + z;
+            case 14: return   y - x;
+            case 15: return - y - z;
+            default: return 0;
         }
-        return 0;
     }
 
     public double noise(double x, double y, double z) {
-        int floor_x = floor(x); 
-        int floor_y = floor(y); 
-        int floor_z = floor(z);
-        
-        double unit_x = x - floor_x;
-        double unit_y = y - floor_y;
-        double unit_z = z - floor_z;
+        int X0 = floor(x) & TABLE_MASK;
+        int Y0 = floor(y) & TABLE_MASK;
+        int Z0 = floor(z) & TABLE_MASK;
+        int X1 = (X0 + 1) & TABLE_MASK;
+        int Y1 = (Y0 + 1) & TABLE_MASK;
+        int Z1 = (Z0 + 1) & TABLE_MASK;
 
-        int x_0 = floor_x & TABLE_MASK;
-        int y_0 = floor_y & TABLE_MASK;
-        int z_0 = floor_z & TABLE_MASK;
-        int x_1 = (x_0 + 1) & TABLE_MASK;
-        int y_1 = (y_0 + 1) & TABLE_MASK;
-        int z_1 = (z_0 + 1) & TABLE_MASK;
+        x -= floor(x);
+        y -= floor(y);
+        z -= floor(z);
 
-        double a = influence(x_0, y_0, z_0, unit_x,   unit_y,   unit_z);
-        double b = influence(x_1, y_0, z_0, unit_x-1, unit_y,   unit_z);
-        double c = influence(x_0, y_1, z_0, unit_x,   unit_y-1, unit_z);
-        double d = influence(x_1, y_1, z_0, unit_x-1, unit_y-1, unit_z);
-        double e = influence(x_0, y_0, z_1, unit_x,   unit_y,   unit_z-1);
-        double f = influence(x_1, y_0, z_1, unit_x-1, unit_y,   unit_z-1);
-        double g = influence(x_0, y_1, z_1, unit_x,   unit_y-1, unit_z-1);
-        double h = influence(x_1, y_1, z_1, unit_x-1, unit_y-1, unit_z-1);
+        double a = influence(X0, Y0, Z0, x,   y,   z);
+        double b = influence(X1, Y0, Z0, x-1, y,   z);
+        double c = influence(X0, Y1, Z0, x,   y-1, z);
+        double d = influence(X1, Y1, Z0, x-1, y-1, z);
+        double e = influence(X0, Y0, Z1, x,   y,   z-1);
+        double f = influence(X1, Y0, Z1, x-1, y,   z-1);
+        double g = influence(X0, Y1, Z1, x,   y-1, z-1);
+        double h = influence(X1, Y1, Z1, x-1, y-1, z-1);
 
-        double S_x = s_curve(unit_x);
-        double S_y = s_curve(unit_y);
-        double S_z = s_curve(unit_z);
+        double Sx = fade(x);
+        double Sy = fade(y);
+        double Sz = fade(z);
 
-        return lerp(S_z, lerp(S_y, lerp(S_x, a, b),
-                                   lerp(S_x, c, d)),
-                         lerp(S_y, lerp(S_x, e, f),
-                                   lerp(S_x, g, h)));
+        return lerp(Sz, lerp(Sy, lerp(Sx, a, b),
+                                 lerp(Sx, c, d)),
+                        lerp(Sy, lerp(Sx, e, f),
+                                 lerp(Sx, g, h)));
     }
 }
