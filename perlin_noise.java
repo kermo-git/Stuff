@@ -7,10 +7,11 @@ class Perlin_1985 {
     private static final int TABLE_SIZE = 256, TABLE_MASK = 255;
     private final int[] P = new int[2*TABLE_SIZE];
     private final double[][] G = new double[TABLE_SIZE][2];
-    private Random generator = new Random();
 
     public Perlin_1985() {
+        Random generator = new Random();
         int i, k, j;
+        
         for (i = 0; i < TABLE_SIZE; i++) {
             for (j = 0; j < 2; j++) {
                 k = generator.nextInt() & (2*TABLE_SIZE-1);
@@ -97,10 +98,11 @@ class Perlin_1985 {
 class Perlin_2002 {
     private static final int TABLE_SIZE = 256, TABLE_MASK = 255;
     private final int[] P = new int[2*TABLE_SIZE];
-    private Random generator = new Random();
 
     public Perlin_2002() {
+        Random generator = new Random();
         int i, k, j;
+        
         for (i = 0; i < TABLE_SIZE; i++) {
             P[i] = i;
         }
