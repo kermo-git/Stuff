@@ -175,8 +175,8 @@ class NeuralNetwork {
 				double sum = 0;
 				for (int j = 0; j < next_size; j++) {
 			    	sum += layers[L+1]->W[j*size+k]*
-			    		   layers[L+1]->activation_func_derivative(j)*
-						   dA[j];
+			    	       layers[L+1]->activation_func_derivative(j)*
+				       dA[j];
 				}
 				result[k] = sum;
 			}
@@ -192,8 +192,8 @@ class NeuralNetwork {
 			for (int j = 0; j < size; j++) {
 				for (int k = 0; k < prev_size; k++) {
 				    result[dW_index] = layers[L-1]->A[k]*
-				    				   layers[L]->activation_func_derivative(j)*
-								       dA[j];
+				    		       layers[L]->activation_func_derivative(j)*
+						       dA[j];
 					dW_index++;
 				}
 			}
@@ -250,7 +250,7 @@ class NeuralNetwork {
 		}
 		
 		void train_minibatch(vector<double *>& inputs,
-				   			 vector<double *>& labels, double learning_rate) {
+				     vector<double *>& labels, double learning_rate) {
 			int size = inputs.size();
 			for (int s = 0; s < size; s++) {
 				get_output(inputs[s]);
