@@ -1,3 +1,7 @@
+// https://www.maths.tcd.ie/~fionn/misc/mt.php
+// https://www.ibm.com/support/knowledgecenter/en/SSLVMB_22.0.0/com.ibm.spss.statistics.algorithms/alg_random-numbers_mersenne.htm
+// http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/ARTICLES/mt.pdf
+
 class MT19937 {
     private static final int W = 32,
                              N = 624,
