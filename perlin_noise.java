@@ -183,3 +183,98 @@ class Perlin_2002 {
                                  lerp(Sx, g, h)));
     }
 }
+
+// https://www.csee.umbc.edu/~olano/s2002c36/ch02.pdf
+// http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
+// https://github.com/SRombauts/SimplexNoise
+
+class Simplex {
+    private Simplex() {}
+    private static int i, j, k;
+    private static double u, v, w;
+
+    public static double noise(double x, double y, double z) {
+        double s = (x + y + z)/3.0;
+        i = floor(x + s);
+        j = floor(y + s);
+        k = floor(z + s);
+
+        s = (i + j + k)/6.0;
+        u = x - i + s;
+        v = y - j + s;
+        w = z - k + s;
+
+        int i1, j1, k1, i2, j2, k2;
+
+        if (u > v) {
+            if (v > w) {
+                i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0;
+            } else if (w > u) {
+                i1 = 0; j1 = 0; k1 = 1; i2 = 1; j2 = 0; k2 = 1;
+            } else {
+                i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 0; k2 = 1;
+            }
+        } else {
+            if (w < u) {
+                i1 = 0; j1 = 1; k1 = 0; i2 = 1; j2 = 1; k2 = 0;
+            } else if (w > v) {
+                i1 = 0; j1 = 0; k1 = 1; i2 = 0; j2 = 1; k2 = 1;
+            } else {
+                i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1;
+            }
+        }
+
+        double n0 = influence(0, 0, 0);
+        double n1 = influence(i1, j1, k1);
+        double n2 = influence(i2, j2, k2);
+        double n3 = influence(1, 1, 1);
+
+        return 3*(n0 + n1 + n2 + n3);
+    }
+
+    private static int floor(double t) {
+        return (t >= 0)? (int)t : (int)t - 1;
+    }
+
+    private static double influence(int di, int dj, int dk) {
+        double s = (di + dj + dk)/6.0;
+        double x = u - di + s;
+        double y = v - dj + s;
+        double z = w - dk + s;
+
+        double t = 0.6 - (x*x + y*y + z*z);
+        if (t < 0) return 0;
+
+        int h = hash(i + di, j + dj, k + dk);
+        return 8*t*t*t*t*grad(h, x, y, z);
+    }
+
+    private static double grad(int hash, double x, double y, double z) {
+        int b10 = hash & 3,
+            b2 = bit(hash, 2), b3 = bit(hash, 3),
+            b4 = bit(hash, 4), b5 = bit(hash, 5);
+        double p, q, r;
+
+        switch (b10) {
+            case 1: p = x; q = y; r = z; break;
+            case 2: p = y; q = z; r = x; break;
+            default: p = z; q = x; r = y; break;
+        }
+        p = (b5 == b3)? -p : p;
+        q = (b5 == b4)? -q : q;
+        r = (b5 != (b4 ^ b3))? -r : r;
+
+        return p + ((b10 == 0)? q + r : (b2 == 0)? q : r);
+    }
+    private static int hash(int i, int j, int k) {
+        return b(i, j, k, 0) + b(j, k, i, 1) + b(k, i, j, 2) + b(i, j, k, 3) +
+               b(j, k, i, 4) + b(k, i, j, 5) + b(i, j, k, 6) + b(j, k, i, 7);
+    }
+    private static int bit(int i, int b) {
+        return (i >> b) & 1;
+    }
+    private static int b(int i, int j, int k, int B) {
+        return BIT_PATTERNS[(bit(i, B) << 2) | (bit(j, B) << 1) | bit(k, B)];
+    }
+    private static final int[] BIT_PATTERNS = {0x15, 0x38, 0x32, 0x2C, 0x0D, 0x13, 0x07, 0x2A};
+}
