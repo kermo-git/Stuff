@@ -118,6 +118,10 @@ class Perlin_2002 {
 
     static { for (int i = 0; i < 256 ; i++) P[256 + i] = P[i] = permutation[i]; }
 
+    private static int[][] G = {{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0},
+                                {1, 0, 1}, {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1},
+                                {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1},
+                                {1, 1, 0}, {0, -1, 1}, {-1, 1, 0}, {0, -1, -1}};
 
     private Perlin_2002() {}
 
@@ -138,19 +142,17 @@ class Perlin_2002 {
     }
 
     private static double grad(int hash, double x, double y, double z) {
-        hash = hash & 15;
-        double u = (hash < 8)? x : y;
-        double v = (hash < 4)? y : (hash==12 || hash==14)? x : z;
-        return ((hash & 1) == 0 ? u : -u) + ((hash & 2) == 0 ? v : -v);
+        int[] gradient = G[hash & 15];
+        return gradient[0]*x + gradient[1]*y + gradient[2]*z;
     }
 
     public static double noise(double x, double y, double z) {
         int X0 = floor(x) & 255;
         int Y0 = floor(y) & 255;
         int Z0 = floor(z) & 255;
-        int X1 = X0 + 1;
-        int Y1 = Y0 + 1;
-        int Z1 = Z0 + 1;
+        int X1 = (X0 + 1) & 255;
+        int Y1 = (Y0 + 1) & 255;
+        int Z1 = (Z0 + 1) & 255;
 
         x -= floor(x);
         y -= floor(y);
