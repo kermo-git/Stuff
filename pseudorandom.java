@@ -51,11 +51,11 @@ class MT19937 {
         index = 0;
     }
 
-    private int concatenate(int a, int b) {
+    private static int concatenate(int a, int b) {
         return (UPPER_MASK & a)^(LOWER_MASK & b);
     }
 
-    private int xA(int x) {
+    private static int xA(int x) {
         if (x%2 == 0)
             return x >>> 1;
         return (x >>> 1)^A;
