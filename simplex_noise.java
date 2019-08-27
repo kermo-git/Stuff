@@ -27,7 +27,7 @@ class Simplex {
     private static double u, v, w;
 
     /**
-     * The basic noise 3D function. Given a point in (x, y, z) space, it returns
+     * 3D noise function. Given a point in (x, y, z) space, it returns
      * a pseudo-random noise value in the range [-1, 1].
      *
      * @param x an x-coordinate
@@ -36,16 +36,20 @@ class Simplex {
      * @return the noise value at (x, y, z)
      */
     public static double noise(double x, double y, double z) {
+        // Skew the input coordinates to (i, j, k)-space and find the origin of the current simplex.
         double s = (x + y + z)/3.0;
         i = floor(x + s);
         j = floor(y + s);
         k = floor(z + s);
-
+        // Unskew the origin back to (x, y, z) space and find the distance vector (origin -> input point)
         s = (i + j + k)/6.0;
         u = x - i + s;
         v = y - j + s;
         w = z - k + s;
-
+        
+        /* Determine which simplex we're in. This means finding the coordinates for each of the simplex corners 
+        relative to the origin corner in (i, j, k)-space. The origin itself is at (0, 0, 0) and the rest are 
+        (i1, j1, k1), (i2, j2, k2) and (1, 1, 1). This part is based on Stefan Gustafson's code.*/
         int i1, j1, k1, i2, j2, k2;
 
         if (u > v) {
@@ -65,12 +69,12 @@ class Simplex {
                 i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1;
             }
         }
-
+        // Calculate noise contributions from every corner.
         double n0 = influence(0, 0, 0);
         double n1 = influence(i1, j1, k1);
         double n2 = influence(i2, j2, k2);
         double n3 = influence(1, 1, 1);
-
+        // Add all the contributions together and scale the result to [-1, 1].
         return 3*(n0 + n1 + n2 + n3);
     }
 
@@ -113,23 +117,26 @@ class Simplex {
     }
 
     /**
-     * Calculates the noise contribution from a simplex corner, given its distance vector
-     * from the origin in (i, j, k) space.
+     * Calculates the noise contribution from a simplex corner, given its coordinates
+     * relative to the origin in (i, j, k) space.
      *
-     * @param di the i-component of the distance vector
-     * @param dj the j-component of the distance vector
-     * @param dk the k-component of the distance vector
+     * @param di the i-coordinate of the corner
+     * @param dj the j-coordinate of the corner
+     * @param dk the k-coordinate of the corner
      * @return the result
      */
     private static double influence(int di, int dj, int dk) {
+        // Skew the input coordinates to (x, y, z)-space and find the distance vector
+        // (corner -> point being evaluated)
         double s = (di + dj + dk)/6.0;
         double x = u - di + s;
         double y = v - dj + s;
         double z = w - dk + s;
-
+        
+        // Calculate the result
         double t = 0.6 - (x*x + y*y + z*z);
         if (t < 0) return 0;
-
+        // Find the absolute coordinates of the corner in (i, j, k)-space and calculate its hashed gradient index.
         int h = hash(i + di, j + dj, k + dk);
         return 8*t*t*t*t*grad(h, x, y, z);
     }
@@ -142,8 +149,7 @@ class Simplex {
      * (1, 0, 1), (-1, 0, 1), (1, 0, -1), (-1, 0, -1)
      *
      * It then calculates the dot product between the gradient vector and the distance
-     * vector (from the corner to to the point being evaluated in (x, y, z)-space) given
-     * as an argument.
+     * vector (corner -> point being evaluated, (x, y, z)-space) given as an argument.
      *
      * @param hash  the hashed gradient index
      * @param x the x-component of the distance vector
