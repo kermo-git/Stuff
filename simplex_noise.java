@@ -33,7 +33,7 @@ class Simplex {
      * @param x an x-coordinate
      * @param y a y-coordinate
      * @param z a z-coordinate
-     * @return the noise value at (x, y, z)
+     * @return the noise value at (x, y, z) in the range [-1, 1]
      */
     public static double noise(double x, double y, double z) {
         // Skew the input coordinates to (i, j, k)-space and find the origin of the current simplex.
@@ -79,24 +79,25 @@ class Simplex {
     }
 
     /**
-     * Creates 2D fractal noise by adding multiple noises together. Each subsequent noise, called
+     * Creates 3D fractal noise by adding multiple noises together. Each subsequent noise, called
      * an octave, has twice the frequency of the previous octave. This method is taken from
      * <a href="https://flafla2.github.io/2014/08/09/perlinnoise.html">here</a>.
      *
      * @param x an x-coordinate
      * @param y a y-coordinate
+     * @param z a z-coordinate
      * @param octaves the number of octaves
      * @param persistence For octave i, amplitude = persistence^i
-     * @return the noise value at (x, y)
+     * @return the noise value at (x, y, z) in the range [-1, 1]
      */
-    public static double fractal_noise(double x, double y, int octaves, double persistence) {
+    public static double fractal_noise(double x, double y, double z, int octaves, double persistence) {
         double total = 0;
         double frequency = 1;
         double amplitude = 1;
         double max_value = 0;
 
         for (int i = 0; i < octaves; i++) {
-            total += amplitude*noise(frequency*x, frequency*y, 0);
+            total += amplitude*noise(frequency*x, frequency*y, frequency*z);
             max_value += amplitude;
             amplitude *= persistence;
             frequency *= 2;
