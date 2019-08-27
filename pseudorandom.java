@@ -18,11 +18,11 @@ class MT19937 {
                              F = 1812433253,
                              LOWER_MASK = (1 << R) - 1,
                              UPPER_MASK = ~LOWER_MASK;
-    private int[] state;
-    private int index;
+
+    private final int[] state = new int[N];
+    private int index = N;
 
     public MT19937(int seed) {
-        state = new int[N]; index = N;
         state[0] = seed;
 
         for (int i = 1; i < N; i++) {
@@ -38,10 +38,10 @@ class MT19937 {
         int x = state[index];
         index++;
         
-        int y = x^((x >>> U) & D);
-        y = y^((y << S) & B);
-        y = y^((y << T) & C);
-        return y^(y >>> L);
+        x = x^((x >>> U) & D);
+        x = x^((x << S) & B);
+        x = x^((x << T) & C);
+        return x^(x >>> L);
     }
 
     private void twist() {
