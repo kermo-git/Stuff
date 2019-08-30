@@ -48,7 +48,7 @@ abstract class WELL {
         int result = ((x << r)^(x >>> (W - r))) & ds;
         return ((x & dt) != 0)? a^result : result;
     }
-    protected int TEMPER(int x, int b, int c) {
+    protected static int TEMPER(int x, int b, int c) {
         int z = x^((x << 7) & b);
         return z^((z << 15) & c);
     }
