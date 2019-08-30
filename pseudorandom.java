@@ -56,7 +56,7 @@ class MT19937 {
     }
 
     private static int xA(int x) {
-        if (x%2 == 0)
+        if (x & 1 == 0)
             return x >>> 1;
         return (x >>> 1)^A;
     }
