@@ -80,6 +80,8 @@ class LCG{
     }
 }
 
+// https://www.jstatsoft.org/v08/i14/paper
+
 class XORshift_32{
     private int state;
 
@@ -101,11 +103,11 @@ class XORshift_128{
     private int c;
     private int d;
 
-    public XORshift_128(int seed) {
-        a = seed;
-        b = seed + 1;
-        c = seed + 2;
-        d = seed + 3;
+    public XORshift_128(int a, int b, int c, int d) {
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.d = d;
     }
 
     public int nextInt() {
