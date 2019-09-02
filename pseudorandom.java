@@ -80,6 +80,61 @@ class LCG{
     }
 }
 
+class rand48 {
+    private static long
+            M = (1L << 48) - 1,
+            A = 25214903917L,
+            C = 11L;
+    private long seed;
+
+    public rand48(long seed) {
+        this.seed = seed ^ A & M;
+    }
+
+    // Reference: if seed = 3, the following sequence is generated:
+    //-1155099828, -1879439976, 304908421, -836442134, 288278256, -1795872892, -995758198, -1824734168, 976394918, -634239373, ...
+    public int rand() {
+        seed = (seed* A + C) & M;
+        return (int) (seed >>> 16);
+    }
+}
+
+class MS_Visual_C_rand {
+    private static final long
+            M = 1L << 31,
+            A = 214013L,
+            C = 2531011L;
+    private long seed;
+
+    public MS_Visual_C_rand(long seed) { this.seed = seed; }
+
+    // Reference: if seed = 3, the following sequence is generated:
+    // 48, 7196, 9294, 9091, 7031, 23577, 17702, 23503, 27217, 12168, ...
+    public int rand() {
+        seed = (seed*A + C) % M;            // same as (seed*A + C) & (M-1)
+        long result = (seed/65536) % 32768; // same as (seed >>> 16) & 32767
+        return (int)result;
+    }
+}
+
+class ANSI_C_rand {
+    private static final long
+            M = 1L << 31,
+            A = 1103515245L,
+            C = 12345L;
+    private long seed;
+
+    public ANSI_C_rand(long seed) { this.seed = seed; }
+
+    // Reference: if seed = 3, the following sequence is generated:
+    // 17747, 7107, 10365, 8312, 20622, ...
+    public int rand() {
+        seed = (seed*A + C) % M;           // same as (seed*A + C) & (M-1)
+        long result = (seed/65536) % 32768; // same as (seed >>> 16) & 32767
+        return (int)result;
+    }
+} 
+
 // https://www.jstatsoft.org/v08/i14/paper
 
 class XORshift_32{
