@@ -62,24 +62,6 @@ class MT19937 {
     }
 }
 
-class LCG{
-    private long Z;
-    // private static final int M = 2147483647, A = 2147483629, C = 2147483587;
-    // private static final int M = 2147483647, A = 742938285, C = 0;
-    // private static final int M = 2147483647, A = 48271, C = 0;
-    // private static final int M = 2147483647, A = 16807, C = 0;
-    private static final int M = 2147483647, A = 2147483629, C = 2147483587;
-
-    public LCG(long seed) {
-        Z = seed;
-    }
-
-    public int nextInt() {
-        Z = (A*Z + C)%M;
-        return (int) Z;
-    }
-}
-
 class rand48 {
     private static long
             M = (1L << 48) - 1,
@@ -133,49 +115,28 @@ class ANSI_C_rand {
         long result = (seed/65536) % 32768; // same as (seed >>> 16) & 32767
         return (int)result;
     }
-} 
+}
 
-// https://www.jstatsoft.org/v08/i14/paper
-
-class XORshift_32{
-    private int state;
-
-    public XORshift_32(int seed) {
-        state = seed;
-    }
-
-    public int nextInt() {
-        state ^= state << 13;
-        state ^= state >>> 17;
-        state ^= state << 5;
-        return state;
+class MINSTD {
+    private static final long
+            M = 2147483647,
+            A = 16807; // 48271
+    private long seed;
+    public MINSTD(long seed) {this.seed = seed;}
+    public int rand() {
+        seed = (seed*A) % M;
+        return (int)seed;
     }
 }
 
-class XORshift_128{
-    private int a;
-    private int b;
-    private int c;
-    private int d;
-
-    public XORshift_128(int a, int b, int c, int d) {
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        this.d = d;
-    }
-
-    public int nextInt() {
-        int t = d;
-
-        d = c;
-        c = b;
-        b = a;
-
-        t ^= t << 11;
-        t ^= t >>> 8;
-        a = t^a^(a >>> 19);
-
-        return a;
+class RANDU {
+    private static final long
+            M = 1L << 31,
+            A = 65539;
+    private long seed;
+    public RANDU(long seed) {this.seed = seed;}
+    public int rand() {
+        seed = (seed*A) % M;
+        return (int)seed;
     }
 }
