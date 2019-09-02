@@ -62,81 +62,66 @@ class MT19937 {
     }
 }
 
-class rand48 {
-    private static long
-            M = (1L << 48) - 1,
-            A = 25214903917L,
-            C = 11L;
+class LCG {
+    private final long A, C, M;
     private long seed;
 
-    public rand48(long seed) {
-        this.seed = seed ^ A & M;
+    private LCG(long seed, long A, long C, long M) {
+        this.seed = seed; this.A = A; this.C = C; this.M = M;
     }
 
-    // Reference: if seed = 3, the following sequence is generated:
-    //-1155099828, -1879439976, 304908421, -836442134, 288278256, -1795872892, -995758198, -1824734168, 976394918, -634239373, ...
     public int rand() {
-        seed = (seed* A + C) & M;
-        return (int) (seed >>> 16);
+        seed = (seed*A + C) % M;
+        return (int) seed;
     }
-}
-
-class MS_Visual_C_rand {
-    private static final long
-            M = 1L << 31,
-            A = 214013L,
-            C = 2531011L;
-    private long seed;
-
-    public MS_Visual_C_rand(long seed) { this.seed = seed; }
-
-    // Reference: if seed = 3, the following sequence is generated:
-    // 48, 7196, 9294, 9091, 7031, 23577, 17702, 23503, 27217, 12168, ...
-    public int rand() {
-        seed = (seed*A + C) % M;            // same as (seed*A + C) & (M-1)
-        long result = (seed/65536) % 32768; // same as (seed >>> 16) & 32767
-        return (int)result;
+    
+    public static LCG MINSTD0 (long seed) {
+        return new LCG(seed, 16807, 0, 1L << 31 - 1);
     }
-}
 
-class ANSI_C_rand {
-    private static final long
-            M = 1L << 31,
-            A = 1103515245L,
-            C = 12345L;
-    private long seed;
-
-    public ANSI_C_rand(long seed) { this.seed = seed; }
-
-    // Reference: if seed = 3, the following sequence is generated:
-    // 17747, 7107, 10365, 8312, 20622, ...
-    public int rand() {
-        seed = (seed*A + C) % M;           // same as (seed*A + C) & (M-1)
-        long result = (seed/65536) % 32768; // same as (seed >>> 16) & 32767
-        return (int)result;
+    public static LCG MINSTD (long seed) {
+        return new LCG(seed, 48271, 0, 1L << 31 - 1);
     }
-}
-
-class MINSTD {
-    private static final long
-            M = 2147483647,
-            A = 16807; // 48271
-    private long seed;
-    public MINSTD(long seed) {this.seed = seed;}
-    public int rand() {
-        seed = (seed*A) % M;
-        return (int)seed;
+    
+    public static LCG RANDU(long seed) {
+        return new LCG(seed, 65539, 0, 1L << 31);
     }
-}
 
-class RANDU {
-    private static final long
-            M = 1L << 31,
-            A = 65539;
-    private long seed;
-    public RANDU(long seed) {this.seed = seed;}
-    public int rand() {
-        seed = (seed*A) % M;
-        return (int)seed;
+    public static LCG rand48(long seed) {
+        long A = 25214903917L, C = 11L, M = 1L << 48;
+        long scrambled_seed = seed ^ A & (M - 1);
+
+        return new LCG(scrambled_seed, A, C, M) {
+            
+            @Override
+            public int rand() {
+                super.rand();
+                return (int)(seed >>> 16);
+            }
+        };
+    }
+
+    public static LCG ANSI_C_standard(long seed) {
+        // Reference for seed = 3 : 17747, 7107, 10365, 8312, 20622, ...
+        return new LCG(seed, 1103515245L, 12345L, 1L << 31) {
+            
+            @Override
+            public int rand() {
+                super.rand();
+                return (int)((seed >>> 16) & 0x7FFF);
+            }
+        };
+    }
+
+    public static LCG MS_Visual_C(long seed) {
+        // Reference for seed = 3 : 48, 7196, 9294, 9091, 7031, 23577, 17702, 23503, 27217, 12168, ...
+        return new LCG(seed, 214013L, 2531011L, 1L << 31) {
+            
+            @Override
+            public int rand() {
+                super.rand();
+                return (int)((seed >>> 16) & 0x7FFF);
+            }
+        };
     }
 }
