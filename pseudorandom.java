@@ -107,7 +107,9 @@ class LCG {
 
     public static LCG MS_Visual_C(long seed) {
         // Reference for seed = 3 : 48, 7196, 9294, 9091, 7031, 23577, 17702, 23503, 27217, 12168, ...
-        LCG result = new LCG(seed, 214013L, 2531011L, 1L << 31);
+        long unsigned_32_bit = seed & 0xFFFFFFFFL;
+        
+        LCG result = new LCG(unsigned_32_bit, 214013L, 2531011L, 1L << 31);
         result.SHIFT = 16; result.MASK = 0x7FFF;
         return result;
     }
