@@ -62,9 +62,10 @@ class MT19937 {
     }
 }
 
+
 class LCG {
-    private final long A, C, M;
-    private long seed;
+    private long seed, A, C, M;
+    private int SHIFT = 0, MASK = 0xFFFFFFFF;
 
     private LCG(long seed, long A, long C, long M) {
         this.seed = seed; this.A = A; this.C = C; this.M = M;
@@ -72,17 +73,18 @@ class LCG {
 
     public int rand() {
         seed = (seed*A + C) % M;
-        return (int) seed;
+        return (int) ((seed >>> SHIFT) & MASK);
     }
-    
+
     public static LCG MINSTD0 (long seed) {
-        return new LCG(seed, 16807, 0, 1L << 31 - 1);
+        return new LCG(seed, 16807, 0, (1L << 31) - 1);
     }
 
     public static LCG MINSTD (long seed) {
-        return new LCG(seed, 48271, 0, 1L << 31 - 1);
+        return new LCG(seed, 48271, 0, (1L << 31) - 1);
     }
-    
+
+    // http://physics.ucsc.edu/~peter/115/randu.pdf
     public static LCG RANDU(long seed) {
         return new LCG(seed, 65539, 0, 1L << 31);
     }
@@ -91,37 +93,22 @@ class LCG {
         long A = 25214903917L, C = 11L, M = 1L << 48;
         long scrambled_seed = seed ^ A & (M - 1);
 
-        return new LCG(scrambled_seed, A, C, M) {
-            
-            @Override
-            public int rand() {
-                super.rand();
-                return (int)(seed >>> 16);
-            }
-        };
+        LCG result = new LCG(scrambled_seed, A, C, M);
+        result.SHIFT = 16;
+        return result;
     }
 
     public static LCG ANSI_C_standard(long seed) {
         // Reference for seed = 3 : 17747, 7107, 10365, 8312, 20622, ...
-        return new LCG(seed, 1103515245L, 12345L, 1L << 31) {
-            
-            @Override
-            public int rand() {
-                super.rand();
-                return (int)((seed >>> 16) & 0x7FFF);
-            }
-        };
+        LCG result = new LCG(seed, 1103515245L, 12345L, 1L << 31);
+        result.SHIFT = 16; result.MASK = 0x7FFF;
+        return result;
     }
 
     public static LCG MS_Visual_C(long seed) {
         // Reference for seed = 3 : 48, 7196, 9294, 9091, 7031, 23577, 17702, 23503, 27217, 12168, ...
-        return new LCG(seed, 214013L, 2531011L, 1L << 31) {
-            
-            @Override
-            public int rand() {
-                super.rand();
-                return (int)((seed >>> 16) & 0x7FFF);
-            }
-        };
+        LCG result = new LCG(seed, 214013L, 2531011L, 1L << 31);
+        result.SHIFT = 16; result.MASK = 0x7FFF;
+        return result;
     }
 }
