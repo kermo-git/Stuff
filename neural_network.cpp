@@ -78,7 +78,6 @@ struct Layer {
 	}
 		
 	void add_dW(double *new_dW) {add(dW, new_dW, dW, MATRIX);}
-		
 	void add_dB(double *new_dB) {add(dB, new_dB, dB, SIZE);}
 		
 	void update_parameters(double learning_rate, int batch_size) {
