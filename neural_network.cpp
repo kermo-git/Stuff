@@ -154,6 +154,16 @@ class NeuralNetwork {
 		vector<Layer *> layers;
 		double *dA; // Derivatives of the cost function with respect to activations
 		int L;
+	
+	        NeuralNetwork(int input_size) {
+			layers = vector<Layer *>();
+			layers.push_back(new Sigmoid(input_size, 0));
+		}
+		~NeuralNetwork() {
+			for (L = 0; L < layers.size(); L++) {
+				delete layers[L];
+			}
+		}
 		
 		void get_output(double *input) {
 			layers[0]->set_A(input);
@@ -163,9 +173,9 @@ class NeuralNetwork {
 		}
 		
 		virtual double cost(double *label)=0;
-		
 		virtual void get_dA(double *label)=0;
-		
+	
+	private:
 		void get_dA() {
 			int size = layers[L]->SIZE;
 			int next_size = layers[L+1]->SIZE;
@@ -225,16 +235,6 @@ class NeuralNetwork {
 			delete[] dA;
 		}
 		
-		NeuralNetwork(int input_size) {
-			layers = vector<Layer *>();
-			layers.push_back(new Sigmoid(input_size, 0));
-		}
-		~NeuralNetwork() {
-			for (L = 0; L < layers.size(); L++) {
-				delete layers[L];
-			}
-		}
-	
 	public:
 		void add_layer(int size, string activation) {
 			int input_size = layers[layers.size() - 1]->SIZE;
