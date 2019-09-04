@@ -16,13 +16,13 @@ class Simplex {
     private Simplex() {}
 
     /**
-     * {@code int} coordinates of the simplex origin in (i, j, k)-space.
+     * Absolute {@code int} coordinates of the simplex origin in (i, j, k)-space.
      */
     private static int i, j, k;
 
     /**
-     * {@code double} components of the distance vector from the simplex origin
-     * to the point being evaluated in (x, y, z)-space.
+     * {@code double} components of the distance vector from the 
+     * (simplex origin -> point being evaluated) in (x, y, z)-space.
      */
     private static double u, v, w;
 
@@ -48,7 +48,7 @@ class Simplex {
         w = z - k + s;
         
         /* Determine which simplex we're in. This means finding the coordinates for each of the simplex corners 
-        relative to the origin corner in (i, j, k)-space. The origin itself is at (0, 0, 0) and the rest are 
+        relative to the origin corner in (i, j, k)-space. The origin itself is (0, 0, 0) and the rest are 
         (i1, j1, k1), (i2, j2, k2) and (1, 1, 1). This part is based on Stefan Gustafson's code.*/
         int i1, j1, k1, i2, j2, k2;
 
@@ -152,7 +152,7 @@ class Simplex {
      * It then calculates the dot product between the gradient vector and the distance
      * vector (corner -> point being evaluated, (x, y, z)-space) given as an argument.
      *
-     * @param hash  the hashed gradient index
+     * @param hash the hashed gradient index
      * @param x the x-component of the distance vector
      * @param y the y-component of the distance vector
      * @param z the z-component of the distance vector
@@ -175,7 +175,7 @@ class Simplex {
     }
 
     /**
-     * Finds the pseudo-random gradient index for a corner using its coordinates
+     * Finds the pseudo-random gradient index for a corner using its absolute coordinates
      * in (i, j, k)-space.
      *
      * @param i the i-coordinate of the corner
