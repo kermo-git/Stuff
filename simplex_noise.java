@@ -1,8 +1,16 @@
 /**
  * A Java implementation of Ken Perlin's Simplex noise function, based mostly on his
- * <a href="https://www.csee.umbc.edu/~olano/s2002c36/ch02.pdf">original implementation</>
- * and some parts of the code are taken from
- * <a href="http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf">Stefan Gustafson's implementation</>
+ * 
+ * <a href="https://www.csee.umbc.edu/~olano/s2002c36/ch02.pdf">
+ * original implementation
+ * </a>.
+ * 
+ * Some parts of the code are taken from
+ * 
+ * <a href="http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf">
+ * Stefan Gustafson's implementation
+ * </a>.
+ * 
  * This code gives exactly the same results as the original one, but it's more readable and commented.
  *
  * @author Kermo Saarse
@@ -81,7 +89,7 @@ class Simplex {
     /**
      * Creates 3D fractal noise by adding multiple noises together. Each subsequent noise, called
      * an octave, has twice the frequency of the previous octave. This method is taken from
-     * <a href="https://flafla2.github.io/2014/08/09/perlinnoise.html">here</a>.
+     * <a href="https://flafla2.github.io/2014/08/09/perlinnoise.html"> here </a>.
      *
      * @param x an x-coordinate
      * @param y a y-coordinate
@@ -144,11 +152,12 @@ class Simplex {
 
     /**
      * Using a hashed gradient index of a simplex corner, it picks a gradient vector from
-     * the following set of vectors:
-     * (1, 1, 0), (-1, 1, 0), (1, -1, 0), (-1, -1, 0)
-     * (0, 1, 1), (0, -1, 1), (0, 1, -1), (0, -1, -1)
-     * (1, 0, 1), (-1, 0, 1), (1, 0, -1), (-1, 0, -1)
-     *
+     * the following set of vectors: <br><br>
+	 *
+     * (1, 1, 0), (-1, 1, 0), (1, -1, 0), (-1, -1, 0) <br>
+     * (0, 1, 1), (0, -1, 1), (0, 1, -1), (0, -1, -1) <br>
+     * (1, 0, 1), (-1, 0, 1), (1, 0, -1), (-1, 0, -1) <br><br>
+	 *
      * It then calculates the dot product between the gradient vector and the distance
      * vector (corner -> point being evaluated, (x, y, z)-space) given as an argument.
      *
@@ -187,6 +196,7 @@ class Simplex {
         return b(i, j, k, 0) + b(j, k, i, 1) + b(k, i, j, 2) + b(i, j, k, 3) +
                b(j, k, i, 4) + b(k, i, j, 5) + b(i, j, k, 6) + b(j, k, i, 7);
     }
+    
     private static int bit(int i, int b) {
         return (i >> b) & 1;
     }
