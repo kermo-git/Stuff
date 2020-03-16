@@ -112,6 +112,113 @@ class MinHeap: public Heap<E> {
 };
 
 
+template <class E>
+class Stack {
+    struct Node {
+        E item;
+        Node* next;
+
+        Node(const E& new_item, Node* next_node) {
+            item = new_item;
+            next = next_node;
+        }
+    };
+    void check() {
+        if (_size == 0) {
+            clear();
+            throw runtime_error("Empty stack");
+        }
+    }
+    Node* head = NULL;
+    int _size = 0;
+public:
+    ~Stack() { clear(); }
+    void clear() {
+        _size = 0; Node* tmp;
+        while (head) {
+            tmp = head;
+            head = head->next;
+            delete tmp;
+        }
+    }
+    int size() { return _size; }
+    bool empty() { return _size == 0; }
+    void push(const E& item) {
+        head = new Node(item, head);
+        _size++;
+    }
+    E peek() {
+        check();
+        return head->item;
+    }
+    E pop() {
+        check();
+        E item = head->item;
+        Node* tmp = head;
+        head = head->next;
+        delete tmp;
+        _size--;
+        return item;
+    }
+};
+
+
+template <class E>
+class Queue {
+    struct Node {
+        E item;
+        Node* next = NULL;
+        Node(const E& new_item) {
+            item = new_item;
+        }
+    };
+    void check() {
+        if (_size == 0) {
+            clear();
+            throw runtime_error("Empty queue");
+        }
+    }
+    Node* head = NULL;
+    Node* tail = NULL;
+    int _size = 0;
+public:
+    ~Queue() { clear(); }
+    void clear() {
+        _size = 0; Node* tmp;
+        while (head) {
+            tmp = head;
+            head = head->next;
+            delete tmp;
+        }
+    }
+    int size() { return _size; }
+    bool empty() { return _size == 0; }
+    void push(const E& item) {
+        if (_size == 0) {
+            head = new Node(item);
+            tail = head;
+        } else {
+            tail->next = new Node(item);
+            tail = tail->next;
+        }
+        _size++;
+    }
+    E peek() {
+        check();
+        return head->item;
+    }
+    E pop() {
+        check();
+        E item = head->item;
+        Node* tmp = head;
+        head = head->next;
+        delete tmp;
+        _size--;
+        return item;
+    }
+};
+
+
 int heap_main() {
     MinHeap<int> heap;
     heap.push(21);
