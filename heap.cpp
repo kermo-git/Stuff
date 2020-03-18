@@ -18,14 +18,6 @@ protected:
         delete[] tree;
         tree = new_tree;
     }
-    void grow() {
-        if (_size >= capacity)
-            resize(capacity << 1);
-    }
-    void shrink() {
-        if (_size <= capacity >> 2)
-            resize(capacity >> 1);
-    }
 
 
     virtual bool wrong_order(int parent, int child)=0;
@@ -33,8 +25,8 @@ protected:
 
 
     void downheap(int k) {
-        int l_child = 2*k + 1;
-        int r_child = 2*k + 2;
+        int l_child = (k << 1) + 1;
+        int r_child = (k << 1) + 2;
 
         if (r_child < _size) {
             if (wrong_order(k, l_child) ||
@@ -65,8 +57,17 @@ protected:
 
 
 public:
+    Heap() {}
+    Heap(const Heap<E>& other) {
+        _size = other._size;
+        capacity = other.capacity;
+        tree = new E[capacity];
+        for (int i = 0; i < capacity; i++)
+            tree[i] = other.tree[i];
+    }
     ~Heap() { delete[] tree; }
-    bool empty() { return _size == 0;}
+    bool empty() { return _size == 0; }
+    int size() { return _size; }
 
     E peek() { return tree[0]; }
     E pop() {
@@ -74,15 +75,20 @@ public:
             delete[] tree;
             throw runtime_error("Empty heap");
         }
+
+        if (_size <= capacity >> 2)
+            resize(capacity >> 1);
+
         E root = tree[0];
-        shrink();
         tree[0] = tree[_size - 1];
         _size--;
         downheap(0);
         return root;
     }
     void push(const E& item) {
-        grow();
+        if (_size >= capacity)
+            resize(capacity << 1);
+
         tree[_size] = item;
         _size++;
         upheap(_size - 1);
@@ -98,6 +104,9 @@ class MaxHeap: public Heap<E> {
     int choose_next(int left, int right) {
         return (this->tree[left] > this->tree[right])? left : right;
     };
+public:
+    MaxHeap() {}
+    MaxHeap(const MaxHeap<E>& other) : Heap<E>(other) {}
 };
 
 
@@ -109,6 +118,9 @@ class MinHeap: public Heap<E> {
     int choose_next(int left, int right) {
         return (this->tree[left] < this->tree[right])? left : right;
     };
+public:
+    MinHeap() {}
+    MinHeap(const MinHeap<E>& other) : Heap<E>(other) {}
 };
 
 
@@ -116,7 +128,7 @@ template <class E>
 class Stack {
     struct Node {
         E item;
-        Node* next;
+        Node* next = NULL;
 
         Node(const E& new_item, Node* next_node) {
             item = new_item;
@@ -124,14 +136,20 @@ class Stack {
         }
     };
     void check() {
-        if (_size == 0) {
-            clear();
+        if (_size == 0)
             throw runtime_error("Empty stack");
-        }
     }
     Node* head = NULL;
     int _size = 0;
 public:
+    Stack() {}
+    Stack(const Stack& other) {
+        Node* current = other.head;
+        while (current != NULL) {
+            push(current->item);
+            current = current->next;
+        }
+    }
     ~Stack() { clear(); }
     void clear() {
         _size = 0; Node* tmp;
@@ -173,15 +191,21 @@ class Queue {
         }
     };
     void check() {
-        if (_size == 0) {
-            clear();
+        if (_size == 0)
             throw runtime_error("Empty queue");
-        }
     }
     Node* head = NULL;
     Node* tail = NULL;
     int _size = 0;
 public:
+    Queue() {}
+    Queue(const Queue& other) {
+        Node* current = other.head;
+        while (current != NULL) {
+            push(current->item);
+            current = current->next;
+        }
+    }
     ~Queue() { clear(); }
     void clear() {
         _size = 0; Node* tmp;
@@ -217,46 +241,3 @@ public:
         return item;
     }
 };
-
-
-int heap_main() {
-    MinHeap<int> heap;
-    heap.push(21);
-    heap.push(19);
-    heap.push(24);
-    heap.push(15);
-    heap.push(42);
-    heap.push(34);
-    heap.push(31);
-    heap.push(9);
-    heap.push(53);
-    heap.push(49);
-    heap.push(0);
-    heap.push(27);
-    heap.push(76);
-    heap.push(17);
-    heap.push(22);
-    heap.push(47);
-    heap.push(7);
-    heap.push(23);
-    heap.push(11);
-    heap.push(12);
-    heap.push(13);
-    heap.push(10);
-    heap.push(74);
-    heap.push(8);
-    heap.push(5);
-    heap.push(3);
-    heap.push(55);
-    heap.push(4);
-    heap.push(18);
-    heap.push(1);
-    heap.push(65);
-
-    while(!heap.empty()) {
-        cout << heap.pop() << " ";
-    }
-    cout << endl;
-
-    return 0;
-}
