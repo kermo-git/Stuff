@@ -294,16 +294,7 @@ public:
     ~Vector() { delete[] array; }
 
 
-    friend ostream& operator <<(ostream& os, Vector<E>& c) {
-        os << "[";
-        if (c._size == 0) { os << "]"; return os; }
-        E* ptr = c.array;
-        for (int i = 0; i < c._size-1; ++i) {
-            os << *(ptr) << ", "; ++ptr;
-        }
-        os << *(ptr) << "]";
-        return os;
-    }
+    
 
 
     int size() const { return _size; }
@@ -384,5 +375,17 @@ public:
         if (_size == 0)
             return;
         clear(0, _size-1);
+    }
+    
+    
+    friend ostream& operator <<(ostream& os, Vector<E>& c) {
+        os << "[";
+        if (c._size == 0) { os << "]"; return os; }
+        E* ptr = c.array;
+        for (int i = 0; i < c._size-1; ++i) {
+            os << *(ptr) << ", "; ++ptr;
+        }
+        os << *(ptr) << "]";
+        return os;
     }
 };
