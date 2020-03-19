@@ -70,6 +70,7 @@ public:
     bool empty() { return _size == 0; }
     int size() { return _size; }
 
+    
     E peek() { return tree[0]; }
     E pop() {
         if (_size == 0) {
