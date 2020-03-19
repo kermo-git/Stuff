@@ -1,5 +1,4 @@
 #include <iostream>
-using namespace std;
 
 template <class E>
 class Heap {
@@ -24,27 +23,27 @@ protected:
     virtual int choose_next(int left, int right)=0;
 
 
-    void downheap(int k) {
-        int l_child = (k << 1) + 1;
-        int r_child = (k << 1) + 2;
+    void downheap(int parent) {
+        int left_child = (parent << 1) + 1;
+        int right_child = (parent << 1) + 2;
 
-        if (r_child < _size) {
-            if (wrong_order(k, l_child) ||
-                wrong_order(k, r_child)) {
+        if (right_child < _size) {
+            if (wrong_order(parent, left_child) ||
+                wrong_order(parent, right_child)) {
 
-                int next = choose_next(l_child, r_child);
-                swap(k, next); downheap(next);
+                int next = choose_next(left_child, right_child);
+                swap(parent, next); downheap(next);
             }
-        } else if (l_child < _size && wrong_order(k, l_child)) {
-            swap(k, l_child); downheap(l_child);
+        } else if (left_child < _size && wrong_order(parent, left_child)) {
+            swap(parent, left_child); downheap(left_child);
         }
     }
 
 
-    void upheap(int k) {
-        int parent = (k - 1) >> 1;
-        if (parent >= 0 && wrong_order(parent, k)) {
-            swap(parent, k); upheap(parent);
+    void upheap(int child) {
+        int parent = (child - 1) >> 1;
+        if (parent >= 0 && wrong_order(parent, child)) {
+            swap(parent, child); upheap(parent);
         }
     }
 
@@ -66,6 +65,8 @@ public:
             tree[i] = other.tree[i];
     }
     ~Heap() { delete[] tree; }
+
+
     bool empty() { return _size == 0; }
     int size() { return _size; }
 
@@ -73,7 +74,7 @@ public:
     E pop() {
         if (_size == 0) {
             delete[] tree;
-            throw runtime_error("Empty heap");
+            throw std::runtime_error("Empty heap.");
         }
 
         if (_size <= capacity >> 2)
@@ -115,8 +116,8 @@ class MinHeap: public Heap<E> {
     bool wrong_order(int parent, int child) {
         return this->tree[parent] > this->tree[child];
     };
-    int choose_next(int left, int right) {
-        return (this->tree[left] < this->tree[right])? left : right;
+    int choose_next(int left_child, int right_child) {
+        return (this->tree[left_child] < this->tree[right_child]) ? left_child : right_child;
     };
 public:
     MinHeap() {}
@@ -136,8 +137,10 @@ class Stack {
         }
     };
     void check() {
-        if (_size == 0)
-            throw runtime_error("Empty stack");
+        if (_size == 0) {
+            clear();
+            throw std::runtime_error("Empty stack.");
+        }
     }
     Node* head = NULL;
     int _size = 0;
@@ -191,8 +194,10 @@ class Queue {
         }
     };
     void check() {
-        if (_size == 0)
-            throw runtime_error("Empty queue");
+        if (_size == 0) {
+            clear();
+            throw std::runtime_error("Empty queue.");
+        }
     }
     Node* head = NULL;
     Node* tail = NULL;
