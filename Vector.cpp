@@ -91,6 +91,9 @@ public:
         result += right;
         return result;
     }
+    void operator=(const Vector<E>& other) {
+        clear(); add_all(0, other);
+    }
     friend bool operator==(const Vector<E>& left, const Vector<E>& right) {
         if (left._size == right._size) {
             E* it_1 = left.array;
@@ -134,8 +137,7 @@ public:
     void insert(int index, const E& data) {
         range_check_end_included(index);
         create_gap(index, 1);
-        array[index] = data;
-        _size++;
+        array[index] = data; _size++;
     }
 
 
@@ -168,8 +170,7 @@ public:
         range_check(index);
         E item = array[index];
         remove_gap(index, 1);
-        _size--;
-        return item;
+        _size--; return item;
     }
 
 
