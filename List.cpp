@@ -56,10 +56,11 @@ class List {
 
 public:
     List() {}
-    List(const List<E>& other) { add_all(0, other); }
+    List(const List<E>& other) {
+        add_all(0, other);
+    }
     ~List() {
-        clear();
-        delete NULL_NODE;
+        clear(); delete NULL_NODE;
     }
 
     int size() const { return _size; }
@@ -77,6 +78,9 @@ public:
         List<E> result = left;
         result += right;
         return result;
+    }
+    void operator=(const List<E>& other) {
+        clear(); add_all(0, other);
     }
     friend bool operator==(const List<E>& left, const List<E>& right) {
         if (left._size == right._size) {
