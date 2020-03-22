@@ -1,5 +1,4 @@
 #include <iostream>
-using namespace std;
 
 
 template <class K, class V>
@@ -195,7 +194,7 @@ public:
         Node *node = search(root, key);
         if (node)
             return node->value;
-        throw runtime_error("No such key.");
+        throw std::runtime_error("No such key.");
     }
     V& operator[](const K& key) {
         root = find_or_add_key(root, key);
