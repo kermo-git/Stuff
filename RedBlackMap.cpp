@@ -1,4 +1,6 @@
 #include <iostream>
+#define RED true
+#define BLACK false
 
 
 template <class K, class V>
@@ -8,14 +10,14 @@ class RedBlackMap {
         Node* parent = nullptr;
         Node* left = nullptr;
         Node* right = nullptr;
-        bool color = true; // true = red, false = black
+        bool color = RED;
 
 
         Node(const K& k) { key = k; }
         Node(const Node& other) {
             key = other.key;
             value = other.value;
-            color  = other.color;
+            color = other.color;
 
             if (other.left) {
                 left = new Node(*(other.left));
@@ -34,54 +36,23 @@ class RedBlackMap {
         }
 
 
-        /*
-         *    x                           y
-         *   / \    <== right rotation   / \
-         *  A   y                       x   C
-         *     / \  left rotation ==>  / \
-         *    B   C                   A   B
-         */
-        void left_rotation() {
-            Node* new_root = right;
-
-            new_root->parent = parent;
-            if (parent) {
-                if (this == parent->left)
-                    parent->left = new_root;
-                else
-                    parent->right = new_root;
-            }
-
-            right = right->left;
-            if (right)
-                right->parent = this;
-
-            new_root->left = this;
-            parent = new_root;
+        bool isOnLeft() {
+            return this == parent->left;
+        }
+        Node* sibling() {
+            return (parent) ?
+                   (isOnLeft() ? parent->right : parent->left ) : nullptr;
+        }
+        Node* grandparent() {
+            return (parent)? parent->parent : nullptr;
+        }
+        Node* uncle() {
+            Node* g = grandparent();
+            return g ? ((parent->isOnLeft()) ? g->right : g->left) : nullptr;
         }
 
 
-        void right_rotation() {
-            Node* new_root = left;
-
-            new_root->parent = parent;
-            if (parent) {
-                if (this == parent->left)
-                    parent->left = new_root;
-                else
-                    parent->right = new_root;
-            }
-
-            left = left->right;
-            if (left)
-                left->parent = this;
-
-            new_root->right = this;
-            parent = new_root;
-        }
-
-
-        void print(ostream& os, Node* largest) {
+        void print(std::ostream& os, Node* largest) {
             if (left)
                 left->print(os, largest);
             if (this == largest) {
@@ -99,6 +70,144 @@ class RedBlackMap {
     int _size = 0;
 
 
+    /*
+     *    x                           y
+     *   / \    <== right rotation   / \
+     *  A   y                       x   C
+     *     / \  left rotation ==>  / \
+     *    B   C                   A   B
+     */
+    void leftRotation(Node* x) {
+        Node* y = x->right;
+        x->right = y->left;
+        y->left = x;
+
+        if (x->right)
+            x->right->parent = x;
+
+        y->parent = x->parent;
+        if (x != root) {
+            if (x->isOnLeft())
+                x->parent->left = y;
+            else
+                x->parent->right = y;
+        }
+        else
+            root = y;
+        x->parent = y;
+    }
+    void rightRotation(Node* x) {
+        Node* y = x->left;
+        x->left = y->right;
+        y->right = x;
+
+        if (x->left)
+            x->left->parent = x;
+
+        y->parent = x->parent;
+        if (x != root) {
+            if (x->isOnLeft())
+                x->parent->left = y;
+            else
+                x->parent->right = y;
+        }
+        else
+            root = y;
+        x->parent = y;
+    }
+
+
+    void fixRedRed(Node* x) {
+        if (x == root)
+            x->color = BLACK;
+        else if (x->parent->color == RED) {
+            Node* parent = x->parent;
+            Node* grandparent = parent->parent;
+            Node* uncle = x->uncle();
+
+            grandparent->color = RED;
+
+            if (uncle && uncle->color == RED) {
+                parent->color = BLACK;
+                uncle->color = BLACK;
+                fixRedRed(grandparent);
+            }
+            else {
+                if (parent->isOnLeft()) {
+                    if (x->isOnLeft())
+                        parent->color = BLACK;
+                    else {
+                        x->color = BLACK;
+                        leftRotation(parent);
+                    }
+                    rightRotation(grandparent);
+                } else {
+                    if (x->isOnLeft()) {
+                        x->color = BLACK;
+                        rightRotation(parent);
+                    }
+                    else
+                        parent->color = BLACK;
+                    leftRotation(grandparent);
+                }
+            }
+        }
+    }
+
+
+    void fixDoubleBlack(Node* parent, Node* sibling) {
+        if (!parent)
+            return;
+        if (!sibling)
+            fixDoubleBlack(parent->parent, parent->sibling());
+        else {
+            if (sibling->color == RED) {
+                parent->color = RED;
+                sibling->color = BLACK;
+                if (sibling->isOnLeft()) {
+                    rightRotation(parent);
+                    fixDoubleBlack(parent, parent->left);
+                } else {
+                    leftRotation(parent);
+                    fixDoubleBlack(parent, parent->right);
+                }
+            }
+            else {
+                bool leftRed = sibling->left && sibling->left->color == RED;
+                bool rightRed = sibling->right && sibling->right->color == RED;
+
+                if (!leftRed && !rightRed) {
+                    sibling->color = RED;
+                    if (parent->color == BLACK)
+                        fixDoubleBlack(parent->parent, parent->sibling());
+                }
+                else if (sibling->isOnLeft()) {
+                    if (leftRed) {
+                        sibling->left->color = BLACK;
+                        sibling->color = parent->color;
+                        rightRotation(parent);
+                    } else {
+                        sibling->right->color = parent->color;
+                        leftRotation(sibling);
+                        rightRotation(parent);
+                    }
+                } else {
+                    if (rightRed) {
+                        sibling->right->color = BLACK;
+                        sibling->color = parent->color;
+                        leftRotation(parent);
+                    } else {
+                        sibling->left->color = parent->color;
+                        rightRotation(sibling);
+                        leftRotation(parent);
+                    }
+                }
+                parent->color = BLACK;
+            }
+        }
+    }
+
+
     Node* search(Node* node, const K& key) {
         if (node) {
             if (key < node->key)
@@ -110,90 +219,83 @@ class RedBlackMap {
     }
 
 
-    void insert_repair(Node* x) {
-        Node* p = x->parent;
-
-        if (!p) {
-            x->color = false;
-            root = x;
-        }
-        else if (p->color) {
-            Node* g = p->parent;
-            bool p_is_left = (p == g->left);
-            Node* u = p_is_left ? g->right : g->left;
-
-            if (u && u->color) {
-                p->color = false;
-                u->color = false;
-                g->color = true;
-                insert_repair(g);
-            }
-            else {
-                bool x_is_left = (x == p->left);
-
-                if (p_is_left && x_is_left) {
-                    p->color = false;
-                    g->color = true;
-                    g->right_rotation();
-
-                    if (!(p->parent))
-                        root = p;
-                }
-                else if (p_is_left && !x_is_left) {
-                    x->color = false;
-                    g->color = true;
-                    p->left_rotation();
-                    g->right_rotation();
-
-                    if (!(x->parent))
-                        root = x;
-                }
-                else if (!p_is_left && !x_is_left) {
-                    p->color = false;
-                    g->color = true;
-                    g->left_rotation();
-
-                    if (!(p->parent))
-                        root = p;
-                }
-                else {
-                    x->color = false;
-                    g->color = true;
-                    p->right_rotation();
-                    g->left_rotation();
-
-                    if (!(x->parent))
-                        root = x;
-                }
-            }
-        }
-    }
-
-
-    V& find_or_add_key(Node* node, const K& key) {
+    V& findOrCreateKey(Node* node, const K& key) {
         if (key < node->key) {
             if (node->left)
-                return find_or_add_key(node->left, key);
+                return findOrCreateKey(node->left, key);
 
             Node* x = new Node(key);
             node->left = x;
             x->parent = node;
-            insert_repair(x);
+            fixRedRed(x);
 
             _size++; return x->value;
         }
         if (key > node->key) {
             if (node->right)
-                return find_or_add_key(node->right, key);
+                return findOrCreateKey(node->right, key);
 
             Node* x = new Node(key);
             node->right = x;
             x->parent = node;
-            insert_repair(x);
+            fixRedRed(x);
 
             _size++; return x->value;
         }
         return node->value;
+    }
+
+
+    void remove(Node* v) {
+        if (v->left && v->right) {
+            Node* u = v->right;
+            while (u->left)
+                u = u->left;
+
+            K u_key = u->key;
+            V u_value = u->value;
+
+            u->key = v->key;
+            u->value = v->value;
+
+            v->key = u_key;
+            v->value = u_value;
+
+            remove(u);
+        }
+        else {
+            Node* u = nullptr;
+            if (v->left) {
+                u = v->left; v->left = nullptr;
+            }
+            else if (v->right) {
+                u = v->right; v->right = nullptr;
+            }
+
+            if (v == root) {
+                root = u;
+            } else {
+                Node* parent = v->parent;
+                Node* sibling = v->sibling();
+
+                if (v->isOnLeft())
+                    parent->left = u;
+                else
+                    parent->right = u;
+
+                if (u) {
+                    u->parent = v->parent;
+                    if (v->color == RED || u->color == RED) {
+                        u->color = BLACK;
+                    } else {
+                        fixDoubleBlack(parent, sibling);
+                    }
+                } else if (v->color == BLACK) {
+                    fixDoubleBlack(parent, sibling);
+                }
+            }
+            delete v;
+        }
     }
 
 
@@ -203,10 +305,7 @@ public:
         root = (other.root)? new Node(*(other.root)) : nullptr;
         _size = other._size;
     }
-    ~RedBlackMap() {
-        if (root)
-            delete root;
-    }
+    ~RedBlackMap() { if (root) delete root; }
 
 
     int size() { return _size; }
@@ -220,27 +319,30 @@ public:
 
 
     V& at(const K& key) {
-        Node *node = search(root, key);
+        Node* node = search(root, key);
         if (node)
             return node->value;
         throw std::runtime_error("No such key.");
     }
     V& operator[](const K& key) {
         if (root)
-            return find_or_add_key(root, key);
+            return findOrCreateKey(root, key);
         root = new Node(key);
-        root->color = false;
+        root->color = BLACK;
         _size++; return root->value;
     }
     void erase(const K& key) {
-        // TODO
+        Node* node = search(root, key);
+        if (node) {
+            remove(node); _size--;
+        }
     }
-    bool contains_key(const K& key) {
+    bool contains(const K& key) {
         return (bool) search(root, key);
     }
 
 
-    friend ostream& operator<<(ostream& os, RedBlackMap& map) {
+    friend std::ostream& operator<<(std::ostream& os, const RedBlackMap& map) {
         os << "{";
         if (map.root) {
             RedBlackMap::Node* largest = map.root;
