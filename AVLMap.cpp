@@ -28,12 +28,12 @@ class AVLMap {
         }
 
 
-        void update_height() {
+        void updateHeight() {
             int l_height = (left)? left->height : 0;
             int r_height = (right)? right->height : 0;
             height = (l_height > r_height)? 1 + l_height : 1 + r_height;
         }
-        int balance_factor() {
+        int balanceFactor() {
             int l_height = (left)? left->height : 0;
             int r_height = (right)? right->height : 0;
             return l_height - r_height;
@@ -47,51 +47,53 @@ class AVLMap {
          *     / \  left rotation ==>  / \
          *    B   C                   A   B
          */
-        Node* left_rotation() {
-            Node* new_root = right;
+        Node* leftRotation() {
+            Node* y = right;
             right = right->left;
-            new_root->left = this;
+            y->left = this;
 
-            update_height();
-            new_root->update_height();
-            return new_root;
+            updateHeight();
+            y->updateHeight();
+            return y;
         }
-        Node* right_rotation() {
-            Node* new_root = left;
+        Node* rightRotation() {
+            Node* y = left;
             left = left->right;
-            new_root->right = this;
+            y->right = this;
 
-            update_height();
-            new_root->update_height();
-            return new_root;
+            updateHeight();
+            y->updateHeight();
+            return y;
         }
-        Node* right_left_rotation() {
-            right = right->right_rotation();
-            return left_rotation();
+        Node* rightLeftRotation() {
+            right = right->rightRotation();
+            return leftRotation();
         }
-        Node* left_right_rotation() {
-            left = left->left_rotation();
-            return right_rotation();
+        Node* leftRightRotation() {
+            left = left->leftRotation();
+            return rightRotation();
         }
 
 
         Node* balance() {
-            int balancefactor = balance_factor();
+            int balancefactor = balanceFactor();
+
             if (balancefactor == 2) {
-                if (left->balance_factor() == -1)
-                    return left_right_rotation();
-                return right_rotation();
-            } else if (balancefactor == -2) {
-                if (right->balance_factor() == 1)
-                    return right_left_rotation();
-                return left_rotation();
+                if (left->balanceFactor() == -1)
+                    return leftRightRotation();
+                return rightRotation();
             }
-            update_height();
+            else if (balancefactor == -2) {
+                if (right->balanceFactor() == 1)
+                    return rightLeftRotation();
+                return leftRotation();
+            }
+            updateHeight();
             return this;
         }
 
 
-        void print(ostream& os, Node* largest) {
+        void print(std::ostream& os, Node* largest) {
             if (left)
                 left->print(os, largest);
             if (this == largest) {
@@ -121,47 +123,49 @@ class AVLMap {
 
 
     Node* temp;
-    Node* find_or_add_key(Node* node, const K& key) {
+    Node* findOrCreateKey(Node* node, const K& key) {
         if (!node) {
             _size++;
             return temp = new Node(key);
         }
         if (key < node->key)
-            node->left = find_or_add_key(node->left, key);
+            node->left = findOrCreateKey(node->left, key);
         else if (key > node->key)
-            node->right = find_or_add_key(node->right, key);
-        else {
+            node->right = findOrCreateKey(node->right, key);
+        else
             return temp = node;
-        }
         return node->balance();
     }
 
 
-    Node* remove_key(Node* node, const K& key) {
+    Node* removeKey(Node* node, const K& key) {
         if (!node)
             return nullptr;
         if (key < node->key)
-            node->left = remove_key(node->left, key);
+            node->left = removeKey(node->left, key);
         else if (key > node->key)
-            node->right = remove_key(node->right, key);
+            node->right = removeKey(node->right, key);
         else {
-            if (!(node->left)) {
-                _size--;
-                Node* tmp = node->right;
-                delete node; return tmp;
-            }
-            else if (!(node->right)) {
+            if (node->left) {
                 _size--;
                 Node* tmp = node->left;
+                node->left = nullptr;
                 delete node; return tmp;
-            } else {
+            }
+            else if (node->right) {
+                _size--;
+                Node* tmp = node->right;
+                node->right = nullptr;
+                delete node; return tmp;
+            }
+            else {
                 Node* next = node->right;
                 while (next->left)
                     next = next->left;
 
                 node->key = next->key;
                 node->value = next->value;
-                node->right = remove_key(node->right, node->key);
+                node->right = removeKey(node->right, node->key);
             }
         }
         return node->balance();
@@ -174,10 +178,7 @@ public:
         root = (other.root)? new Node(*(other.root)) : nullptr;
         _size = other._size;
     }
-    ~AVLMap() {
-        if(root)
-            delete root;
-    }
+    ~AVLMap() { if (root) delete root; }
 
 
     int size() { return _size; }
@@ -197,18 +198,18 @@ public:
         throw std::runtime_error("No such key.");
     }
     V& operator[](const K& key) {
-        root = find_or_add_key(root, key);
+        root = findOrCreateKey(root, key);
         return temp->value;
     }
     void erase(const K& key) {
-        root = remove_key(root, key);
+        root = removeKey(root, key);
     }
-    bool contains_key(const K& key) {
+    bool contains(const K& key) {
         return (bool) search(root, key);
     }
 
 
-    friend ostream& operator<<(ostream& os, AVLMap& map) {
+    friend std::ostream& operator<<(std::ostream& os, const AVLMap& map) {
         os << "{";
         if (map.root) {
             AVLMap::Node *largest = map.root;
