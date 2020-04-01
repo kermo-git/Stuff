@@ -146,16 +146,16 @@ class AVLMap {
         else if (key > node->key)
             node->right = removeKey(node->right, key);
         else {
-            if (node->left) {
-                _size--;
-                Node* tmp = node->left;
-                node->left = nullptr;
-                delete node; return tmp;
-            }
-            else if (node->right) {
+            if (!(node->left)) {
                 _size--;
                 Node* tmp = node->right;
                 node->right = nullptr;
+                delete node; return tmp;
+            }
+            else if (!(node->right)) {
+                _size--;
+                Node* tmp = node->left;
+                node->left = nullptr;
                 delete node; return tmp;
             }
             else {
