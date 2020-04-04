@@ -1,3 +1,5 @@
+#ifndef AVLMAP_H
+#define AVLMAP_H
 #include <iostream>
 
 
@@ -221,3 +223,5 @@ public:
         return os;
     }
 };
+
+#endif
