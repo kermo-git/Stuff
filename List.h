@@ -1,3 +1,6 @@
+#ifndef LIST_H
+#define LIST_H
+
 #include <iostream>
 
 template <class E>
@@ -235,3 +238,5 @@ public:
         clear(0, _size-1);
     }
 };
+
+#endif
