@@ -10,12 +10,15 @@ class List {
         Node* next;
         Node* prev;
 
+        
         Node() { next = this; prev = this; }
         Node(Node* prev_node, const E& new_item, Node* next_node) {
             item = new_item;
             link(prev_node, this);
             link(this, next_node);
         }
+        
+        
         static void link(Node* left, Node* right) {
             left->next = right;
             right->prev = left;
@@ -31,15 +34,17 @@ class List {
     int _size = 0;
 
 
-    void range_check_end_included(int index) const {
+    void range_check_end_included(int index) {
         if (index < 0 || index > _size)
             throw std::runtime_error("Index out of range.");
     }
-    void range_check(int index) const {
+    void range_check(int index) {
         if (index < 0 || index >= _size)
             throw std::runtime_error("Index out of range.");
     }
-    Node* node_at(int index) const {
+    
+    
+    Node* node_at(int index) {
         Node* ptr = NULL_NODE;
         if (index <= _size >> 1) {
             for (int i = 0; i <= index; ++i)
@@ -50,7 +55,9 @@ class List {
         }
         return ptr;
     }
-    void _remove(Node *ptr) {
+    
+    
+    void remove(Node *ptr) {
         ptr->unlink();
         delete ptr;
         _size--;
@@ -66,6 +73,7 @@ public:
         clear(); delete NULL_NODE;
     }
 
+    
     int size() const { return _size; }
     bool empty() const { return _size == 0; }
 
@@ -77,14 +85,18 @@ public:
     void operator+=(const List<E>& other) {
         add_all(_size, other);
     }
+    void operator=(const List<E>& other) {
+        clear(); add_all(0, other);
+    }
+    
+    
     friend List<E> operator+(const List<E>& left, const List<E>& right) {
         List<E> result = left;
         result += right;
         return result;
     }
-    void operator=(const List<E>& other) {
-        clear(); add_all(0, other);
-    }
+    
+    
     friend bool operator==(const List<E>& left, const List<E>& right) {
         if (left._size == right._size) {
             Node* node_1 = left.NULL_NODE->next;
@@ -102,6 +114,8 @@ public:
     friend bool operator!=(const List<E>& left, const List<E>& right) {
         return !(left == right);
     }
+    
+    
     friend std::ostream& operator<<(std::ostream& os, List<E>& list) {
         os << "[";
         if (list._size == 0) { os << "]"; return os; }
@@ -155,6 +169,23 @@ public:
     E& front() { return this[0]; }
     E& back() { return this[_size-1]; }
     E& at(int index) { return this[index]; }
+    
+    
+    bool contains(const E& value) {
+        for (Node* node = NULL_NODE->next; node != NULL_NODE; node = node->next) {
+            if (node->item == value)
+                return true;
+        }
+        return false;
+    }
+    int count(const E& value) {
+        int count = 0;
+        for (Node* node = NULL_NODE->next; node != NULL_NODE; node = node->next) {
+            if (node->item == value)
+                ++count;
+        }
+        return count;
+    }
 
 
     void push_back(const E& item) { insert(_size, item); }
@@ -185,7 +216,16 @@ public:
     void remove_back() { remove(_size-1); }
     void remove(int index) {
         range_check(index);
-        _remove(node_at(index));
+        remove(node_at(index));
+    }
+    bool remove(const E& value) {
+        for (Node* node = NULL_NODE->next; node != NULL_NODE; node = node->next) {
+            if (node->item == value) {
+                remove(node);
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -195,7 +235,7 @@ public:
         range_check(index);
         Node* node = node_at(index);
         E item = node->item;
-        _remove(node);
+        remove(node);
         return item;
     }
 
