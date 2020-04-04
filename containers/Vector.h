@@ -13,7 +13,6 @@ class Vector {
     void init(int initial_capacity) {
         capacity = initial_capacity;
         array = new E[capacity];
-        _size = 0;
     }
 
 
@@ -26,19 +25,16 @@ class Vector {
             throw std::runtime_error("Index out of range.");
     }
 
-
-    void move(E *new_array, int start_index, int end_index, int shift) {
-        for (int i = start_index; i <= end_index; ++i) {
-            new_array[i + shift] = array[i];
-        }
-    }
+    
     void create_gap(int start, int length) {
         if (_size + length > capacity) {
             capacity = (_size + length) << 1;
             E *new_array = new E[capacity];
 
-            move(new_array, 0, start-1, 0);
-            move(new_array, start, _size-1, length);
+            for (int i = 0; i <= start-1; ++i)
+                new_array[i] = array[i];
+            for (int i = start; i <= _size-1; ++i)
+                new_array[i + length] = array[i];
 
             delete[] array;
             array = new_array;
@@ -53,8 +49,10 @@ class Vector {
             capacity >>= 1;
             E *new_array = new E[capacity];
 
-            move(new_array, 0, start-1, 0);
-            move(new_array, start+length, _size-1, -length);
+            for (int i = 0; i <= start-1; ++i)
+                new_array[i] = array[i];
+            for (int i = start+length; i <= _size-1; ++i)
+                new_array[i - length] = array[i];
 
             delete[] array;
             array = new_array;
@@ -89,14 +87,18 @@ public:
     void operator+=(const Vector<E>& other) {
         add_all(_size, other);
     }
+    void operator=(const Vector<E>& other) {
+        clear(); add_all(0, other);
+    }
+    
+    
     friend Vector<E> operator+(const Vector<E>& left, const Vector<E>& right) {
         Vector<E> result = left;
         result += right;
         return result;
     }
-    void operator=(const Vector<E>& other) {
-        clear(); add_all(0, other);
-    }
+    
+    
     friend bool operator==(const Vector<E>& left, const Vector<E>& right) {
         if (left._size == right._size) {
             E* it_1 = left.array;
@@ -113,6 +115,8 @@ public:
     friend bool operator!=(const Vector<E>& left, const Vector<E>& right) {
         return !(left == right);
     }
+    
+    
     friend std::ostream& operator<<(std::ostream& os, Vector<E>& c) {
         os << "[";
         if (c._size == 0) { os << "]"; return os; }
@@ -133,6 +137,23 @@ public:
     E& front() { return this[0]; }
     E& back() { return this[_size-1]; }
     E& at(int index) { return this[index]; }
+    
+    
+    bool contains(const E& value) {
+        for (E* ptr = array; ptr != array + _size; ++ptr) {
+            if (*ptr == value)
+                return true;
+        }
+        return false;
+    }
+    int count(const E& value) {
+        int count = 0;
+        for (E* ptr = array; ptr != array + _size; ++ptr) {
+            if (*ptr == value)
+                ++count;
+        }
+        return count;
+    }
 
 
     void push_back(const E& data) { insert(_size, data); }
@@ -164,6 +185,17 @@ public:
         range_check(index);
         remove_gap(index, 1);
         _size--;
+    }
+    bool remove(const E& value) {
+        E* ptr = array;
+
+        for (int i = 0; i < _size; ++i) {
+            if (*ptr == value) {
+                remove_gap(i, 1);
+                _size--; return true;
+            } ++ptr;
+        }
+        return false;
     }
 
 
