@@ -44,6 +44,8 @@ class Vector {
             }
         }
     }
+    
+    
     void remove_gap(int start, int length) {
         if (_size - length <= capacity >> 2) {
             capacity >>= 1;
