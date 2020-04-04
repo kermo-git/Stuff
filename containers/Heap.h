@@ -27,18 +27,18 @@ protected:
 
 
     void downheap(int parent) {
-        int left_child = (parent << 1) + 1;
-        int right_child = (parent << 1) + 2;
+        int left = (parent << 1) + 1;
+        int right = (parent << 1) + 2;
 
-        if (right_child < _size) {
-            if (wrong_order(parent, left_child) ||
-                wrong_order(parent, right_child)) {
+        if (right < _size) {
+            if (wrong_order(parent, left) ||
+                wrong_order(parent, right)) {
 
-                int next = choose_next(left_child, right_child);
+                int next = choose_next(left, right);
                 swap(parent, next); downheap(next);
             }
-        } else if (left_child < _size && wrong_order(parent, left_child)) {
-            swap(parent, left_child); downheap(left_child);
+        } else if (left < _size && wrong_order(parent, left)) {
+            swap(parent, left); downheap(left);
         }
     }
 
@@ -120,8 +120,8 @@ class MinHeap: public Heap<E> {
     bool wrong_order(int parent, int child) {
         return this->tree[parent] > this->tree[child];
     };
-    int choose_next(int left_child, int right_child) {
-        return (this->tree[left_child] < this->tree[right_child]) ? left_child : right_child;
+    int choose_next(int left, int right) {
+        return (this->tree[left] < this->tree[right]) ? left : right;
     };
 public:
     MinHeap() {}
