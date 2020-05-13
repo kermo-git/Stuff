@@ -1,68 +1,11 @@
-// https://www.maths.tcd.ie/~fionn/misc/mt.php
-
-class MT19937 {
-    private static final int W = 32,
-                             N = 624,
-                             M = 397,
-                             R = 31,
-                             A = 0x9908B0DF,
-                             U = 11,
-                             D = 0xFFFFFFFF,
-                             S = 7,
-                             B = 0x9D2C5680,
-                             T = 15,
-                             C = 0xEFC60000,
-                             L = 18,
-                             F = 1812433253,
-                             LOWER_MASK = (1 << R) - 1,
-                             UPPER_MASK = ~LOWER_MASK;
-
-    private final int[] state = new int[N];
-    private int index = N;
-
-    public MT19937(int seed) {
-        state[0] = seed;
-
-        for (int i = 1; i < N; i++) {
-            int x = state[i-1];
-            state[i] = F*(x^(x >>> (W - 2))) + i;
-        }
-    }
-
-    public int nextInt() {
-        if (index >= N)
-            twist();
-        
-        int x = state[index];
-        index++;
-        
-        x = x^((x >>> U) & D);
-        x = x^((x << S) & B);
-        x = x^((x << T) & C);
-        return x^(x >>> L);
-    }
-
-    private void twist() {
-        for (int i = 0; i < N; i++) {
-            state[i] = state[(i+M)%N]^xA(concatenate(state[i], state[(i+1)%N]));
-        }
-        index = 0;
-    }
-
-    private static int concatenate(int a, int b) {
-        return (UPPER_MASK & a)^(LOWER_MASK & b);
-    }
-
-    private static int xA(int x) {
-        if (x & 1 == 0)
-            return x >>> 1;
-        return (x >>> 1)^A;
-    }
-}
-
-
-// https://en.wikipedia.org/wiki/Linear_congruential_generator
-
+/*
+ * This is a very simple pseudorandom number generator, called linear congruential generator.
+ * If seeded wih X(0), then the N'th "random" number in the sequence is defined as
+ * X(N) = (X(N-1)*A + C) % M
+ * where A, C and M are parameters.
+ *
+ * https://en.wikipedia.org/wiki/Linear_congruential_generator
+ */
 class LCG {
     private long seed, A, C, M;
     private int SHIFT = 0, MASK = 0xFFFFFFFF;
@@ -111,9 +54,79 @@ class LCG {
 }
 
 
-// https://www.iro.umontreal.ca/~lecuyer/myftp/papers/wellrng.pdf
-// https://bitbucket.org/sergiu/random/src/tip/well.hpp
+/*
+ * Another random number generator, called Mersenne Twister. It can generate
+ * a sequence of 2^19937 pseudorandom numbers before the sequence repeats.
+ *
+ * https://www.maths.tcd.ie/~fionn/misc/mt.php
+ */
+class MT19937 {
+    private static final int W = 32,
+                             N = 624,
+                             M = 397,
+                             R = 31,
+                             A = 0x9908B0DF,
+                             U = 11,
+                             D = 0xFFFFFFFF,
+                             S = 7,
+                             B = 0x9D2C5680,
+                             T = 15,
+                             C = 0xEFC60000,
+                             L = 18,
+                             F = 1812433253,
+                             LOWER_MASK = (1 << R) - 1,
+                             UPPER_MASK = ~LOWER_MASK;
 
+    private final int[] state = new int[N];
+    private int index = N;
+
+    public MT19937(int seed) {
+        state[0] = seed;
+
+        for (int i = 1; i < N; i++) {
+            int x = state[i-1];
+            state[i] = F*(x^(x >>> (W - 2))) + i;
+        }
+    }
+
+    public int rand() {
+        if (index >= N)
+            twist();
+        
+        int x = state[index];
+        index++;
+        
+        x = x^((x >>> U) & D);
+        x = x^((x << S) & B);
+        x = x^((x << T) & C);
+        return x^(x >>> L);
+    }
+
+    private void twist() {
+        for (int i = 0; i < N; i++) {
+            state[i] = state[(i+M)%N]^xA(concatenate(state[i], state[(i+1)%N]));
+        }
+        index = 0;
+    }
+
+    private static int concatenate(int a, int b) {
+        return (UPPER_MASK & a)^(LOWER_MASK & b);
+    }
+
+    private static int xA(int x) {
+        if (x & 1 == 0)
+            return x >>> 1;
+        return (x >>> 1)^A;
+    }
+}
+
+
+/*
+ * A very complicated pseudorandom number generator. It's really over the top.
+ *
+ * https://www.iro.umontreal.ca/~lecuyer/myftp/papers/wellrng.pdf
+ * https://bitbucket.org/sergiu/random/src/tip/well.hpp
+ */
 abstract class WELL {
     protected static final int
             W = 32,
