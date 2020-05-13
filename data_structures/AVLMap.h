@@ -4,8 +4,9 @@
 
 
 /*
- * An AVL tree based implementation of a key-value map. All operation are O(log n).
- * Public methods are similar to C++'s std::map:
+ * An AVL tree based implementation of a key-value map. It needs type parameters K for keys
+ * (must overload the comparison operators) and V for values. Insert and remove operations are
+ * O(log n). Public methods:
  * 
  * int size()
  * bool empty()
