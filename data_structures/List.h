@@ -3,6 +3,10 @@
 #include <iostream>
 
 
+/*
+ * An implementation of a double linked list, like C++'s std::list or Java LinkedList. Accesing an
+ * element by index is O(n). Once the element is found, removing it or adding a new one is O(1).
+ */
 template <class E>
 class List {
     struct Node {
