@@ -7,6 +7,20 @@
 #define BLACK false
 
 
+/*
+ * A red-black tree based implementation of a key-value map (just like Java TreeMap).
+ * All operation are O(log n). Public methods are similar to C++'s std::map:
+ * 
+ * int size()
+ * bool empty()
+ * void clear()
+ * V& at(const K& key) - return the value associated with the key or throws an exception if it doesn't exist
+ * V& operator[](const K& key) - can be used in two ways:
+ *   map[5] = "value" // adding a new key or overwriting the value for an existing key.
+ *   string str = map[5] // get a value by key. If it doesn't exist, it creates a new key with a default value.
+ * void erase(const K& key) - removes a key, if it exists.
+ * bool contains(const K& key)
+ */
 template <class K, class V>
 class RedBlackMap {
     struct Node {
