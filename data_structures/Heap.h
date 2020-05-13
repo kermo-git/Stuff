@@ -3,6 +3,12 @@
 #include <iostream>
 
 
+/*
+ * A Binary Heap implementation, needs type parameter E, which must overload the
+ * comparison operators. push(const E&) adds a new element. pop() removes and returns
+ * the smallest or largest one in O(log n) time, depending on whether it's MinHeap or
+ * MaxHeap.
+ */
 template <class E>
 class Heap {
 protected:
