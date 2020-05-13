@@ -1,9 +1,16 @@
 import java.util.Random
 
-// https://mzucker.github.io/html/perlin-noise-math-faq.html
-// https://www.scratchapixel.com/lessons/procedural-generation-virtual-worlds/perlin-noise-part-2
-// https://www.mrl.nyu.edu/~perlin/doc/oscar.html#noise
-
+/**
+ * An algorithm for generating smooth noise by Ken Perlin. Method {@code noise(double x, double y)}
+ * returns a random value between 0 and 1. Coordinates (x and y) that are close to each other have
+ * similar noise values. Method {@code fractal_noise(double x, double y, int octaves, double persistence)} 
+ * adds multiple instances of the noise ("octaves") together, each subsequent noise having with twice
+ * the frequency than the previous one. The noise can be visualised by using generated numbers as greyscale
+ * values and plotting them on a 2D image using the given coordinates. The noise repeats after every 256 units.
+ *
+ * https://mzucker.github.io/html/perlin-noise-math-faq.html
+ * https://www.scratchapixel.com/lessons/procedural-generation-virtual-worlds/perlin-noise-part-2
+ */
 class Perlin_1985 {
     private static final int SIZE = 256, MASK = 255;
     private final int[] P = new int[2* SIZE];
@@ -96,10 +103,14 @@ class Perlin_1985 {
     }
 }
 
-// https://flafla2.github.io/2014/08/09/perlinnoise.html
-// https://mrl.nyu.edu/~perlin/paper445.pdf
-// https://mrl.nyu.edu/~perlin/noise/
 
+/**
+ * This class uses a slightly improved algorithm to generate smooth noise in 3D space, so {@code noise(double, double, double)}
+ * requires 3 coordinates.
+ *
+ * https://flafla2.github.io/2014/08/09/perlinnoise.html
+ * https://mrl.nyu.edu/~perlin/noise/
+ */
 class Perlin_2002 {
     private static final int[] P = new int[512];
     private static final int[] permutation = { 151,160,137,91,90,15,
@@ -178,9 +189,13 @@ class Perlin_2002 {
     }
 }
 
-// https://www.csee.umbc.edu/~olano/s2002c36/ch02.pdf
-// http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
 
+/**
+ * A completely different algorithm for generating 3D noise also invented by Ken Perlin.
+ *
+ * http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
+ * https://www.csee.umbc.edu/~olano/s2002c36/ch02.pdf
+ */
 class Simplex {
     private static int i, j, k;
     private static double u, v, w;
