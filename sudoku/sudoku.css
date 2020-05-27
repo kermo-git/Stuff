@@ -1,0 +1,132 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: url('background.jpg');
+    background-position: center top;
+    background-size: cover;
+}
+h1 {
+    font-size: 10vmin;
+    text-align: center;
+}
+p {
+    font-size: 3vmin;
+    text-align: justify;
+}
+
+
+button {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 3vmin;
+    color: white;
+
+    background-color: black;
+    border: none;
+
+    height: 8vmin;
+    width: 16vmin;
+}
+button:first-child {
+    border-top-left-radius: 2vmin;
+    border-bottom-left-radius: 2vmin;
+}
+button:last-child {
+    border-top-right-radius: 2vmin;
+    border-bottom-right-radius: 2vmin;
+}
+@media(hover: hover) and (pointer: fine) {
+    button:hover {
+        transition-duration: 0.4s;
+        background: rgb(116, 116, 116);
+        color: black;
+    }
+}
+button:active {
+    transition-duration: 0s;
+    background: rgb(59, 59, 59);
+}
+
+
+#languages {
+    text-align: right;
+}
+/* Lippude ikoonid on pärit siit: https://www.flaticon.com/packs/countrys-flags */
+#eng {
+    background-image: url('uk.png');
+    background-size: 100% 100%; 
+}
+#est {
+    background-image: url('estonia.png');
+    background-size: 100% 100%;
+}
+@media(hover: hover) and (pointer: fine) {
+    #est:hover, #eng:hover {
+        transition-duration: 0s;
+        border: 0.15em solid black;
+    }
+}
+#est:active, #eng:active {
+    border: 0.15em solid black;
+}
+
+
+#difficulties, #solution_div {
+    text-align: center;
+    padding-top: 1vmin;
+    padding-bottom: 1vmin;
+}
+
+
+.sudoku {
+    background-color: lightblue;
+    font-size: 5vmin;
+}
+
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+
+    margin-top: 3vmin;
+    margin-bottom: 3vmin;
+
+    border-collapse: collapse;
+}
+td {
+    font-weight: bold;
+    text-align: center;
+    border: 0.05em solid black;
+    height: 1.5em;
+    width: 1.5em;
+}
+
+
+td:first-child {
+    border-left: 0.15em solid black;
+}
+td:nth-child(3n) {
+    border-right: 0.15em solid black;
+}
+tr:first-child td {
+    border-top: 0.15em solid black;
+}
+tr:nth-child(3n) td {
+    border-bottom: 0.15em solid black;
+}
+
+
+select {
+    height: 100%;
+    width: 100%;
+    border: none;
+
+    /* The following attributes get rid of the dropdown arrow icon.*/
+
+    /* for Firefox */
+    -moz-appearance: none;
+    /* for Chrome */
+    -webkit-appearance: none;
+}
+/* For IE10 */
+select::-ms-expand {
+    display: none;
+}
