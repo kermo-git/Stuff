@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sudoku</title>
+
+        <script src="sudoku_logic.js"></script>
+        <script src="html_utils.js"></script>
+
+        <link rel="stylesheet" href="sudoku.css">
+
+        <meta charset="UTF-8">
+        <meta name="author" content="Kermo Saarse"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div id="languages">
+            <button id="eng" onclick="setEnglish()" title="English"></button>
+            <button id="est" onclick="setEstonian()" title="Eesti keel"></button>
+        </div>
+
+        <h1>SUDOKU</h1>
+
+        <p id="description"></p>
+
+        <div id="difficulties">
+            <button id="easy" onclick="generate(30);fillTable();"></button>
+            <button id="medium" onclick="generate(40);fillTable();"></button>
+            <button id="hard" onclick="generate(50);fillTable();"></button>
+        </div>
+
+        <script>buildTable();</script>
+
+        <div id="solution_div">
+            <button id="solution" onclick="solve();fillTable();"></button>
+        </div>
+
+        <script>setEstonian();</script>
+    </body>
+</html>
