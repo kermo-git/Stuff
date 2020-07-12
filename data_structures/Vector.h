@@ -4,9 +4,9 @@
 
 
 /*
- * An array that autamatically resizes itself, just like C++'s std::vector or Java ArrayList.
- * Accessing an element by index is O(1). Inserting an element is O(n), because all the elements
- * must be shifted by one position or the entire array must be copied to a new location.
+ * An array that automatically resizes itself, just like C++'s std::vector or Java ArrayList.
+ * Accessing an element by index is O(1). Inserting or removing an element is O(n), because all the
+ * following elements must be shifted by one position or the entire array must be copied to a new location.
  */
 template <class E>
 class Vector {
