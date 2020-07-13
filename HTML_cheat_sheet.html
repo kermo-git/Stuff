@@ -1,0 +1,265 @@
+<!--
+HTML element: <tag> elemendi sisu </tag>
+
+HTML dokumendi struktuur:
+
+<!DOCTYPE html>
+<html>
+    <head>
+        /* Metainfo */
+    </head>
+    <body>
+        /* Veebilehe sisu */
+    </body>
+</html>
+
+HTML elemendile saab vajadusel lisada atribuute:
+
+<tag title="See tekst kuvatakse siis, Kui kursor on elemendi peal"
+     style="CSS atribuudid"
+
+     /* Sündmused. Jutumärkide vahel on JavaScripti kood, mis käivitub sündmuse toimumisel */
+
+     // Hiir
+     onclick=""
+     ondblclick=""
+     onmouseover="Kursor on elemendi kohal"
+     onmousedown="Hiirenuppu hoitakse all"
+     onmouseup="Hiirenupp lastakse lahti"
+
+     // Klaviatuur
+     onkeypress=""
+     onkeydown=""
+     onkeyup=""
+
+     oninput=""
+     onchange=""
+     oncontextmenu="">
+
+    elemendi sisu
+</tag>
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Näidatakse brauseri tab'il. -->
+        <title>Veebilehe pealkiri</title>
+        <!-- Viitab JavaScripti failile -->
+        <script src="teekond/failini/skript.js"></script>
+        <!--
+        Siin on võimalik määrata veebilehe CSS kood.
+        Seda saab teha kahel moel:
+
+        1) Kasutades style tag'i
+            <style>
+                Kirjuta CSS kood siia
+            </style>
+        
+        2) Viidates .css failile
+            <link rel="stylesheet" href="teekond/failini/stiil.css">
+        -->
+ 
+        <meta charset="UTF-8">
+        <meta name="description" content="Free Web tutorials">
+        <meta name="author" content="John Doe"> 
+        <!-- Aitab erineva suurusega ekraanide korral. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Võtmesõnad otsingumootorite jaoks. -->
+        <meta name="keywords" content="HTML, CSS, XML, JavaScript">
+    </head>
+
+
+    <body>
+        <script>
+            var x = "Siia saab kirjutada JavaScripti koodi. Kui <head> elemendis on viide JavaScripti failile,";
+            var y = "siis saab siin kasutada kõiki muutujaid ja funktsioone, mis selles failis defineeritud on.";
+        </script>
+        <noscript>
+            Teade juhuks, kui brauseris on skriptid keelatud.
+        </noscript>
+
+
+        <hr> <!--Horisontaalne joon-->
+        <!--
+        Pealkirjad väikseimast suurimani:
+        h1, h2, h3, h4, h5, h6
+        -->
+        <h1>Pealkiri</h1>
+
+
+        <!--Lõik-->
+        <p>
+            Tavaline tekst
+            <br> <!--reavahetus-->
+            <b>rasvane</b>
+            <i>kaldkiri</i>
+            <small>natuke väiksem kiri</small>
+            <mark>marker</mark>
+            <del>ülekriipsutatud</del>
+            <ins>allajoonitud</ins>
+            <sub>alaindeks</sub>
+            <sup>ülaindeks</sup>
+            <q>jutumärkides tekst.</q>
+
+            <cite>Viide raamatule, filmile, autorile jne.</cite>
+
+            <blockquote cite="https://www.tsitaadi-allikas.ee">
+                See tekst tsiteeritud lehelt https://www.tsitaadi-allikas.ee ja kuvatakse taandega.
+            </blockquote>
+
+            <!--Aadressi ette ja järele paneb brauser reavahetuse ja tekst on kaldkirjas.-->
+            <address>
+                Autor: Jaan Tamm<br> 
+                Koduleht:<br>
+                www.veebileht.ee<br>
+                Purde 27, Tartu<br>
+                Eesti
+            </address>
+
+            Kui viia kursor lühendi <abbr title="World Health Organization">WHO</abbr>.
+            kohale, kuvab "World Health Organization".
+        </p>
+
+
+        <!-- Nummerdamata nimekiri -->
+        <ul>
+            <li>Element</li>
+            <li>Element</li>
+            <li>Element</li>
+        </ul>
+          
+
+        <!-- Nummerdatud nimekiri -->
+        <ol>
+            <li>Element 1</li>
+            <li>Element 2</li>
+            <li>Element 3</li>
+        </ol>
+
+
+        <!-- Kirjeldustega nimekiri -->
+        <dl>
+            <dt>Element 1</dt>
+            <dd>Kirjeldus 1</dd>
+            <dt>Element 2</dt>
+            <dd>Kirjeldus 2</dd>
+        </dl>
+
+
+        <!-- Tabel -->
+        <table>
+            <caption>Tabeli pealkiri</caption>
+            <!-- tr on tabeli rida. th on päise lahter (paksus kirjas) ja td on andmelahter. -->
+            <tr>
+                <th>Lahter 1</th>
+                <!-- 2 veeru pikkune lahter -->
+                <th colspan="2">Lahter 2</th>
+            </tr>
+            <tr>
+                <!-- 2 rea kõrgune lahter -->
+                <td rowspan="2">Lahter 3</td>
+                <td>Lahter 4</td>
+                <td>Lahter 5</td>
+            </tr>
+            <tr>
+                <td>Lahter 6</td>
+                <td>Lahter 7</td>
+            </tr>
+        </table>
+
+
+        <span>
+            See element ei alga uuelt real ja võtab laiuses niipalju ruumi kui vajalik.
+        </span>
+        <div>
+            See element algab alati uuelt real ja võtab laiuses niipalju ruumi kui võimalik.
+        </div>
+
+
+        <!-- Hüperlink. target="_blank" tähendab, et link avatakse uues aknas-->
+        <a href="https://www.w3schools.com" target="_blank">
+            Lingi sisu - tekst või mõni HTML element, millele klikates link avaneb
+        </a>
+        <!--Link elemendile, millel on id="id"-->
+        <a href="#id">Lingi sisu</a>
+
+
+        <!-- Pilt -->
+        <img src="pildi/link/või/failitee" alt="Kui pilti ei saa kuvada" width="100" height="100">
+
+
+        <!-- Pildile saab lisada klikatavaid alasid. -->
+        <map name="imagemap">
+            <!-- Koordinaadid pildil: (px vasakust äärest, px ülemisest äärest) -->
+
+            <!-- Ristküliku koordinaadid: coords="x, y, w, z"
+                 (x, y) - ülemine vasak nurk, (w, z) - alumine parem nurk -->
+            <area shape="rect" coords="34,44,270,350" alt="Computer" href="link 1">
+            <!-- Ringi koordinaadid: coords="x, y, r"
+                 (x, y) - keskpunkti koordinaadid, r - raadius -->
+            <area shape="circle" coords="337,300,44" alt="Coffee" href="link 2">
+        </map>
+        <!-- Pilt, mis kasutab eelnevalt defineeritud klikatavaid alasid -->
+        <img src="" alt="" style="" usemap="#imagemap">
+
+
+        <!-- Kuvab mingi teise veebilehe selle veebilehe sees. -->
+        <iframe src="www.veebileht.ee" height="200" width="300"></iframe>
+
+
+        <pre>
+See tekst kuvatakse täpselt nii,
+                      
+nagu see siin kirjas on,
+                      
+koos kõikide reavahetuste ja tühikutega.
+                      
+Font on tavaliselt courier.
+        </pre>
+
+
+        <!-- Kasutajaliidese elemendid -->
+        <button>Nupu tekst</button>
+        <textarea rows="4" cols="50">
+            Tekstikast, kuhu kasutaja saab midagi kirjutada. See siin on esialgne tekst.
+        </textarea>
+
+
+        <!-- Ankeet, mille sees on mitmeid kasutajaliidese elemente. Need elemendid
+             võivad esineda ka väljaspool <form> elementi. -->
+        <form action="URL/või/failitee">
+            <!-- <label> elemendi for atribuut peab olema selle elemendi id, mida see <label> kirjeldab. -->
+            <label for="text">Tekstiväli</label>
+            <input type="text" id="text"><br>
+
+            <!-- value atribuuti ei näidata ekraanil, kuid see on see väärtus, mis serverisse
+                 saadetakse, kui vajutatakse submit nuppu. -->
+            <label for="drop">Rippmenüü</label>
+            <select id="drop">
+                <option value="drop_1">Valik 1</option>
+                <option value="drop_2">Valik 2</option>
+                <option value="drop_3">Valik 3</option>
+            </select> <br>
+
+            <!-- Menüü, milles on ainult 1 võimalik valik 2-st. NB! igal <input type="radio">
+                 elemendil selles valikus peab olema sama name atribuut! -->
+            <input type="radio" name="radio_menu" id="radio_1" value="radio_1">
+            <label for="radio_1">Valik 1</label><br>
+            <input type="radio" name="radio_menu" id="radio_2" value="radio_2">
+            <label for="radio_2">Valik 2</label><br>
+
+            <!-- Menüü, milles on rohkem kui 1 valik. -->
+            <input type="checkbox" name="check_menu" id="check_1" value="check_1">
+            <label for="check_1">Valik 1</label> <br>
+            <input type="checkbox" name="check_menu" id="check_2" value="check_2">
+            <label for="check_2">Valik 2</label><br>
+
+            <input type="button" onclick="" value="Nupu tekst">
+            <input type="number" id="n" name="n" min="1" max="9">
+
+            <!-- Kinnitamise nupp. -->
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>  
