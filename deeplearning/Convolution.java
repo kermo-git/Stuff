@@ -34,14 +34,16 @@ public class Convolution extends Layer {
 
     @Override
     public void setInput(Matrix input) {
+        this.input = input;
+
         int numSamples = input.dim0;
         int inputChannels = input.dim1;
 
         filters = new Matrix(numFilters, inputChannels, filterSize, filterSize);
         biases = new Matrix(numFilters);
-        
-        parameters.add(filters);
-        parameters.add(biases);
+
+        filters.gaussianFill(0, Math.sqrt(2.0/(3 * input.dim2 * input.dim3)));
+        addParameters(filters, biases);
 
         paddedSizeX = input.dim2 + 2 * zeroPadding;
         paddedSizeY = input.dim3 + 2 * zeroPadding;
@@ -66,10 +68,10 @@ public class Convolution extends Layer {
                 bias = biases.value[filter];
 
                 outputX = 0;
-                for (paddedX = 0; paddedX < paddedSizeX; paddedX += stride) {
+                for (paddedX = 0; paddedX <= paddedSizeX - filterSize; paddedX += stride) {
                     
                     outputY = 0;
-                    for (paddedY = 0; paddedY < paddedSizeY; paddedY += stride) {
+                    for (paddedY = 0; paddedY <= paddedSizeX - filterSize; paddedY += stride) {
                         convolutionForward();
                         outputY++;
                     }
@@ -87,10 +89,10 @@ public class Convolution extends Layer {
             for (filter = 0; filter < numFilters; filter++) {
 
                 outputX = 0;
-                for (paddedX = 0; paddedX < paddedSizeX; paddedX += stride) {
+                for (paddedX = 0; paddedX <= paddedSizeX - filterSize; paddedX += stride) {
                     
                     outputY = 0;
-                    for (paddedY = 0; paddedY < paddedSizeY; paddedY += stride) {
+                    for (paddedY = 0; paddedY <= paddedSizeY - filterSize; paddedY += stride) {
                         convolutionBackward();
                         outputY++;
                     }

@@ -15,6 +15,12 @@ public abstract class Layer extends Matrix {
     protected Matrix input;
     protected List<Matrix> parameters = new LinkedList<>();
 
+    protected void addParameters(Matrix ...parameters) {
+        for (Matrix matrix : parameters) {
+            this.parameters.add(matrix);
+        }
+    }
+
     @Override
     public void update(double learningRate) {
         for (Matrix matrix : parameters) {
@@ -26,8 +32,8 @@ public abstract class Layer extends Matrix {
     abstract public void setInput(Matrix input);
 
     abstract public void forward(int firstSample, int lastSample);
-    public void forward() { forward(0, input.dim1); }
+    public void forward() { forward(0, input.dim0); }
 
     abstract public void backward(int firstSample, int lastSample);
-    public void backward() { backward(0, input.dim1); }
+    public void backward() { backward(0, input.dim0); }
 }

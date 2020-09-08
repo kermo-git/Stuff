@@ -35,7 +35,6 @@ public abstract class Pointwize extends Layer {
     @Override
     public void backward(int firstSample, int lastSample) {
         int sample, d1, d2, d3;
-        int hash;
 
         for (sample = firstSample; sample < lastSample; sample++) {
             for (d1 = 0; d1 < dim1; d1++) {

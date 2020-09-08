@@ -1,4 +1,6 @@
-import java.util.Random
+package algorithms;
+
+import java.util.Random;
 
 /**
  * An algorithm for generating smooth noise by Ken Perlin. Method {@code noise(double x, double y)}

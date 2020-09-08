@@ -112,8 +112,7 @@ public class LSTM extends Layer {
 
                 weights.gaussianFill(0, Math.sqrt(2.0 / (inputFeatures + outputFeatures))); // xavier
 
-                LSTM.this.parameters.add(weights);
-                LSTM.this.parameters.add(biases);
+                LSTM.this.addParameters(weights, biases);
             } 
             else if (inputFeatures != weights.dim0 - outputFeatures)
                 throw new IllegalArgumentException();

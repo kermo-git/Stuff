@@ -183,6 +183,32 @@ public class Matrix {
     }
 
 
+    public static Matrix randomImages(int numImages, int width, int height) {
+        Random random = new Random();
+        Matrix images = new Matrix(numImages, 3, width, height);
+
+        for (int i = 0; i < images.value.length; i++) {
+            images.value[i] = random.nextInt(256);
+        }
+        return images;
+    }
+
+    
+    public static Matrix randomOneHots(int samples, int classes, int timeSteps) {
+        Random random = new Random();
+        Matrix data = new Matrix(samples, classes, timeSteps);
+
+        for (int s = 0; s < samples; s++) {
+            for (int t = 0; t < timeSteps; t++) {
+                int c = random.nextInt(classes);
+                int hash = data.indexHash(s, c, t);
+                data.value[hash] = 1;
+            }
+        }
+        return data;
+    }
+
+
     @Override
     public String toString() {
         int max_len = 0;

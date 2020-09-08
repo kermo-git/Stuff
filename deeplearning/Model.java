@@ -26,10 +26,10 @@ public class Model {
     }
 
 
-    public void train(Matrix trainX, Matrix trainY, int batchSize, int epochs, double learningRate) {
-        setInput(trainX, trainY);
+    public void train(Matrix input, Matrix label, int batchSize, int epochs, double learningRate) {
+        setInput(input, label);
 
-        int numSamples = trainX.dim0;
+        int numSamples = input.dim0;
         int firstSample, lastSample;
 
         for (int i = 1; i <= epochs; i++) {
@@ -44,8 +44,21 @@ public class Model {
 
                 firstSample = lastSample;
             }
+            forward();
+            System.out.println("Error: " + error.getError() + '\n');
         }
         // TODO: remove dropouts
+    }
+
+
+    public void train(Matrix input, Matrix label, int epochs, double learningRate) {
+        setInput(input, label);
+        for (int i = 1; i <= epochs; i++) {
+            System.out.println("Epoch: " + i);
+            forward();
+            System.out.println("Error: " + error.getError());
+            backward(learningRate);
+        }
     }
 
 
@@ -108,6 +121,19 @@ public class Model {
         while (it.hasPrevious()) {
             Layer layer = it.previous();
             layer.backward(firstSample, lastSample);
+            layer.update(learningRate);
+        }
+    }
+
+
+    private void backward(double learningRate) {
+        error.backward();
+
+        ListIterator<Layer> it = layers.listIterator(layers.size());
+
+        while (it.hasPrevious()) {
+            Layer layer = it.previous();
+            layer.backward();
             layer.update(learningRate);
         }
     }

@@ -24,6 +24,8 @@ public class MaxPooling extends Layer {
 
     @Override
     public void setInput(Matrix input) {
+        this.input = input;
+        
         int samples = input.dim0;
         int channels = input.dim1;
         inputSizeX = input.dim2;
@@ -47,10 +49,10 @@ public class MaxPooling extends Layer {
             for (channel = 0; channel < dim1; channel++) {
 
                 outputX = 0;
-                for (inputX = 0; inputX < inputSizeX; inputX += stride) {
+                for (inputX = 0; inputX <= inputSizeX - poolSize; inputX += stride) {
                     
                     outputY = 0;
-                    for (inputY = 0; inputY < inputSizeX; inputY += stride) {
+                    for (inputY = 0; inputY <= inputSizeY - poolSize; inputY += stride) {
                         maxPoolingForward();
                         outputY++;
                     }
@@ -68,10 +70,10 @@ public class MaxPooling extends Layer {
             for (channel = 0; channel < dim1; channel++) {
 
                 outputX = 0;
-                for (inputX = 0; inputX < inputSizeX; inputX += stride) {
+                for (inputX = 0; inputX <= inputSizeX - poolSize; inputX += stride) {
                     
                     outputY = 0;
-                    for (inputY = 0; inputY < inputSizeX; inputY += stride) {
+                    for (inputY = 0; inputY <= inputSizeY - poolSize; inputY += stride) {
                         maxPoolingBackward();
                         outputY++;
                     }

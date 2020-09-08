@@ -13,15 +13,11 @@ public class CrossEntropy extends Error {
         error = 0;
 
         for (sample = firstSample; sample < lastSample; sample++) {
-            for (timeStep = 0; timeStep < dim2; timeStep++) {
-                for (feature = 0; feature < dim1; feature++) {
+            for (timeStep = 0; timeStep < input.dim2; timeStep++) {
+                for (feature = 0; feature < input.dim1; feature++) {
 
-                    hash = indexHash(feature, sample, timeStep);
-                    
-                    if (label.value[hash] > 0) {
-                        error += -Math.log(input.value[hash]);
-                        break;
-                    }
+                    hash = input.indexHash(sample, feature, timeStep);
+                    error -= label.value[hash] * Math.log(input.value[hash]);
                 }
             }
         }
@@ -36,11 +32,11 @@ public class CrossEntropy extends Error {
         int hash;
 
         for (sample = firstSample; sample < lastSample; sample++) {
-            for (timestep = 0; timestep < dim2; timestep++) {
-                for (feature = 0; feature < dim1; feature++) {
+            for (timestep = 0; timestep < input.dim2; timestep++) {
+                for (feature = 0; feature < input.dim1; feature++) {
 
-                    hash = indexHash(sample, feature, timestep);
-                    input.gradient[hash] += -label.value[hash] / (input.value[hash] * batchSize);
+                    hash = input.indexHash(sample, feature, timestep);
+                    input.gradient[hash] -= label.value[hash] / (input.value[hash] * batchSize);
                 }
             }
         }

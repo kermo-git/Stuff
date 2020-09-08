@@ -25,9 +25,7 @@ public class Dense extends Layer {
             biases = new Matrix(outputFeatures);
 
             xavierInit();
-
-            parameters.add(weights);
-            parameters.add(biases);
+            addParameters(weights, biases);
         }
         else if (inputFeatures != weights.dim0)
             throw new IllegalArgumentException();

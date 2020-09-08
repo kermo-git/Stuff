@@ -37,7 +37,7 @@ public class Softmax extends Layer {
                     this.value[hash] = exp;
                 }
 
-                for (feature = 0; feature < dim0; feature++) {
+                for (feature = 0; feature < dim1; feature++) {
                     hash = indexHash(sample, feature, timeStep);
 
                     this.value[hash] /= sum;

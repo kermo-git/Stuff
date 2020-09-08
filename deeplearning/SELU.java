@@ -6,6 +6,13 @@ public class SELU extends Pointwize {
         ALPHA = 1.6732632423543772848170429916717;
         
     @Override
+    public void setInput(Matrix input) {
+        if (input instanceof Dense && input != this.input) {
+            ((Dense) input).leCunInit();
+        }
+        super.setInput(input);
+    }
+    @Override
     public double forwardOp(double x) {
         if (x > 0)
             return LAMBDA*x;

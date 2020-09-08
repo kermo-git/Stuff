@@ -1,3 +1,5 @@
+package algorithms;
+
 /*
  * This is a very simple pseudorandom number generator, called linear congruential generator.
  * If seeded wih X(0), then the N'th "random" number in the sequence is defined as
@@ -114,7 +116,7 @@ class MT19937 {
     }
 
     private static int xA(int x) {
-        if (x & 1 == 0)
+        if ((x & 1) == 0)
             return x >>> 1;
         return (x >>> 1)^A;
     }
