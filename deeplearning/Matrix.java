@@ -3,6 +3,7 @@ package deeplearning;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
+import java.awt.image.BufferedImage;
 
 
 /**
@@ -59,57 +60,23 @@ public class Matrix {
     }
 
 
-    protected int indexHash(int x, int y, int z, int w) {
-        return x + dim0*(y + dim1*(z + dim2*w));
-    }
-    protected int indexHash(int x, int y, int z) {
-        return x + dim0*(y + dim1*z);
-    }
-    protected int indexHash(int x, int y) {
-        return x + dim0*y;
-    }
-
-
-    public void update(double learningRate) {
-        for (int i = 0; i < value.length; i++)
-            value[i] -= learningRate * gradient[i];
-
-        gradient = new double[value.length];
-    }
-    public void reset() {
-        value = new double[value.length];
-        gradient = new double[value.length];
-    }
-    protected void resetGradient() {
-        gradient = new double[value.length];
-    }
-
-
     public int getDim0() { return dim0; }
     public int getDim1() { return dim1; }
     public int getDim2() { return dim2; }
     public int getDim3() { return dim3; }
 
 
-    public int safeHash(int x, int y, int z, int w) {
-        boolean inBounds = (x >= 0 && x < dim0);
-        inBounds = inBounds && (y >= 0 && y < dim1);
-        inBounds = inBounds && (z >= 0 && z < dim2);
-        inBounds = inBounds && (w >= 0 && w < dim3);
+    public int indexHash(int x, int y, int z, int w) {
+        return x + dim0*(y + dim1*(z + dim2*w));
+    }
+    public int indexHash(int x, int y, int z) {
+        return x + dim0*(y + dim1*z);
+    }
+    public int indexHash(int x, int y) {
+        return x + dim0*y;
+    }
+    
 
-        if (inBounds)
-            return x + dim0*(y + dim1*(z + dim2*w));
-        throw new IllegalArgumentException();
-    }
-    public int safeHash(int x, int y, int z) {
-        return safeHash(x, y, z, 1);
-    }
-    public int safeHash(int x, int y) {
-        return safeHash(x, y, 1, 1);
-    }
-    public int safeHash(int x) {
-        return safeHash(x, 1, 1, 1);
-    }
     public double getValue(int hash) {
         if (hash >= 0 && hash < value.length)
             return value[hash];
@@ -123,7 +90,27 @@ public class Matrix {
     }
 
 
-    public void storeVector(int sample, int timeStep, double[] vector) {
+    public void update(double learningRate) {
+        for (int i = 0; i < value.length; i++)
+            value[i] -= learningRate * gradient[i];
+
+        gradient = new double[value.length];
+    }
+    public void reset() {
+        value = new double[value.length];
+        gradient = new double[value.length];
+    }
+    public void resetGradient() {
+        gradient = new double[value.length];
+    }
+
+
+    /*
+     * STORING DATA
+     */
+
+
+    public void storeVector(int sample, double[] vector, int timeStep) {
         if (vector.length == dim1) {
         if (sample >= 0 && sample < dim0) {
         if (timeStep >= 0 && timeStep < dim2) {
@@ -136,11 +123,11 @@ public class Matrix {
         throw new IllegalArgumentException();
     }
     public void storeVector(int sample, double[] vector) {
-        storeVector(sample, 0, vector);
+        storeVector(sample, vector, 0);
     }
 
 
-    public void storeVector(int sample, int timeStep, Collection<? extends Number> vector) {
+    public void storeVector(int sample, Collection<? extends Number> vector, int timeStep) {
         double[] temp = new double[vector.size()];
 
         int i = 0;
@@ -148,11 +135,44 @@ public class Matrix {
             temp[i] = d.doubleValue();
             i++;
         }
-        storeVector(sample, timeStep, temp);
+        storeVector(sample, temp, timeStep);
     }
     public void storeVector(int sample, Collection<? extends Number> vector) {
-        storeVector(sample, 0, vector);
+        storeVector(sample, vector, 0);
     }
+
+
+    public Matrix(Collection<BufferedImage> images) {
+        int width = images.get(0).getWidth();
+        int height = images.get(0).getHeight();
+        init(imgs.size(), 3, width, height);
+
+        BufferedImage img;
+        int RGB, red, green, blue;
+
+        for (int sample = 0; sample < imgs.size(); sample++) {
+            img = images.get(sample);
+
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    RGB = img.getRGB(x, y);
+
+                    red = (RGB >> 16) & 0xFF;
+                    green = (RGB >> 8) & 0xFF;
+                    blue = RGB & 0xFF;
+
+                    value[indexHash(sample, 0, x, y)] = red;
+                    value[indexHash(sample, 1, x, y)] = green;
+                    value[indexHash(sample, 2, x, y)] = blue;
+                }
+            }
+        }
+    }
+
+
+    /*
+     * FILLING WITH RANDOM VALUES
+     */
 
 
     public void fill(double value) {
@@ -183,6 +203,11 @@ public class Matrix {
     }
 
 
+    /*
+     * GENERATING RANDOM DATASETS
+     */
+
+
     public static Matrix randomImages(int numImages, int width, int height) {
         Random random = new Random();
         Matrix images = new Matrix(numImages, 3, width, height);
@@ -206,6 +231,9 @@ public class Matrix {
             }
         }
         return data;
+    }
+    public static Matrix randomOneHots(int samples, int classes, int timeSteps) {
+        return randomOneHots(samples, classes, 1);
     }
 
 

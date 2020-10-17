@@ -159,6 +159,7 @@ function ActionLink() {
 // Samasugune asi ES6 klassi kujul:
 class ActionLink extends React.Component {
     constructor(props) {
+        super(props);
         this.handleClick = this.handleClick.bind(this);
     }
 
