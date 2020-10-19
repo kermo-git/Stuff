@@ -37,15 +37,17 @@ import java.awt.image.BufferedImage;
  * NP = (NA*(XB - XP) + NB*(XP - XA))/(XB - XA)
  */
 public class Triangle implements Comparable<Triangle> {
+    Mesh mesh;
     Vertex v1, v2, v3;
     Vector normal;
     int RGB;
     double distance = 0;
 
-    public Triangle(Vertex v1, Vertex v2, Vertex v3) {
+    public Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh mesh) {
         this.v1 = v1; v1.triangles.add(this);
         this.v2 = v2; v2.triangles.add(this);
         this.v3 = v3; v3.triangles.add(this);
+        this.mesh = mesh;
     }
 
 
@@ -75,29 +77,35 @@ public class Triangle implements Comparable<Triangle> {
     }
 
 
-    private int find_mid_x(int x1, int y1, int x2, int y2, int y) {
-        double ratio = 1.0*(y2 - y)/(y2 - y1);
-        return (int)(x2 - ratio*(x2 - x1));
+    private int findMidX(Pixel p1, Pixel p2, int midY) {
+        double ratio = 1.0*(p2.y - midY)/(p2.y - p1.y);
+        return (int)(p2.x - ratio*(p2.x - p1.x));
     }
 
 
-    public void draw_line(BufferedImage img, int x1, int x2, int y) {
-        int w = img.getWidth();
+    public void drawLine(BufferedImage screen, int x1, int x2, int y) {
+        int width = screen.getWidth();
 
-        int start_x = (x1 < x2)? x1 : x2;
-        int end_x = (x1 < x2)? x2 : x1;
+        int startX = (x1 < x2)? x1 : x2;
+        int endX = (x1 < x2)? x2 : x1;
 
-        start_x = (start_x >= 0)? start_x : 0;
-        end_x = (end_x < w)? end_x : (w - 1);
+        startX = (startX >= 0)? startX : 0;
+        endX = (endX < width)? endX : (width - 1);
 
-        for (int x = start_x; x <= end_x; x++) {
-            img.setRGB(x, y, RGB);
+        for (int x = startX; x <= endX; x++) {
+            screen.setRGB(x, y, RGB);
         }
     }
 
 
-    public void render(Scene3D scene, BufferedImage img) {
-        Vertex high, middle, low;
+    public void render(Scene scene) {
+        RGB = mesh.material.illuminate(scene, v1, normal).getRGB();
+
+        Pixel v1 = scene.project(this.v1);
+        Pixel v2 = scene.project(this.v2);
+        Pixel v3 = scene.project(this.v3);
+
+        Pixel high, middle, low;
 
         if (v1.y < v2.y) {
             high = v1; middle = v2;
@@ -116,37 +124,28 @@ public class Triangle implements Comparable<Triangle> {
             low = v3;
         }
 
-        int rx1 = scene.projectX(high.x, high.z);
-        int ry1 = scene.projectY(high.y, high.z);
-
-        int rx2 = scene.projectX(middle.x, middle.z);
-        int ry2 = scene.projectY(middle.y, middle.z);
-        
-        int rx3 = scene.projectX(low.x, low.z);
-        int ry3 = scene.projectY(low.y, low.z);
-
-        int h = img.getHeight();
+        int height = scene.screen.getHeight();
         int x1, x2;
 
-        int start_y = (ry1 >= 0)? ry1 : 0;
-        int end_y = (ry2 < h)? ry2 : (h - 1);
+        int startY = (high.y >= 0)? high.y : 0;
+        int endY = (middle.y < height)? middle.y : (height - 1);
 
-        if (ry1 != ry2 && ry1 != ry3) {
-            for (int y = start_y; y < end_y; y++) {
-                x1 = find_mid_x(rx1, ry1, rx2, ry2, y);
-                x2 = find_mid_x(rx1, ry1, rx3, ry3, y);
-                draw_line(img, x1, x2, y);
+        if (high.y != middle.y && high.y != low.y) {
+            for (int y = startY; y < endY; y++) {
+                x1 = findMidX(high, middle, y);
+                x2 = findMidX(high, low, y);
+                drawLine(scene.screen, x1, x2, y);
             }
         }
 
-        start_y = end_y;
-        end_y = (ry3 < h)? ry3 : (h - 1);
+        startY = endY;
+        endY = (low.y < height)? low.y : (height - 1);
 
-        if (ry3 != ry2 && ry3 != ry1) {
-            for (int y = start_y; y <= end_y; y++) {
-                x1 = find_mid_x(rx2, ry2, rx3, ry3, y);
-                x2 = find_mid_x(rx1, ry1, rx3, ry3, y);
-                draw_line(img, x1, x2, y);
+        if (low.y != middle.y && low.y != high.y) {
+            for (int y = startY; y <= endY; y++) {
+                x1 = findMidX(middle, low, y);
+                x2 = findMidX(high, low, y);
+                drawLine(scene.screen, x1, x2, y);
             }
         }
     }

@@ -2,6 +2,7 @@ package deeplearning;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 import java.awt.image.BufferedImage;
 
@@ -142,15 +143,15 @@ public class Matrix {
     }
 
 
-    public Matrix(Collection<BufferedImage> images) {
+    public Matrix(List<BufferedImage> images) {
         int width = images.get(0).getWidth();
         int height = images.get(0).getHeight();
-        init(imgs.size(), 3, width, height);
+        init(images.size(), 3, width, height);
 
         BufferedImage img;
         int RGB, red, green, blue;
 
-        for (int sample = 0; sample < imgs.size(); sample++) {
+        for (int sample = 0; sample < images.size(); sample++) {
             img = images.get(sample);
 
             for (int x = 0; x < width; x++) {
@@ -232,7 +233,7 @@ public class Matrix {
         }
         return data;
     }
-    public static Matrix randomOneHots(int samples, int classes, int timeSteps) {
+    public static Matrix randomOneHots(int samples, int classes) {
         return randomOneHots(samples, classes, 1);
     }
 

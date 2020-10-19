@@ -8,11 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class Mesh implements Comparable<Mesh> {
+public class Mesh {
     List<Triangle> triangles = new ArrayList<>();
     List<Vertex> vertices = new ArrayList<>();
     Material material;
-    double distance = 0;
 
 
     public void setMaterial(Material material) {
@@ -20,39 +19,16 @@ public class Mesh implements Comparable<Mesh> {
     }
 
 
-    public void prepare(Scene3D scene) {
+    public void prepare() {
         for (Triangle triangle : triangles) {
             triangle.calculateNormal();
             triangle.calculateDistance();
-
-            if (triangle.distance > distance)
-                distance = triangle.distance;
         }
-        Collections.sort(triangles);
-
         for (Vertex vertex : vertices) {
             vertex.calculateNormal();
         }
         for (Triangle triangle : triangles) {
             triangle.normal.normalize();
-            triangle.RGB = material.illuminationRGB(scene, triangle.v1, triangle.normal);
-        }
-    }
-
-
-    @Override
-    public int compareTo(Mesh other) {
-        if (distance > other.distance)
-            return -1;
-        else if (distance == other.distance)
-            return 0;
-        return 1;
-    }
-
-
-    public void render(Scene3D scene, BufferedImage img) {
-        for (Triangle triangle : triangles) {
-            triangle.render(scene, img);
         }
     }
 
@@ -142,14 +118,14 @@ public class Mesh implements Comparable<Mesh> {
             next_1 = it1.next();
             next_2 = it2.next();
 
-            triangles.add(new Triangle(next_1, prev_2, prev_1));
-            triangles.add(new Triangle(next_1, next_2, prev_2));
+            triangles.add(new Triangle(next_1, prev_2, prev_1, this));
+            triangles.add(new Triangle(next_1, next_2, prev_2, this));
 
             prev_1 = next_1; 
             prev_2 = next_2;
         }
-        triangles.add(new Triangle(start_1, prev_2, prev_1));
-        triangles.add(new Triangle(start_1, start_2, prev_2));
+        triangles.add(new Triangle(start_1, prev_2, prev_1, this));
+        triangles.add(new Triangle(start_1, start_2, prev_2, this));
     }
 
 
@@ -162,10 +138,10 @@ public class Mesh implements Comparable<Mesh> {
 
         while (it.hasNext()) {
             next = it.next();
-            triangles.add(new Triangle(apex, prev, next));
+            triangles.add(new Triangle(apex, prev, next, this));
             prev = next;
         }
-        triangles.add(new Triangle(apex, prev, start));
+        triangles.add(new Triangle(apex, prev, start, this));
     }
 }
 

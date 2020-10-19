@@ -1,59 +1,47 @@
 package graphics3D;
 
 public class Material {
-    double 
-        ambientRedFilter, 
-        ambientGreenFilter, 
-        ambientBlueFilter;
-    double 
-        diffuseRedFilter, 
-        diffuseGreenFilter, 
-        diffuseBlueFilter;
-    double 
-        specularRedFilter, 
-        specularGreenFilter, 
-        specularBlueFilter;
-    
-    double shininess;
+    private ColorFilter 
+        ambientFilter, 
+        diffuseFilter, 
+        specularFilter;
+    private double shininess;
 
+    public Material(ColorFilter ambientFilter, ColorFilter diffuseFilter, 
+        ColorFilter specularFilter, double shininess) {
 
-    public Material(int ambientRGB, int diffuseRGB, int specularRGB, double shininess) {
-        ambientRedFilter = ((ambientRGB >> 16) & 0xFF)/255.0;
-        ambientGreenFilter = ((ambientRGB >> 8) & 0xFF)/255.0;
-        ambientBlueFilter = (ambientRGB & 0xFF)/255.0;
-
-        diffuseRedFilter = ((diffuseRGB >> 16) & 0xFF)/255.0;
-        diffuseGreenFilter = ((diffuseRGB >> 8) & 0xFF)/255.0;
-        diffuseBlueFilter = (diffuseRGB & 0xFF)/255.0;
-
-        specularRedFilter = ((specularRGB >> 16) & 0xFF)/255.0;
-        specularGreenFilter = ((specularRGB >> 8) & 0xFF)/255.0;
-        specularBlueFilter = (specularRGB & 0xFF)/255.0;
-
+        this.ambientFilter = ambientFilter;
+        this.diffuseFilter = diffuseFilter;
+        this.specularFilter = specularFilter;
         this.shininess = shininess;
     }
-    private Material() {}
 
 
     // https://www.cs.brandeis.edu/~cs155/Lecture_16.pdf
     // https://en.wikipedia.org/wiki/Phong_reflection_model
 
     
-    int illuminationRGB(Scene3D scene, Vector point, Vector normal) {
-        double red = ambientRedFilter * scene.ambientRed;
-        double green = ambientGreenFilter * scene.ambientGreen;
-        double blue = ambientBlueFilter * scene.ambientBlue;
+    Color illuminate(Scene scene, Vector point, Vector normal) {
+        Color ambientColor = scene.ambientColor;
+
+        double red = ambientFilter.red * ambientColor.red;
+        double green = ambientFilter.green * ambientColor.green;
+        double blue = ambientFilter.blue * ambientColor.blue;
+
+        double diffuseIntensity, specularIntensity;
+        Color diffuseColor, specularColor;
 
         for (LightSource light : scene.lights) {
-            Vector lightVec = new Vector(point, light);
+            Vector lightVec = new Vector(point, light.location);
             lightVec.normalize();
 
-            double diffuseIntensity =  lightVec.dot(normal);
+            diffuseIntensity =  lightVec.dot(normal);
             
             if (diffuseIntensity > 0) {
-                red += diffuseIntensity * diffuseRedFilter * light.diffuseRed;
-                green += diffuseIntensity * diffuseGreenFilter * light.diffuseGreen;
-                blue += diffuseIntensity * diffuseBlueFilter * light.diffuseBlue;
+                diffuseColor = light.diffuseColor;
+                red += diffuseIntensity * diffuseFilter.red * diffuseColor.red;
+                green += diffuseIntensity * diffuseFilter.green * diffuseColor.green;
+                blue += diffuseIntensity * diffuseFilter.blue * diffuseColor.blue;
 
                 Vector viewVec = point.scale(-1);
                 viewVec.normalize();
@@ -61,25 +49,22 @@ public class Material {
                 Vector reflectedVec = normal.scale(2*diffuseIntensity);
                 reflectedVec.add(lightVec.scale(-1));
                 
-                double specularIntensity = reflectedVec.dot(viewVec);
+                specularIntensity = reflectedVec.dot(viewVec);
 
                 if (specularIntensity > 0) {
                     specularIntensity = Math.pow(specularIntensity, shininess);
+                    specularColor = light.specularColor;
 
-                    red += specularIntensity * specularRedFilter * light.specularRed;
-                    green += specularIntensity * specularGreenFilter * light.specularGreen;
-                    blue += specularIntensity * specularBlueFilter * light.specularBlue;
+                    red += specularIntensity * specularFilter.red * specularColor.red;
+                    green += specularIntensity * specularFilter.green * specularColor.green;
+                    blue += specularIntensity * specularFilter.blue * specularColor.blue;
                 }
             }
         }
-        int R = (int) ((red <= 255)? red : 255);
-        int G = (int) ((green <= 255)? green : 255);
-        int B = (int) ((blue <= 255)? blue : 255);
-
-        return
-        ((R & 0xFF) << 16) |
-        ((G & 0xFF) << 8)  |
-         (B & 0xFF);
+        return new Color(
+            (int) ((red <= 255)? red : 255), 
+            (int) ((green <= 255)? green : 255), 
+            (int) ((blue <= 255)? blue : 255));
     }
 
 
@@ -87,127 +72,61 @@ public class Material {
 
 
     public static Material EMERALD() {
-        Material m = new Material();
-
-        m.ambientRedFilter = 0.0215;
-        m.ambientGreenFilter = 0.1745;
-        m.ambientBlueFilter = 0.0215;
-
-        m.diffuseRedFilter = 0.07568;
-        m.diffuseGreenFilter = 0.61424;
-        m.diffuseBlueFilter = 0.07568;
-
-        m.specularRedFilter = 0.633;
-        m.specularGreenFilter = 0.727811;
-        m.specularBlueFilter = 0.633;
-
-        m.shininess = 0.6*128;
-
-        return m;
+        return new Material(
+            new ColorFilter(0.0215, 0.1745, 0.0215),
+            new ColorFilter(0.07568, 0.61424, 0.07568),
+            new ColorFilter(0.633, 0.727811, 0.633),
+            0.6*128
+        );
     }
 
 
     public static Material OBSIDIAN() {
-        Material m = new Material();
-
-        m.ambientRedFilter = 0.05375;
-        m.ambientGreenFilter = 0.05;
-        m.ambientBlueFilter = 0.06625;
-
-        m.diffuseRedFilter = 0.18275;
-        m.diffuseGreenFilter = 0.17;
-        m.diffuseBlueFilter = 0.22525;
-
-        m.specularRedFilter = 0.332741;
-        m.specularGreenFilter = 0.328634;
-        m.specularBlueFilter = 0.346435;
-
-        m.shininess = 0.3*128;
-
-        return m;
+        return new Material(
+            new ColorFilter(0.05375, 0.05, 0.06625),
+            new ColorFilter(0.18275, 0.17, 0.22525),
+            new ColorFilter(0.332741, 0.328634, 0.346435),
+            0.3*128
+        );
     }
 
 
     public static Material COPPER() {
-        Material m = new Material();
-
-        m.ambientRedFilter = 0.19125;
-        m.ambientGreenFilter = 0.0735;
-        m.ambientBlueFilter = 0.0225;
-
-        m.diffuseRedFilter = 0.7038;
-        m.diffuseGreenFilter = 0.27048;
-        m.diffuseBlueFilter = 0.0828;
-
-        m.specularRedFilter = 0.256777;
-        m.specularGreenFilter = 0.137622;
-        m.specularBlueFilter = 0.086014;
-
-        m.shininess = 0.1*128;
-
-        return m;
+        return new Material(
+            new ColorFilter(0.19125, 0.0735, 0.0225),
+            new ColorFilter(0.7038, 0.27048, 0.0828),
+            new ColorFilter(0.256777, 0.137622, 0.086014),
+            0.1*128
+        );
     }
 
 
     public static Material GOLD() {
-        Material m = new Material();
-
-        m.ambientRedFilter = 0.24725;
-        m.ambientGreenFilter = 0.1995;
-        m.ambientBlueFilter = 0.0745;
-
-        m.diffuseRedFilter = 0.75164;
-        m.diffuseGreenFilter = 0.60648;
-        m.diffuseBlueFilter = 0.22648;
-
-        m.specularRedFilter = 0.628281;
-        m.specularGreenFilter = 0.555802;
-        m.specularBlueFilter = 0.366065;
-
-        m.shininess = 0.4*128;
-
-        return m;
+        return new Material(
+            new ColorFilter(0.24725, 0.1995, 0.0745),
+            new ColorFilter(0.75164, 0.60648, 0.22648),
+            new ColorFilter(0.628281, 0.137622, 0.366065),
+            0.4*128
+        );
     }
 
 
     public static Material SILVER() {
-        Material m = new Material();
-
-        m.ambientRedFilter = 0.19225;
-        m.ambientGreenFilter = 0.19225;
-        m.ambientBlueFilter = 0.19225;
-
-        m.diffuseRedFilter = 0.50754;
-        m.diffuseGreenFilter = 0.50754;
-        m.diffuseBlueFilter = 0.50754;
-
-        m.specularRedFilter = 0.508273;
-        m.specularGreenFilter = 0.508273;
-        m.specularBlueFilter = 0.508273;
-
-        m.shininess = 0.4*128;
-
-        return m;
+        return new Material(
+            new ColorFilter(0.19225, 0.19225, 0.19225),
+            new ColorFilter(0.50754, 0.50754, 0.50754),
+            new ColorFilter(0.508273, 0.508273, 0.508273),
+            0.4*128
+        );
     }
 
 
     public static Material CYAN_PLASTIC() {
-        Material m = new Material();
-
-        m.ambientRedFilter = 0.0;
-        m.ambientGreenFilter = 0.1;
-        m.ambientBlueFilter = 0.06;
-
-        m.diffuseRedFilter = 0.0;
-        m.diffuseGreenFilter = 0.50980392;
-        m.diffuseBlueFilter = 0.50980392;
-
-        m.specularRedFilter = 0.50196078;
-        m.specularGreenFilter = 0.50196078;
-        m.specularBlueFilter = 0.50196078;
-
-        m.shininess = 0.25*128;
-
-        return m;
+        return new Material(
+            new ColorFilter(0.0, 0.1, 0.06),
+            new ColorFilter(0.0, 0.50980392, 0.50980392),
+            new ColorFilter(0.50196078, 0.50196078, 0.50196078),
+            0.25*128
+        );
     }
 }

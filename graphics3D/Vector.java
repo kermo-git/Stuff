@@ -22,15 +22,15 @@ public class Vector {
         y /= len;
         z /= len;
     }
+    public double length() {
+        return Math.sqrt(x*x + y*y + z*z);
+    }
+
+
     public void add(Vector v) {
         x += v.x;
         y += v.y;
         z += v.z;
-    }
-
-
-    public double length() {
-        return Math.sqrt(x*x + y*y + z*z);
     }
     public Vector scale(double scalar) {
         return new Vector(
