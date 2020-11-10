@@ -51,6 +51,13 @@ public class Test {
 
 
     public static void main(String[] args) {
+        System.out.print("Feedforward regression\n\n");
         testFeedForwardRegression();
+
+        System.out.print("\nFeedforward classification\n\n");
+        testFeedForwardClassification();
+        
+        System.out.print("\nConvolution\n\n");
+        testConv();
     }
 }

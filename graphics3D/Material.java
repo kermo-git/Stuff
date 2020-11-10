@@ -21,7 +21,7 @@ public class Material {
     // https://en.wikipedia.org/wiki/Phong_reflection_model
 
     
-    Color illuminate(Scene scene, Vector point, Vector normal) {
+    Color illuminate(Scene3D scene, Vector point, Vector normal) {
         Color ambientColor = scene.ambientColor;
 
         double red = ambientFilter.red * ambientColor.red;

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.awt.image.BufferedImage;
 
 
-public class Scene {
+public class Scene3D {
     private int screenWidth;
     private int screenHeight;
     BufferedImage screen;
@@ -19,7 +19,7 @@ public class Scene {
     List<LightSource> lights = new ArrayList<>();
 
 
-    public Scene(int screenWidth, int screenHeight, double FOVdegrees) {
+    public Scene3D(int screenWidth, int screenHeight, double FOVdegrees) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
 

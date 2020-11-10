@@ -98,7 +98,7 @@ public class Triangle implements Comparable<Triangle> {
     }
 
 
-    public void render(Scene scene) {
+    public void render(Scene3D scene) {
         RGB = mesh.material.illuminate(scene, v1, normal).getRGB();
 
         Pixel v1 = scene.project(this.v1);

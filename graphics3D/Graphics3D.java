@@ -6,12 +6,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 
-public class Shapes extends JPanel {
+public class Graphics3D extends JPanel {
     private static final long serialVersionUID = 1L;
-    Scene scene;
+    Scene3D scene;
 
 
-    public Shapes(Scene scene) {
+    public Graphics3D(Scene3D scene) {
         this.scene = scene;
     }
     
@@ -29,27 +29,32 @@ public class Shapes extends JPanel {
 
         Toolkit tk = Toolkit.getDefaultToolkit();
 
-        Scene scene = new Scene(
+        Scene3D scene = new Scene3D(
             tk.getScreenSize().width, 
             tk.getScreenSize().height, 
             70
         );
 
         LightSource light = new LightSource(
-            new Vector(7, -7, 0), 
+            new Vector(20, -7, 0), 
             new Color(0xFFFFFF), 
             new Color(0xFFFFFF));
 
-        Mesh mesh = new Torus(10, 15, 20);
-        mesh.setMaterial(Material.CYAN_PLASTIC());
-        mesh.rotateAroundX(0.15*Math.PI);
-        mesh.translate(0, 0, 20);
+        Mesh torus = new Torus(10, 15, 20);
+        torus.setMaterial(Material.CYAN_PLASTIC());
+        torus.rotateAroundX(0.1*Math.PI);
+        torus.translate(0, 0, 35);
+
+        Mesh sphere = new Sphere(7, 20);
+        sphere.setMaterial(Material.COPPER());
+        sphere.rotateAroundX(0.25*Math.PI);
+        sphere.translate(0, 0, 35);
 
         scene.addLightSources(light);
         scene.setAmbientColor(new Color(0xFFFFFF));
-        scene.addShapes(mesh);
+        scene.addShapes(torus, sphere);
 
-        frame.add(new Shapes(scene));
+        frame.add(new Graphics3D(scene));
         frame.setVisible(true);
     }
 }

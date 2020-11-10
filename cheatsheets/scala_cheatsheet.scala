@@ -62,7 +62,7 @@ object Basics {
   // Rakendab funktsiooni func osaliselt, ei anna argumente x1 ja x4.
   // Tulemuseks on kahe argumendiga funktsioon
   val partiallyApplied: (Int, Int) => Int = multiArgsList(_: Int, 5)(7, _: Int)
-  val result: Int = partiallyApplied(3, 4) // Sama mis func(3, 5, 7, 4)
+  val result: Int = partiallyApplied(3, 4) // Sama mis multiArgsList(3, 5)(7, 4)
 
 
   def main(args: Array[String]) {
