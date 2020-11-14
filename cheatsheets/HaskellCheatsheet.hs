@@ -106,13 +106,50 @@ repeatString str copyNumber | copyNumber < 0 = error "n must be >= 0"
         helper _ result 1 = result
         helper unit result n = helper unit (unit ++ result) (n-1)
 
+
+-- Võtmesõna let
+letDemo :: Int -> Int -> Int
+letDemo x y = 
+    let r = 3 
+        s = 6
+        in  r*x + s*y
+
+-- case of avaldis
+listSum :: [Int] -> Int
+listSum list = case list of
+    [] -> 0
+    (x:xs) -> x + listSum xs
+
+-- if lause. NB! else peab kindlasti olema!
+grade :: Int -> Char
+grade x = 
+    if x > 90 then 
+        'A'
+    else 
+        if 80 < x && x < 90 then 
+            'B'
+        else 
+            if 70 < x && x < 80 then 
+                'C'
+            else 
+                if 60 < x && x < 70 then 
+                    'D'
+                else 
+                    'F'
+
+-- lambda funktsioon ehk anonüümne funktsioon:
+lambdaDemo :: Int
+lambdaDemo = (\x y -> x + y) 3 5 -- 8
+
 {-
-Funktsiooni kasutamine käsureal (prefiks-kujul):
+Funktsioonide kasutamine käsureal:
+
+-- Kahe argumendiga funktsiooni kasutamine prefiks-kujul:
 
 ghci> repeatString "Hello" 5
 "HelloHelloHelloHelloHello"
 
--- Kahe argumendiga funktsioone saab kasutada ka infiks-kujul:
+-- Kahe argumendiga funktsiooni kasutamine infiks-kujul:
 
 ghci> "Hello" `repeatString` 5
 "HelloHelloHelloHelloHello"
@@ -121,7 +158,7 @@ ghci> "Hello" `repeatString` 5
 prefix-kujul - 5 + 3
 infiks-kujul - (+) 5 3
 
-Funkstiooni saab ka osaliselt rakendada. Siin kutsutakse funkstiooni
+Funktsiooni saab ka osaliselt rakendada. Siin kutsutakse funkstiooni
 repeatString, kuid jäetakse teine argument ära. Tulemuseks on uus funktsioon,
 mis on samasugune, kuid esimene argument on fikseeritud "Hello".
 
@@ -139,10 +176,6 @@ ghci> repeatHello 3
 ghci> repeatHello 4
 "HelloHelloHelloHello"
 -}
-
--- On olemas ka lambda funktsioonid ehk anonüümsed funktsioonid:
-lambdaResult :: Int
-lambdaResult = (\x y -> x + y) 3 5 -- 8
 
 
 {-----------------------------}
@@ -279,20 +312,41 @@ class Applicative m => Monad m where
     return :: a -> m a
 
 
-Selline avaldis monaadi funktsioonidega ...
+https://wiki.haskell.org/Monads_as_computation
+Monaadi funktsioonide jaoks saab kasutada do-notatsiooni:
+    
+do { x } = x
 
-action1
-    >>=
-        (\ x1 -> action2
-            >>=
-                (\ x2 -> mk_action3 x1 x2 ))
+do { x ; <stmts> }
+  = x >> do { <stmts> }
 
-... on sama mis selline do notatsiooniga avaldis:
+do { v <- x ; <stmts> }
+  = x >>= \v -> do { <stmts> }
 
-do { x1 <- action1; 
-     x2 <- action2;
-     mk_action3 x1 x2 }
+do { let <decls> ; <stmts> }
+  = let <decls> in do { <stmts> }
 -}
+
+
+-- Näide Maybe monaadi kasutamisest - üks ja sama arvutus 
+-- >>= operaatoriga ja do notatsiooniga
+maybeLambda :: Maybe Int
+maybeLambda = 
+    (Just 5) >>= 
+    (\x -> Just (x+3)) >>= 
+    (\y -> Just (y*5))
+
+maybeDo :: Maybe Int
+maybeDo = do {
+    x <- Just 5;
+    y <- Just (x + 3);
+    return (y*5)
+}
+
+
+{---------------------}
+{- SISEND JA VÄLJUND -}
+{---------------------}
 
 
 {-
@@ -325,11 +379,10 @@ nameLambda = putStr "What is your first name? " >>
 
 -- Sama programm, aga do notatsiooniga
 nameDo :: IO ()
-nameDo = do {
-    putStr "What is your first name? ";
-    firstName <- getLine;
-    putStr "And your last name? ";
-    lastName <- getLine;
+nameDo = do
+    putStr "What is your first name? "
+    firstName <- getLine
+    putStr "And your last name? "
+    lastName <- getLine
     let fullName = firstName ++ " " ++ lastName
-    in putStrLn ("Pleased to meet you, " ++ fullName ++ "!")
-}
+    putStrLn ("Pleased to meet you, " ++ fullName ++ "!")
