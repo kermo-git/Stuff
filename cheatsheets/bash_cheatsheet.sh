@@ -23,6 +23,13 @@ echo $a ja $b summa on $c
 echo -n $a ja $b summa on $c
 
 
+# Juhuarvude genereerimine. Iga kord kui lugeda muutujat RANDOM,
+# genereeritakse juhuarv vahemikust 0 kuni 32767.
+
+RANDOM=$$ # Muutuja initsialiseerimine protsessi ID-ga.
+echo $RANDOM # Prindib juhuarvu.
+
+
 # Loeb käsurealt kasutaja sisendi ja salvestab muutujasse a.
 read a
 # Sama asi, aga enne kuvab teate "Sisesta a : ".
@@ -39,10 +46,16 @@ read - p "Sisesta a : " a
 # Suurem kui:         [ $a -gt $b ] - (($a > $b))
 # Suurem või võrdne:  [ $a -ge $b ] - (($a >= $b))
 
+# Loogikaoperaatoreid saab kasutada nii:
+# Tähistagu ... mingit lihtsat võrdlust, näiteks [ $a -eq $b ]
+# AND: [ ... ] && [ ... ] või [[ ... && ... ]]
+# OR: [ ... ] || [ ... ] või [[ ... || ... ]]
+# NOT: !... või [ ! ... ]
+
 
 # While tsükkel
 i=0
-while [ $i lt 10 ] 
+while [ $i -lt 10 ] 
 do
     echo Tsükkel nr. $i
     ((++i)) # i=`expr $i + 1`
@@ -52,7 +65,7 @@ done
 # For tsükkel
 for i in 1 2 3 4 5 6 7 8 9 10 
 do
-    if [ $i eq 5 ]
+    if [ $i -eq 5 ]
     then
         continue
     elif (($i == 8))
@@ -76,8 +89,6 @@ case $CARS in
     "bmw")
         echo "Headquarters - Chennai, Tamil Nadu, India" ;; 
 esac
-
-
 
 
 #########
@@ -278,11 +289,11 @@ command ls
 DIR=/gpfs/hpc/home/area51
 FILE=$DIR/topsecret.txt
 
-if [ -d $HOME ] 
+if [ -d $DIR ] 
 then 
-    echo Kataloog $HOME on olemas.
+    echo Kataloog $DIR on olemas.
 else
-    echo Kataloogi $HOME ei ole olemas.
+    echo Kataloogi $DIR ei ole olemas.
 fi
 
 if [ -e $FILE ] 
@@ -298,16 +309,26 @@ fi
 ls $DIR
 # Sama asi praeguses kataloogis
 ls
-# Tekita kataloog DIR
-mkdir $DIR
+
 # Liigu kataloogi DIR
 cd $DIR
 # Liigu praegusest kataloogist välja ühe taseme võrra
 cd ..
+
+# Tekita kataloog nimega newdir
+mkdir newdir
+
 # Kustuta fail FILE
 rm $FILE
 # Kustuta kataloog DIR ja kogu selle sisu
 rm -r $DIR
+# Kustuta kataloogis DIR kõik failid (ühtegi kataloogi seal olla ei tohi)
+rm $DIR/*
+# Kustuta kataloogis DIR kõik failid ja seal olevad kataloogid koos sisuga.
+rm -r $DIR/*
+# -r võib kirjutada ka siis, kui kustatada ainult faile.
+# -r asemel võib ka kasutada -rf, mis ei küsi ühtegi kinnitust.
+
 # Kopeeri fail FILE asukohta DEST
 cp $FILE $DEST
 # Kopeeri kataloog DIR (koos sisuga) asukohta DEST
@@ -323,15 +344,15 @@ count=$(grep -c "line" $FILE)
 
 # Olgu kataloogis /path/to/ failid file1.txt ja file2.txt.
 # Prindime for tsükliga kõik failinimed välja.
-FILES=/path/to/*
-for f in $FILES
+FILES=/path/to
+for f in $FILES/*
 do
     echo $f
 done
 # Väljund:
 #
 # /path/to/file1.txt
-# /path/to/file1.txt
+# /path/to/file2.txt
 
 
 # Liigume kataloogi FILES ja siis prindime:
@@ -350,3 +371,21 @@ done
 # for d in */
 # Ainult failid, mille nime lõpus on out.txt
 # for f in *out.txt
+
+
+# Operaatoreid && ja || saab kasutada veel teisel viisil.
+
+# Operaator && on käskude ühendamiseks nii, et järgmine käsk käivitub 
+# ainult siis, kui eelmise exit code on 0, s.t õnnestumine.
+
+# Prindib ainult siis, kui i = 5.
+[ $i -eq 5 ] && echo success
+# Kui faili "file.txt" kustutamine õnnestub (selleks peab fail eksisteerima
+# praeguses kaustas), prindib "success".
+rm file.txt && echo success
+
+# Operaator || on käskude ühendamiseks nii, et järgmine käsk käivitub 
+# ainult siis, kui eelmise exit code ei olnud 0.
+
+# Kui i on 5, prindib success, vastasel juhul prindib fail.
+[ $i -eq 5 ] && echo success || echo fail

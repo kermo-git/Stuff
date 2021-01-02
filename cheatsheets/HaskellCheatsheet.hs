@@ -332,15 +332,17 @@ do { let <decls> ; <stmts> }
 -- >>= operaatoriga ja do notatsiooniga
 maybeLambda :: Maybe Int
 maybeLambda = 
-    (Just 5) >>= 
-    (\x -> Just (x+3)) >>= 
-    (\y -> Just (y*5))
+    Just 5 >>= \x -> 
+    Just (x + 3) >>= \y -> 
+    Just (x * y) >>= \z -> 
+    Just (x + y + z)
 
 maybeDo :: Maybe Int
 maybeDo = do {
     x <- Just 5;
     y <- Just (x + 3);
-    return (y*5)
+    z <- Just (x * y);
+    return (x + y + z)
 }
 
 
