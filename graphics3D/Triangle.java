@@ -1,7 +1,5 @@
 package graphics3D;
 
-import java.awt.image.BufferedImage;
-
 // https://www.javatpoint.com/computer-graphics-phong-shading
 
 /*
@@ -36,116 +34,76 @@ import java.awt.image.BufferedImage;
  * NB = (N1*(YS - Y3) + N3*(Y1 - YS))/(Y1 - Y3)
  * NP = (NA*(XB - XP) + NB*(XP - XA))/(XB - XA)
  */
-public class Triangle implements Comparable<Triangle> {
-    Mesh mesh;
+public class Triangle {
+    Material material;
     Vertex v1, v2, v3;
-    Vector normal;
-    int RGB;
     double distance = 0;
 
-    public Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh mesh) {
+
+    public Triangle(Vertex v1, Vertex v2, Vertex v3) {
         this.v1 = v1; v1.triangles.add(this);
         this.v2 = v2; v2.triangles.add(this);
         this.v3 = v3; v3.triangles.add(this);
-        this.mesh = mesh;
     }
-
-
-    public void calculateNormal() {
-        normal = new Vector(v1, v3).cross(new Vector(v1, v2));
+    public Vector getNormal() {
+        return new Vector(v1, v3).cross(new Vector(v1, v2));
     }
-
-
-    public void calculateDistance() {
-        double d1 = v1.length();
-        double d2 = v2.length();
-        double d3 = v3.length();
-
-        distance = (d1 > d2) ? 
-        ((d1 > d3) ? d1 : d3) :
-        ((d2 > d3) ? d2 : d3);
+    private static int min(int a, int b) {
+        return (a < b) ? a : b;
     }
-
-
-    @Override
-    public int compareTo(Triangle other) {
-        if (distance > other.distance)
-            return -1;
-        else if (distance == other.distance)
-            return 0;
-        return 1;
-    }
-
-
-    private int findMidX(Pixel p1, Pixel p2, int midY) {
-        double ratio = 1.0*(p2.y - midY)/(p2.y - p1.y);
-        return (int)(p2.x - ratio*(p2.x - p1.x));
-    }
-
-
-    public void drawLine(BufferedImage screen, int x1, int x2, int y) {
-        int width = screen.getWidth();
-
-        int startX = (x1 < x2)? x1 : x2;
-        int endX = (x1 < x2)? x2 : x1;
-
-        startX = (startX >= 0)? startX : 0;
-        endX = (endX < width)? endX : (width - 1);
-
-        for (int x = startX; x <= endX; x++) {
-            screen.setRGB(x, y, RGB);
-        }
+    private static int max(int a, int b) {
+        return (a > b) ? a : b;
     }
 
 
     public void render(Scene3D scene) {
-        RGB = mesh.material.illuminate(scene, v1, normal).getRGB();
-
-        Pixel v1 = scene.project(this.v1);
-        Pixel v2 = scene.project(this.v2);
-        Pixel v3 = scene.project(this.v3);
-
-        Pixel high, middle, low;
-
-        if (v1.y < v2.y) {
-            high = v1; middle = v2;
-        } else {
-            high = v2; middle = v1;
-        }
-        if (v3.y < high.y) {
-            low = middle; 
-            middle = high;
-            high = v3;
-        } 
-        else if (v3.y < middle.y) {
-            low = middle;  
-            middle = v3;
-        } else {
-            low = v3;
+        Pixel p1 = scene.camera.project(v1);
+        Pixel p2 = scene.camera.project(v2);
+        Pixel p3 = scene.camera.project(v3);
+        if (p1 == null || p2 == null || p3 == null) {
+            return;
         }
 
-        int height = scene.screen.getHeight();
-        int x1, x2;
+        int low_x = min(p1.x, min(p2.x, p3.x));
+        int high_x = max(p1.x, max(p2.x, p3.x));
+        int low_y = min(p1.y, min(p2.y, p3.y));
+        int high_y = max(p1.y, max(p2.y, p3.y));
+        
+        int x, y, sum, color;
+        int det1, det2, det3;
+        double lambda1, lambda2, lambda3, depth;
 
-        int startY = (high.y >= 0)? high.y : 0;
-        int endY = (middle.y < height)? middle.y : (height - 1);
+        Vector point, normal;
 
-        if (high.y != middle.y && high.y != low.y) {
-            for (int y = startY; y < endY; y++) {
-                x1 = findMidX(high, middle, y);
-                x2 = findMidX(high, low, y);
-                drawLine(scene.screen, x1, x2, y);
-            }
-        }
+        for (x = low_x; x <= high_x; x++) {
+            for (y = low_y; y <= high_y; y++) {
 
-        startY = endY;
-        endY = (low.y < height)? low.y : (height - 1);
+                det1 = (x - p3.x)*(p2.y - p3.y) - (y - p3.y)*(p2.x - p3.x);
+                det2 = (x - p1.x)*(p3.y - p1.y) - (y - p1.y)*(p3.x - p1.x);
+                det3 = (x - p2.x)*(p1.y - p2.y) - (y - p2.y)*(p1.x - p2.x);
 
-        if (low.y != middle.y && low.y != high.y) {
-            for (int y = startY; y <= endY; y++) {
-                x1 = findMidX(middle, low, y);
-                x2 = findMidX(high, low, y);
-                drawLine(scene.screen, x1, x2, y);
+                if (det1 >= 0 && det2 >= 0 && det3 >= 0) {
+                    sum = det1 + det2 + det3;
+                    lambda1 = 1.0 * det1 / sum;
+                    lambda2 = 1.0 * det2 / sum;
+                    lambda3 = 1.0 * det3 / sum;
+
+                    depth = lambda1*p1.depth + lambda2*p2.depth + lambda3*p3.depth;
+                    if (depth < scene.zBuffer[x][y]) {
+                        scene.zBuffer[x][y] = depth;
+
+                        normal = v1.normal.scale(lambda1);
+                        normal.add(v2.normal.scale(lambda2));
+                        normal.add(v3.normal.scale(lambda3));
+
+                        point = v1.scale(lambda1);
+                        point.add(v2.scale(lambda2));
+                        point.add(v3.scale(lambda3));
+                        
+                        color = material.illuminate(scene, point, normal).getRGBhex();
+                        scene.canvas.setRGB(x, y, color);
+                    }
+                }
             }
         }
     }

@@ -1,68 +1,58 @@
 package graphics3D;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.awt.image.BufferedImage;
 
 
 public class Scene3D {
-    private int screenWidth;
-    private int screenHeight;
-    BufferedImage screen;
+    Camera camera;
+    double[][] zBuffer;
+    BufferedImage canvas;
 
-    private double tanHalfFOVX;
-    private double tanHalfFOVY;
+    List<LightSource> lights;
+    List<Mesh> objects;
 
-    private List<Mesh> shapes = new ArrayList<>();
-    Color ambientColor;
-    List<LightSource> lights = new ArrayList<>();
-
-
-    public Scene3D(int screenWidth, int screenHeight, double FOVdegrees) {
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
-
-        tanHalfFOVX = Math.tan(Math.toRadians(FOVdegrees/2));
-        tanHalfFOVY = screenHeight * tanHalfFOVX / screenWidth;
+    public Scene3D(Camera camera, List<LightSource> lights, List<Mesh> objects) {
+        this.camera = camera;
+        this.lights = lights;
+        this.objects = objects;
+        clear();
     }
 
-
-    public void setAmbientColor(Color color) {
-        this.ambientColor = color;
-    }
-    public void addLightSources(LightSource ...lights) {
-        for (LightSource light : lights) {
-            this.lights.add(light);
+    private void clear() {
+        zBuffer = new double[camera.screenWidth][camera.screenHeight];
+        int x, y;
+        for (x = 0; x < camera.screenWidth; x++) {
+            for (y = 0; y < camera.screenHeight; y++) {
+                zBuffer[x][y] = Double.MAX_VALUE;
+            }
         }
-    }
-    public void addShapes(Mesh ...shapes) {
-        for (Mesh shape : shapes) {
-            shape.prepare();
-            this.shapes.add(shape);
-        }
-    }
-
-
-    public Pixel project(Vector v) {
-        return new Pixel(
-            (int) (screenWidth * (v.x / (2 * v.z * tanHalfFOVX) + 0.5)),
-            (int) (screenHeight * (v.y / (2 * v.z * tanHalfFOVY) + 0.5))
+        canvas = new BufferedImage(
+            camera.screenWidth, 
+            camera.screenHeight, 
+            BufferedImage.TYPE_INT_RGB
         );
     }
 
+    // public Pixel project(Vector v) {
+    //     return new Pixel(
+    //         (int) (screenWidth * (v.x / (2 * v.z * tanHalfFOVX) + 0.5)),
+    //         (int) (screenHeight * (v.y / (2 * v.z * tanHalfFOVY) + 0.5))
+    //     );
+    // }
 
     public BufferedImage render() {
-        screen = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_RGB);
+        clear();
         List<Triangle> triangles = new ArrayList<>();
 
-        for (Mesh shape : shapes) {
-            triangles.addAll(shape.triangles);
+        for (Mesh object : objects) {
+            object.calculateNormals();
+            triangles.addAll(object.triangles);
         }
-        Collections.sort(triangles);
         for (Triangle t : triangles) {
             t.render(this);
         }
-        return screen;
+        return canvas;
     }
 }

@@ -2,12 +2,13 @@ package graphics3D;
 
 public class LightSource {
     Vector location;
-    Color diffuseColor;
-    Color specularColor;
+    Color diffuse, specular;
 
-    public LightSource(Vector location, Color diffuseColor, Color specularColor) {
+    public static Color ambient = new Color(0.2, 0.2, 0.2);
+
+    public LightSource(Vector location, Color diffuse, Color specular) {
         this.location = location;
-        this.diffuseColor = diffuseColor;
-        this.specularColor = specularColor;
+        this.diffuse = diffuse;
+        this.specular = specular;
     }
 }

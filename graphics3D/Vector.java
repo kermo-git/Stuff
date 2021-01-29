@@ -1,18 +1,61 @@
 package graphics3D;
 
 public class Vector {
-    double x, y, z;
+    double x = 0, y = 0, z = 0;
 
-
+    public Vector() {}
     public Vector(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
     public Vector(Vector startPoint, Vector endPoint) {
-        x = endPoint.x - startPoint.x;
-        y = endPoint.y - startPoint.y;
-        z = endPoint.z - startPoint.z;
+        this(
+            endPoint.x - startPoint.x,
+            endPoint.y - startPoint.y,
+            endPoint.z - startPoint.z
+        );
+    }
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Vector) {
+            Vector v = (Vector) other;
+            return x == v.x && y == v.y && z == v.z;
+        }
+        return false;
+    }
+
+
+    // phi - [0 - 2pi], theta - [0 - pi]
+    double radius = 0, phi = 0, theta = 0;
+
+    private void updateSpericalCoordinates() {
+        radius = Math.sqrt(x*x + y*y + z*z);
+        theta = Math.acos(y / radius);
+        phi = Math.atan(x / z);
+    }
+    private void updateCartesianCoordinates() {
+        x = radius * Math.sin(theta) * Math.cos(phi);
+        y = radius * Math.cos(phi);
+        z = radius * Math.sin(theta) * Math.sin(phi);
+    }
+    private void rotate(double phiRadians, double thetaRadians) {
+        double fullRotation = 2 * Math.PI;
+
+        phi += phiRadians % fullRotation;
+        if (phi < 0) {
+            phi = fullRotation + phi;
+        }
+        else if (phi > fullRotation) {
+            phi -= fullRotation;
+        }
+        theta += thetaRadians % Math.PI;
+        if (theta < 0) {
+            theta = -theta;
+        } 
+        else if (theta > Math.PI) {
+            theta = 2 * Math.PI - theta;
+        }
     }
 
 
@@ -23,7 +66,7 @@ public class Vector {
         z /= len;
     }
     public double length() {
-        return Math.sqrt(x*x + y*y + z*z);
+        return Math.sqrt(x * x + y * y + z * z);
     }
 
 
@@ -34,9 +77,9 @@ public class Vector {
     }
     public Vector scale(double scalar) {
         return new Vector(
-            x*scalar,
-            y*scalar,
-            z*scalar
+            x * scalar,
+            y * scalar,
+            z * scalar
         );
     }
     public double dot(Vector v) {
@@ -46,44 +89,18 @@ public class Vector {
         return new Vector(
             y * v.z - z * v.y, 
             z * v.x - x * v.z, 
-            x * v.y - y * v.x);
+            x * v.y - y * v.x
+        );
     }
 
 
-    public void translate(double x, double y, double z) {
-        this.x += x;
-        this.y += y;
-        this.z += z;
+    public Vector getReflection(Vector normal) {
+        double dot = this.dot(normal);
+        Vector reflection = normal.scale(2 * dot);
+        reflection.add(this.scale(-1));
+        return reflection;
     }
-    public void rotateAroundX(double sin, double cos) {
-        double temp = cos*y - sin*z;
-        z = sin*y + cos*z;
-        y = temp;
-    }
-    public void rotateAroundY(double sin, double cos) {
-        double temp = cos*x + sin*z;
-        z = - sin*x + cos*z;
-        x = temp;
-    }
-    public void rotateAroundZ(double sin, double cos) {
-        double temp = cos*x - sin*y;
-        y = sin*x + cos*y;
-        x = temp;
-    }
-
-
-    public void rotateAroundX(double radians) {
-        rotateAroundX(Math.sin(radians), Math.cos(radians));
-    }
-    public void rotateAroundY(double radians) {
-        rotateAroundY(Math.sin(radians), Math.cos(radians));
-    } 
-    public void rotateAroundZ(double radians) {
-        rotateAroundZ(Math.sin(radians), Math.cos(radians));
-    } 
-
-
-    public String toString() {
-        return "<" + x + ", " + y + ", " + z + ">";
+    public Vector getRefraction(Vector normal, double refractionIndex) {
+        return null;
     }
 }

@@ -15,50 +15,20 @@ public class Mesh {
 
     public void setMaterial(Material material) {
         this.material = material;
+        for (Triangle triangle : triangles) {
+            triangle.material = material;
+        }
+    }
+    public void transform(Matrix matrix) {
+        for (Vertex v : vertices) {
+            matrix.transform(v);
+        }
     }
 
 
-    public void prepare() {
-        for (Triangle triangle : triangles) {
-            triangle.calculateNormal();
-            triangle.calculateDistance();
-        }
+    public void calculateNormals() {
         for (Vertex vertex : vertices) {
             vertex.calculateNormal();
-        }
-        for (Triangle triangle : triangles) {
-            triangle.normal.normalize();
-        }
-    }
-
-
-    public void translate(double x, double y, double z) {
-        for (Vertex v : vertices) {
-            v.translate(x, y, z);
-        }
-    }
-    public void rotateAroundX(double radians) {
-        double sin = Math.sin(radians);
-        double cos = Math.cos(radians);
-        
-        for (Vertex v : vertices) {
-            v.rotateAroundX(sin, cos);
-        }
-    }
-    public void rotateAroundY(double radians) {
-        double sin = Math.sin(radians);
-        double cos = Math.cos(radians);
-        
-        for (Vertex v : vertices) {
-            v.rotateAroundY(sin, cos);
-        }
-    }
-    public void rotateAroundZ(double radians) {
-        double sin = Math.sin(radians);
-        double cos = Math.cos(radians);
-        
-        for (Vertex v : vertices) {
-            v.rotateAroundZ(sin, cos);
         }
     }
 
@@ -69,7 +39,7 @@ public class Mesh {
 
         for (int i = 0; i < n; i++) {
             Vertex v = new Vertex(0, radius, 0);
-            v.rotateAroundZ(alpha*i);
+            Matrix.rotateAroundZ(alpha * i).transform(v);
             result.add(v);
         }
         vertices.addAll(result);
@@ -81,7 +51,7 @@ public class Mesh {
 
         for (int i = 0; i < n; i++) {
             Vertex v = new Vertex(0, radius, 0);
-            v.rotateAroundX(alpha*i);
+            Matrix.rotateAroundX(alpha * i).transform(v);
             result.add(v);
         }
         vertices.addAll(result);
@@ -93,7 +63,7 @@ public class Mesh {
 
         for (int i = 0; i < n; i++) {
             Vertex v = new Vertex(radius, 0, 0);
-            v.rotateAroundY(alpha*i);
+            Matrix.rotateAroundY(alpha * i).transform(v);
             result.add(v);
         }
         vertices.addAll(result);
@@ -117,14 +87,14 @@ public class Mesh {
             next_1 = it1.next();
             next_2 = it2.next();
 
-            triangles.add(new Triangle(next_1, prev_2, prev_1, this));
-            triangles.add(new Triangle(next_1, next_2, prev_2, this));
+            triangles.add(new Triangle(next_1, prev_2, prev_1));
+            triangles.add(new Triangle(next_1, next_2, prev_2));
 
             prev_1 = next_1; 
             prev_2 = next_2;
         }
-        triangles.add(new Triangle(start_1, prev_2, prev_1, this));
-        triangles.add(new Triangle(start_1, start_2, prev_2, this));
+        triangles.add(new Triangle(start_1, prev_2, prev_1));
+        triangles.add(new Triangle(start_1, start_2, prev_2));
     }
 
 
@@ -137,10 +107,10 @@ public class Mesh {
 
         while (it.hasNext()) {
             next = it.next();
-            triangles.add(new Triangle(apex, prev, next, this));
+            triangles.add(new Triangle(apex, prev, next));
             prev = next;
         }
-        triangles.add(new Triangle(apex, prev, start, this));
+        triangles.add(new Triangle(apex, prev, start));
     }
 }
 
@@ -163,19 +133,22 @@ class Torus extends Mesh {
         double curve_rotation = 2*Math.PI/num_circles;
 
         List<Vertex> first_circle = YZregularPolygon(level_of_detail, tube_radius);
+        Matrix translation = Matrix.translate(0, 0, mean_radius);
+
         for (Vertex v : first_circle) {
-            v.translate(0, 0, mean_radius);
+            translation.transform(v);
         }
 
         List<Vertex> circle1 = first_circle, circle2 = null;
 
         for (int i = 1; i <= num_circles - 1; i++) {
             circle2 = YZregularPolygon(level_of_detail, tube_radius);
+            Matrix rotationX = Matrix.rotateAroundX(i * twist_rotation);
+            Matrix rotationY = Matrix.rotateAroundY(-i * curve_rotation);
+            Matrix matrix = rotationX.combine(translation).combine(rotationY);
 
             for (Vertex v : circle2) {
-                v.rotateAroundX(i*twist_rotation);
-                v.translate(0, 0, mean_radius);
-                v.rotateAroundY(-i*curve_rotation);
+                matrix.transform(v);
             }
             
             buildPrismSurface(circle1, circle2);
@@ -192,14 +165,17 @@ class Prism extends Mesh {
         Vertex apex1 = new Vertex(0, 0.5*height, 0);
         Vertex apex2 = new Vertex(0, -0.5*height, 0);
 
+        Matrix moveDown = Matrix.translate(0, 0.5 * height, 0);
+        Matrix moveUp = Matrix.translate(0, -0.5 * height, 0);
+
         List<Vertex> circle1 = XZregularPolygon(n, radius);
         for (Vertex v : circle1) {
-            v.translate(0, 0.5*height, 0);
+            moveDown.transform(v);
         }
 
         List<Vertex> circle2 = XZregularPolygon(n, radius);
         for (Vertex v : circle2) {
-            v.translate(0, -0.5*height, 0);
+            moveUp.transform(v);
         }
 
         buildPyramidSurface(apex2, circle2);
@@ -218,14 +194,18 @@ class AntiPrism extends Mesh {
         Vertex apex2 = new Vertex(0, 0.5*height, 0);
 
         List<Vertex> circle1 = XZregularPolygon(n, radius);
+        Matrix moveDown = Matrix.translate(0, 0.5 * height, 0);
+        Matrix moveUpAndRotate = 
+            Matrix.translate(0, -0.5 * height, 0).combine(
+            Matrix.rotateAroundY(Math.PI / n));
+
         for (Vertex v : circle1) {
-            v.translate(0, -0.5*height, 0);
-            v.rotateAroundY(Math.PI/n);
+            moveUpAndRotate.transform(v);
         }
 
         List<Vertex> circle2 = XZregularPolygon(n, radius);
         for (Vertex v : circle2) {
-            v.translate(0, 0.5*height, 0);
+            moveDown.transform(v);
         }
 
         buildPyramidSurface(apex1, circle1);
@@ -261,9 +241,10 @@ class Sphere extends Mesh {
 
         for (int i = 0; i < num_meridians; i++) {
             List<Vertex> meridian = XYregularPolygon(num_corners, radius);
+            Matrix rotation = Matrix.rotateAroundY(i * rotation_angle);
             
             for (Vertex v : meridian) {
-                v.rotateAroundY(i*rotation_angle);
+                rotation.transform(v);
             }
             meridians.add(meridian);
         }
