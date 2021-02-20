@@ -29,7 +29,7 @@ print(lst[1]) # 64
 names(lst) <- c("red", "green", "blue")
 print(lst$green) # "hello"
 
-# Maatrix on 2-mõõtmeline andmestruktuur
+# Maatriks on 2-mõõtmeline andmestruktuur
 mat = matrix(
   c(4, 5, 6, 7, 8, 9), 
   nrow = 2, 
@@ -78,20 +78,33 @@ print(arr)
 cars = data.frame(
   car = c("Ford Scorpio", "Audi A6", "Mazda 6"),
   year = c(1997L, 2005L, 2010L),
-  rwd = c(TRUE, FALSE, TRUE)
+  rwd = c(TRUE, FALSE, TRUE),
+  city = c("London", "Tallinn", "Moscow")
 )
 print(cars)
-#   car           year  rwd
-# 1 Ford Scorpio  1997  TRUE
-# 2 Audi A6       2005  FALSE
-# 3 Mazda 6       2010  TRUE
+#   car           year  rwd    city
+# 1 Ford Scorpio  1997  TRUE   London
+# 2 Audi A6       2005  FALSE  Tallinn
+# 3 Mazda 6       2010  TRUE   Moscow
+
+# typeof(cars) == list
+# Tulpade arv
+length(cars) # 4
+
+# Tulba saamine tabelist ühetulbalise tabeli kujul
+yearColumn <- cars[2] 
+# lenght(yearColumn) == 1, typeof(yearColumn) == list
 
 # Tulba saamine tabelist vektori kujul
-yearVec <- cars$year
-# Tulba lisamine tabelisse
-cars$color <- c("black", "gray", "red")
+yearVec <- cars$year 
+# length(yearVec) == 3, typeof(yearVec) == integer
+
 # Eraldab tabelist 2. ja 3. rea ning 1. ja 2. veeru
 fordAndAudi = cars[c(2,3), c(1,2)]
+
+# Tulba lisamine tabelisse
+cars$color <- c("black", "gray", "red")
+
 # Tabeli filtreerimine
 newCars <- subset(cars, year > 2000L)
 # Tabeli lugemine csv failist

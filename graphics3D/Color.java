@@ -6,7 +6,6 @@ public class Color {
     public Color() {}
     public Color(double r, double g, double b) {
         red = r; green = g; blue = b;
-        fit();
     }
     public Color(int RGBhex) {
         int redInt = (RGBhex >> 16) & 0xFF;
@@ -17,6 +16,13 @@ public class Color {
         green = greenInt / 255.0;
         blue = blueInt / 255.0;
     }
+    public Color(Color color1, Color color2) {
+        this(
+            color1.red * color2.red,
+            color1.green * color2.green,
+            color1.blue * color2.blue
+        );
+    }
     public Color(double intensity, Color color1, Color color2) {
         this(
             intensity * color1.red * color2.red,
@@ -24,18 +30,11 @@ public class Color {
             intensity * color1.blue * color2.blue
         );
     }
-    public Color(double intensity, Color color1) {
+    public Color(double intensity, Color color) {
         this(
-            intensity * color1.red,
-            intensity * color1.green,
-            intensity * color1.blue
-        );
-    }
-    public Color(Color color1, Color color2) {
-        this(
-            color1.red * color2.red,
-            color1.green * color2.green,
-            color1.blue * color2.blue
+            intensity * color.red,
+            intensity * color.green,
+            intensity * color.blue
         );
     }
 
@@ -46,18 +45,16 @@ public class Color {
         blue += other.blue;
     }
     public int getRGBhex() {
-        fit();
-        int redInt = (int) (red * 255);
-        int greenInt = (int) (green * 255);
-        int blueInt = (int) (blue * 255);
-        return redInt << 16 | greenInt << 8 | blueInt;
-    }
-    private void fit() {
         if (red < 0) red = 0;
         if (red > 1) red = 1;
         if (green < 0) green = 0;
         if (green > 1) green = 1;
         if (blue < 0) blue = 0;
         if (blue > 1) blue = 1;
+
+        int redInt = (int) (red * 255);
+        int greenInt = (int) (green * 255);
+        int blueInt = (int) (blue * 255);
+        return redInt << 16 | greenInt << 8 | blueInt;
     }
 }

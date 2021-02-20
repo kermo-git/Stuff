@@ -388,3 +388,7 @@ nameDo = do
     lastName <- getLine
     let fullName = firstName ++ " " ++ lastName
     putStrLn ("Pleased to meet you, " ++ fullName ++ "!")
+
+-- põhipprogramm
+main :: IO()
+main = do putStrLn "Hello World!"

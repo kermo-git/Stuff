@@ -7,25 +7,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
+enum Shading {
+    FLAT, GOURAUD, PHONG
+}
+
+
 public class Mesh {
     List<Triangle> triangles = new ArrayList<>();
     List<Vertex> vertices = new ArrayList<>();
     Material material;
+    Shading shading;
 
 
-    public void setMaterial(Material material) {
+    public Mesh(Material material, Shading shading) {
         this.material = material;
-        for (Triangle triangle : triangles) {
-            triangle.material = material;
-        }
+        this.shading = shading;
     }
     public void transform(Matrix matrix) {
         for (Vertex v : vertices) {
             matrix.transform(v);
         }
     }
-
-
     public void calculateNormals() {
         for (Vertex vertex : vertices) {
             vertex.calculateNormal();
@@ -33,7 +35,7 @@ public class Mesh {
     }
 
 
-    protected List<Vertex> XYregularPolygon(int n, double radius) {
+    private List<Vertex> XYregularPolygon(int n, double radius) {
         List<Vertex> result = new ArrayList<>();
         double alpha = (2 * Math.PI) / n;
 
@@ -45,7 +47,7 @@ public class Mesh {
         vertices.addAll(result);
         return result;
     }
-    protected List<Vertex> YZregularPolygon(int n, double radius) {
+    private List<Vertex> YZregularPolygon(int n, double radius) {
         List<Vertex> result = new ArrayList<>();
         double alpha = (2 * Math.PI) / n;
 
@@ -57,7 +59,7 @@ public class Mesh {
         vertices.addAll(result);
         return result;
     }
-    protected List<Vertex> XZregularPolygon(int n, double radius) {
+    private List<Vertex> XZregularPolygon(int n, double radius) {
         List<Vertex> result = new ArrayList<>();
         double alpha = (2 * Math.PI) / n;
 
@@ -71,7 +73,22 @@ public class Mesh {
     }
 
 
-    protected void buildPrismSurface(List<Vertex> circle1, List<Vertex> circle2) {
+    public void addTriangle(Vertex v1, Vertex v2, Vertex v3) {
+        switch (shading) {
+            case FLAT:
+                triangles.add(new FlatTriangle(material, v1, v2, v3));
+                break;
+            case GOURAUD:
+                triangles.add(new GouraudTriangle(material, v1, v2, v3));
+                break;
+            case PHONG:
+                triangles.add(new PhongTriangle(material, v1, v2, v3));
+                break;
+        }
+    }
+
+
+    public void buildPrismSurface(List<Vertex> circle1, List<Vertex> circle2) {
         Iterator<Vertex> it1 = circle1.iterator();
         Iterator<Vertex> it2 = circle2.iterator();
 
@@ -87,18 +104,18 @@ public class Mesh {
             next_1 = it1.next();
             next_2 = it2.next();
 
-            triangles.add(new Triangle(next_1, prev_2, prev_1));
-            triangles.add(new Triangle(next_1, next_2, prev_2));
+            addTriangle(next_1, prev_2, prev_1);
+            addTriangle(next_1, next_2, prev_2);
 
             prev_1 = next_1; 
             prev_2 = next_2;
         }
-        triangles.add(new Triangle(start_1, prev_2, prev_1));
-        triangles.add(new Triangle(start_1, start_2, prev_2));
+        addTriangle(start_1, prev_2, prev_1);
+        addTriangle(start_1, start_2, prev_2);
     }
 
 
-    protected void buildPyramidSurface(Vertex apex, List<Vertex> circle) {
+    public void buildPyramidSurface(Vertex apex, List<Vertex> circle) {
         vertices.add(apex);
         Iterator<Vertex> it = circle.iterator();
 
@@ -107,61 +124,14 @@ public class Mesh {
 
         while (it.hasNext()) {
             next = it.next();
-            triangles.add(new Triangle(apex, prev, next));
+            addTriangle(apex, prev, next);
             prev = next;
         }
-        triangles.add(new Triangle(apex, prev, start));
+        addTriangle(apex, prev, start);
     }
-}
 
 
-class Torus extends Mesh {
-
-    public Torus(double innerRadius, double outerRadius, int level_of_detail) {
-
-        double mean_radius = (outerRadius + innerRadius)/2;
-        double tube_radius = (outerRadius - innerRadius)/2;
-    
-        double twist_rotation = Math.PI/level_of_detail;
-
-        double triangle_side = 2*tube_radius*Math.tan(twist_rotation);
-        int num_circles = (int) (2*Math.PI*outerRadius/triangle_side);
-
-        if (num_circles%2 == 1)
-            num_circles += 1;
-
-        double curve_rotation = 2*Math.PI/num_circles;
-
-        List<Vertex> first_circle = YZregularPolygon(level_of_detail, tube_radius);
-        Matrix translation = Matrix.translate(0, 0, mean_radius);
-
-        for (Vertex v : first_circle) {
-            translation.transform(v);
-        }
-
-        List<Vertex> circle1 = first_circle, circle2 = null;
-
-        for (int i = 1; i <= num_circles - 1; i++) {
-            circle2 = YZregularPolygon(level_of_detail, tube_radius);
-            Matrix rotationX = Matrix.rotateAroundX(i * twist_rotation);
-            Matrix rotationY = Matrix.rotateAroundY(-i * curve_rotation);
-            Matrix matrix = rotationX.combine(translation).combine(rotationY);
-
-            for (Vertex v : circle2) {
-                matrix.transform(v);
-            }
-            
-            buildPrismSurface(circle1, circle2);
-            circle1 = circle2;
-        }
-        buildPrismSurface(circle2, first_circle);
-    }
-}
-
-
-class Prism extends Mesh {
-
-    public Prism(int n, double height, double radius) {
+    public void buildPrism(int n, double height, double radius) {
         Vertex apex1 = new Vertex(0, 0.5*height, 0);
         Vertex apex2 = new Vertex(0, -0.5*height, 0);
 
@@ -184,12 +154,9 @@ class Prism extends Mesh {
         Collections.reverse(circle1);
         buildPyramidSurface(apex1, circle1);
     }
-}
 
 
-class AntiPrism extends Mesh {
-    
-    public AntiPrism(int n, double height, double radius) {
+    public void buildAntiPrism(int n, double height, double radius) {
         Vertex apex1 = new Vertex(0, -0.5*height, 0);
         Vertex apex2 = new Vertex(0, 0.5*height, 0);
 
@@ -214,24 +181,18 @@ class AntiPrism extends Mesh {
         Collections.reverse(circle2);
         buildPyramidSurface(apex2, circle2);
     }
-}
 
 
-class Bipyramid extends Mesh {
-
-    public Bipyramid(int RGB, int n, double length, double baseRadius) {
+    public void buildBipyramid(int n, double length, double baseRadius) {
         List<Vertex> circle = XZregularPolygon(n, baseRadius);
         buildPyramidSurface(new Vertex(0, -0.5*length, 0), circle);
 
         Collections.reverse(circle);
         buildPyramidSurface(new Vertex(0, 0.5*length, 0), circle);
     }
-}
 
 
-class Sphere extends Mesh {
-
-    public Sphere(double radius, int num_meridians) {
+    public void buildSphere(double radius, int num_meridians) {
         int num_parallels = num_meridians - 1;
         int num_corners = 2*num_meridians;
 
@@ -290,5 +251,45 @@ class Sphere extends Mesh {
             circle1 = circle2;
         }
         buildPyramidSurface(north_pole, circle1);
+    }
+
+
+    public void buildTorus(double innerRadius, double outerRadius, int level_of_detail) {
+        double mean_radius = (outerRadius + innerRadius)/2;
+        double tube_radius = (outerRadius - innerRadius)/2;
+    
+        double twist_rotation = Math.PI/level_of_detail;
+
+        double triangle_side = 2*tube_radius*Math.tan(twist_rotation);
+        int num_circles = (int) (2*Math.PI*outerRadius/triangle_side);
+
+        if (num_circles%2 == 1)
+            num_circles += 1;
+
+        double curve_rotation = 2*Math.PI/num_circles;
+
+        List<Vertex> first_circle = YZregularPolygon(level_of_detail, tube_radius);
+        Matrix translation = Matrix.translate(0, 0, mean_radius);
+
+        for (Vertex v : first_circle) {
+            translation.transform(v);
+        }
+
+        List<Vertex> circle1 = first_circle, circle2 = null;
+
+        for (int i = 1; i <= num_circles - 1; i++) {
+            circle2 = YZregularPolygon(level_of_detail, tube_radius);
+            Matrix twist = Matrix.rotateAroundX(i * twist_rotation);
+            Matrix curve = Matrix.rotateAroundY(-i * curve_rotation);
+            Matrix matrix = twist.combine(translation).combine(curve);
+
+            for (Vertex v : circle2) {
+                matrix.transform(v);
+            }
+            
+            buildPrismSurface(circle1, circle2);
+            circle1 = circle2;
+        }
+        buildPrismSurface(circle2, first_circle);
     }
 }

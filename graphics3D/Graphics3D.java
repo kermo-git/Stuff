@@ -2,18 +2,29 @@ package graphics3D;
 
 import java.util.Arrays;
 import java.util.List;
+
 import java.awt.Graphics;
 import java.awt.Toolkit;
+
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputListener;
 
-public class Graphics3D extends JPanel {
+public class Graphics3D extends JPanel implements KeyListener, MouseInputListener {
     private static final long serialVersionUID = 1L;
     Scene3D scene;
 
     public Graphics3D(Scene3D scene) {
         this.scene = scene;
+        addKeyListener(this);
+        addMouseListener(this);
+        setFocusable(true);
     }
+
     @Override
     public void paint(Graphics g) {
         g.drawImage(scene.render(), 0, 0, this);
@@ -26,50 +37,99 @@ public class Graphics3D extends JPanel {
 
         Toolkit tk = Toolkit.getDefaultToolkit();
 
-        Camera camera = new Camera(
-            tk.getScreenSize().width, 
-            tk.getScreenSize().height, 
-            70
-        );
-        camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 1));
+        Camera camera = new Camera(tk.getScreenSize().width, tk.getScreenSize().height, 70);
+        camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 35));
 
-        LightSource yellowLight = new LightSource(
-            new Vector(-20, 7, 20), 
-            new Color(0xFFFB2B), 
-            new Color(0xFFFB2B)
-        );
-        LightSource blueLight = new LightSource(
-            new Vector(20, 4, 30), 
-            new Color(0x2BCAFF), 
-            new Color(0x2BCAFF)
-        );
-        LightSource magentaLight = new LightSource(
-            new Vector(-5, 15, 30), 
-            new Color(0xFF2BB1), 
-            new Color(0xFF2BB1)
+        LightSource light1 = new LightSource(
+            new Vector(0, 10, 30), 
+            new Color(0xFFFFFF), 
+            new Color(0xFFFFFF)
         );
 
-        Matrix translation = Matrix.translate(0, 0, 35);
-        Matrix rotation1 = Matrix.rotateAroundX(-0.1 * Math.PI);
-        Matrix rotation2 = Matrix.rotateAroundX(-0.25 * Math.PI);
+        LightSource light2 = new LightSource(
+            new Vector(-30, 0, 0), 
+            new Color(0xFFFFFF), 
+            new Color(0xFFFFFF)
+        );
 
-        Mesh torus = new Torus(10, 15, 20);
-        torus.setMaterial(Material.SILVER());
-        torus.transform(rotation1.combine(translation));
+        Mesh sphere = new Mesh(Material.CYAN_PLASTIC(), Shading.FLAT);
+        sphere.buildSphere(7, 40);
+        sphere.transform(
+            Matrix.rotateAroundX(-0.25 * Math.PI)
+            .combine(Matrix.translate(-10, 0, 35))
+        );
 
-        Mesh sphere = new Sphere(7, 20);
-        sphere.setMaterial(Material.SILVER());
-        sphere.transform(rotation2.combine(translation));
+        Mesh antiPrism = new Mesh(Material.CYAN_PLASTIC(), Shading.FLAT);
+        antiPrism.buildBipyramid(10, 20, 5);
+        antiPrism.transform(
+            Matrix.rotateAroundX(-0.15 * Math.PI)
+            .combine(Matrix.translate(10, 0, 35))
+        );
 
-        Mesh antiPrism = new AntiPrism(8, 8, 3);
-        antiPrism.setMaterial(Material.SILVER());
-        antiPrism.transform(rotation2.combine(Matrix.translate(10, 10, 35)));
-
-        List<LightSource> lights = Arrays.asList(yellowLight, blueLight, magentaLight);
-        List<Mesh> objects = Arrays.asList(torus, sphere, antiPrism);
+        List<LightSource> lights = Arrays.asList(light1, light2);
+        List<Mesh> objects = Arrays.asList(sphere, antiPrism);
 
         Scene3D scene = new Scene3D(camera, lights, objects);
         frame.add(new Graphics3D(scene));
         frame.setVisible(true);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        // TODO Auto-generated method stub
+
     }
 }

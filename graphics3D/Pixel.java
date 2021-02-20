@@ -2,15 +2,11 @@ package graphics3D;
 
 public class Pixel {
     int x, y;
-    double depth;
+    double zRec;
 
-    public Pixel(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-    public Pixel(int x, int y, double depth) {
-        this.x = x;
-        this.y = y;
-        this.depth = depth;  
+    public Pixel(int screenX, int screenY, double zReciprocal) {
+        this.zRec = zReciprocal;
+        this.x = screenX;
+        this.y = screenY;
     }
 }

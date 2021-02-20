@@ -22,12 +22,6 @@ public class Scene3D {
 
     private void clear() {
         zBuffer = new double[camera.screenWidth][camera.screenHeight];
-        int x, y;
-        for (x = 0; x < camera.screenWidth; x++) {
-            for (y = 0; y < camera.screenHeight; y++) {
-                zBuffer[x][y] = Double.MAX_VALUE;
-            }
-        }
         canvas = new BufferedImage(
             camera.screenWidth, 
             camera.screenHeight, 

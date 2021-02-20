@@ -71,7 +71,7 @@ public class Convolution extends Layer {
                 for (paddedX = 0; paddedX <= paddedSizeX - filterSize; paddedX += stride) {
                     
                     outputY = 0;
-                    for (paddedY = 0; paddedY <= paddedSizeX - filterSize; paddedY += stride) {
+                    for (paddedY = 0; paddedY <= paddedSizeY - filterSize; paddedY += stride) {
                         convolutionForward();
                         outputY++;
                     }

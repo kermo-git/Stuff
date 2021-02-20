@@ -45,20 +45,19 @@ public class Camera {
             return null;
 
         double depth = -result.z;
-        result.x /= depth;
-        result.y /= depth;
+        double imageX = result.x / depth;
+        double imageY = result.y / depth;
         
-        if (Math.abs(result.x) > halfViewPortWidth ||
-            Math.abs(result.y) > halfViewPortHeight)
+        if (Math.abs(imageX) > halfViewPortWidth ||
+            Math.abs(imageY) > halfViewPortHeight)
             return null;
         
-        double normalizedX = (halfViewPortWidth + result.x) / (2 * halfViewPortWidth);
-        double normalizedY = (halfViewPortHeight + result.y) / (2 * halfViewPortHeight);
+        double normalizedX = (halfViewPortWidth + imageX) / (2 * halfViewPortWidth);
+        double normalizedY = (halfViewPortHeight + imageY) / (2 * halfViewPortHeight);
 
-        return new Pixel(
-            (int) (normalizedX * screenWidth), 
-            (int) ((1 - normalizedY) * screenHeight), 
-            depth
-        );
+        int screenX = (int) (normalizedX * screenWidth);
+        int screenY = (int) ((1 - normalizedY) * screenHeight);
+
+        return new Pixel(screenX, screenY, 1.0 / depth);
     }
 }
