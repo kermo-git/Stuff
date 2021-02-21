@@ -27,47 +27,67 @@ public class Graphics3D extends JPanel implements KeyListener, MouseInputListene
 
     @Override
     public void paint(Graphics g) {
-        g.drawImage(scene.render(), 0, 0, this);
+        g.drawImage(scene.renderImage(), 0, 0, this);
     }
 
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setTitle("3D Shapes");
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-
         Toolkit tk = Toolkit.getDefaultToolkit();
 
         Camera camera = new Camera(tk.getScreenSize().width, tk.getScreenSize().height, 70);
-        camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 35));
+        camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 1));
 
         LightSource light1 = new LightSource(
-            new Vector(0, 10, 30), 
-            new Color(0xFFFFFF), 
-            new Color(0xFFFFFF)
+            new Vector(-20, 30, 50), 
+            new Color(0x26CAFC), 
+            new Color(0x26CAFC)
         );
 
         LightSource light2 = new LightSource(
-            new Vector(-30, 0, 0), 
-            new Color(0xFFFFFF), 
-            new Color(0xFFFFFF)
+            new Vector(20, 30, 50), 
+            new Color(0xFC26F5), 
+            new Color(0xFC26F5)
         );
 
-        Mesh sphere = new Mesh(Material.CYAN_PLASTIC(), Shading.FLAT);
-        sphere.buildSphere(7, 40);
-        sphere.transform(
-            Matrix.rotateAroundX(-0.25 * Math.PI)
-            .combine(Matrix.translate(-10, 0, 35))
+        LightSource light3 = new LightSource(
+            new Vector(40, -10, 0), 
+            new Color(0xFFF947), 
+            new Color(0xFFF947)
         );
 
-        Mesh antiPrism = new Mesh(Material.CYAN_PLASTIC(), Shading.FLAT);
-        antiPrism.buildBipyramid(10, 20, 5);
-        antiPrism.transform(
-            Matrix.rotateAroundX(-0.15 * Math.PI)
-            .combine(Matrix.translate(10, 0, 35))
+        Mesh terrain = new Mesh(Material.SILVER(), Shading.PHONG);
+        terrain.buildFunctionPlot(10, 10, 10, 50, new Perlin(4, 0.4));
+        terrain.transform(
+            Matrix.rotateAroundX(0.8*Math.PI)
+            .combine(Matrix.translate(0, 0, 50))
         );
+
+        Mesh object1 = new Mesh(Material.SILVER(), Shading.PHONG);
+        object1.buildTorus(5, 10, 20);
+        object1.transform(
+            Matrix.rotateAroundX(-0.25*Math.PI)
+            .combine(Matrix.translate(20, 15, 50)
+        ));
+
+        Mesh object2 = new Mesh(Material.SILVER(), Shading.PHONG);
+        object2.buildSphere(5, 20);
+        object2.transform(
+            Matrix.rotateAroundX(-0.25*Math.PI)
+            .combine(Matrix.translate(-20, 15, 50)
+        ));
+
+        Mesh object3 = new Mesh(Material.SILVER(), Shading.FLAT);
+        object3.buildAntiPrism(8, 20, 5);
+        object3.transform(
+            Matrix.rotateAroundX(0.3*Math.PI)
+            .combine(Matrix.rotateAroundY(0.2*Math.PI))
+            .combine(Matrix.translate(-5, 10, 50)
+        ));
 
         List<LightSource> lights = Arrays.asList(light1, light2);
-        List<Mesh> objects = Arrays.asList(sphere, antiPrism);
+        List<Mesh> objects = Arrays.asList(terrain, object1, object2, object3);
 
         Scene3D scene = new Scene3D(camera, lights, objects);
         frame.add(new Graphics3D(scene));

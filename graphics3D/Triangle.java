@@ -1,18 +1,15 @@
 package graphics3D;
 
 public abstract class Triangle {
-    protected Material material;
-    protected Vertex v1, v2, v3;
-
+    Material material;
+    Vertex v1, v2, v3;
+    Vector normal;
 
     public Triangle(Material material, Vertex v1, Vertex v2, Vertex v3) {
         this.material = material;
         this.v1 = v1; v1.triangles.add(this);
         this.v2 = v2; v2.triangles.add(this);
         this.v3 = v3; v3.triangles.add(this);
-    }
-    public Vector getNormal() {
-        return new Vector(v1, v3).cross(new Vector(v1, v2));
     }
     private static int min(int a, int b) {
         return (a < b) ? a : b;
@@ -21,23 +18,19 @@ public abstract class Triangle {
         return (a > b) ? a : b;
     }
 
-
-    protected abstract void beforeLoop(Scene3D scene);
-
     protected Pixel p1, p2, p3;
     protected double q1, q2, q3, zRec;
 
     protected abstract Color interpolate(Scene3D scene);
 
-
     public void render(Scene3D scene) {
-        p1 = scene.camera.project(v1);
-        p2 = scene.camera.project(v2);
-        p3 = scene.camera.project(v3);
+        p1 = v1.projection;
+        p2 = v2.projection;
+        p3 = v3.projection;
         if (p1 == null || p2 == null || p3 == null) {
             return;
         }
-
+        
         int low_x = min(p1.x, min(p2.x, p3.x));
         int high_x = max(p1.x, max(p2.x, p3.x));
         int low_y = min(p1.y, min(p2.y, p3.y));
@@ -45,10 +38,8 @@ public abstract class Triangle {
 
         int x, y;
         double s1, s2, s3;
-
         double s = (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
 
-        beforeLoop(scene);
         for (x = low_x; x <= high_x; x++) {
             for (y = low_y; y <= high_y; y++) {
 

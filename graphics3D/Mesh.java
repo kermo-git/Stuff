@@ -1,23 +1,19 @@
 package graphics3D;
 
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
 enum Shading {
     FLAT, GOURAUD, PHONG
 }
-
 
 public class Mesh {
     List<Triangle> triangles = new ArrayList<>();
     List<Vertex> vertices = new ArrayList<>();
     Material material;
     Shading shading;
-
 
     public Mesh(Material material, Shading shading) {
         this.material = material;
@@ -27,10 +23,34 @@ public class Mesh {
         for (Vertex v : vertices) {
             matrix.transform(v);
         }
+        calculateNormals();
     }
+
+
     public void calculateNormals() {
+        for (Triangle t : triangles) {
+            t.normal = new Vector(t.v1, t.v3).cross(new Vector(t.v1, t.v2));
+        }
+        for (Vertex v : vertices) {
+            v.normal = new Vector();
+            for (Triangle t : v.triangles) {
+                v.normal.add(t.normal);
+            }
+            v.normal.normalize();
+        }
+        for (Triangle t : triangles) {
+            t.normal.normalize();
+        }
+    }
+
+
+    public void render(Scene3D scene) {
         for (Vertex vertex : vertices) {
-            vertex.calculateNormal();
+            vertex.color = material.illuminate(scene, vertex, vertex.normal);
+            vertex.projection = scene.camera.project(vertex);
+        }
+        for (Triangle triangle : triangles) {
+            triangle.render(scene);
         }
     }
 
@@ -47,6 +67,8 @@ public class Mesh {
         vertices.addAll(result);
         return result;
     }
+
+
     private List<Vertex> YZregularPolygon(int n, double radius) {
         List<Vertex> result = new ArrayList<>();
         double alpha = (2 * Math.PI) / n;
@@ -59,6 +81,8 @@ public class Mesh {
         vertices.addAll(result);
         return result;
     }
+
+
     private List<Vertex> XZregularPolygon(int n, double radius) {
         List<Vertex> result = new ArrayList<>();
         double alpha = (2 * Math.PI) / n;
@@ -88,9 +112,9 @@ public class Mesh {
     }
 
 
-    public void buildPrismSurface(List<Vertex> circle1, List<Vertex> circle2) {
-        Iterator<Vertex> it1 = circle1.iterator();
-        Iterator<Vertex> it2 = circle2.iterator();
+    public void buildSurface(List<Vertex> row1, List<Vertex> row2, boolean isLoop) {
+        Iterator<Vertex> it1 = row1.iterator();
+        Iterator<Vertex> it2 = row2.iterator();
 
         Vertex start_1 = it1.next();
         Vertex start_2 = it2.next();
@@ -110,8 +134,16 @@ public class Mesh {
             prev_1 = next_1; 
             prev_2 = next_2;
         }
-        addTriangle(start_1, prev_2, prev_1);
-        addTriangle(start_1, start_2, prev_2);
+        if (isLoop) {
+            addTriangle(start_1, prev_2, prev_1);
+            addTriangle(start_1, start_2, prev_2);
+        }
+    }
+    public void buildPrismSurface(List<Vertex> circle1, List<Vertex> circle2) {
+        buildSurface(circle1, circle2, true);
+    }
+    public void buildRibbon(List<Vertex> row1, List<Vertex> row2) {
+        buildSurface(row1, row2, false);
     }
 
 
@@ -291,5 +323,38 @@ public class Mesh {
             circle1 = circle2;
         }
         buildPrismSurface(circle2, first_circle);
+    }
+
+    public void buildFunctionPlot(
+        double unitsX, double unitsY, 
+        double unitSize, int density, 
+        Function function) {
+
+        List<Vertex> prev = new ArrayList<>();
+        List<Vertex> current = new ArrayList<>();
+        
+        double step = 1.0 / density;
+        double rangeX = unitsX / 2;
+        double rangeY = unitsY / 2;
+
+        double x, y, z;
+
+        for (x = -rangeX; x < rangeX; x += step) {
+            for (y = -rangeY; y < rangeY; y += step) {
+                z = function.f(x, y);
+                Vertex v = new Vertex(
+                    x * unitSize, 
+                    z * unitSize, 
+                    y * unitSize
+                );
+                current.add(v);
+                vertices.add(v);
+            }
+            if (!prev.isEmpty()) {
+                buildRibbon(prev, current);
+            }
+            prev = new ArrayList<>(current);
+            current = new ArrayList<>();
+        }
     }
 }

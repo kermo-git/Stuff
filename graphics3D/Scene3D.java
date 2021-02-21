@@ -1,7 +1,6 @@
 package graphics3D;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.awt.image.BufferedImage;
 
 
@@ -29,23 +28,36 @@ public class Scene3D {
         );
     }
 
-    // public Pixel project(Vector v) {
-    //     return new Pixel(
-    //         (int) (screenWidth * (v.x / (2 * v.z * tanHalfFOVX) + 0.5)),
-    //         (int) (screenHeight * (v.y / (2 * v.z * tanHalfFOVY) + 0.5))
-    //     );
-    // }
+    public BufferedImage renderZBuffer() {
+        renderImage();
+        double max = 0, min = Double.MAX_VALUE;
 
-    public BufferedImage render() {
-        clear();
-        List<Triangle> triangles = new ArrayList<>();
-
-        for (Mesh object : objects) {
-            object.calculateNormals();
-            triangles.addAll(object.triangles);
+        for (int x = 0; x < zBuffer.length; x++) {
+            for (int y = 0; y < zBuffer[0].length; y++) {
+                double value = zBuffer[x][y];
+                if (value > max) {
+                    max = value;
+                }
+                if (value < min) {
+                    min = value;
+                }
+            }
         }
-        for (Triangle t : triangles) {
-            t.render(this);
+        double diff = max - min;
+        for (int x = 0; x < zBuffer.length; x++) {
+            for (int y = 0; y < zBuffer[0].length; y++) {
+                double norm = (zBuffer[x][y] - min) / diff;
+                int color = new Color(norm, norm, norm).getRGBhex();
+                canvas.setRGB(x, y, color);
+            }
+        }
+        return canvas;
+    }
+ 
+    public BufferedImage renderImage() {
+        clear();
+        for (Mesh object : objects) {
+            object.render(this);
         }
         return canvas;
     }
