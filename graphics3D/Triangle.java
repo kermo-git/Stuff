@@ -19,7 +19,7 @@ public abstract class Triangle {
     }
 
     protected Pixel p1, p2, p3;
-    protected double q1, q2, q3, zRec;
+    protected double w1, w2, w3, zRec;
 
     protected abstract Color interpolate(Scene3D scene);
 
@@ -37,7 +37,7 @@ public abstract class Triangle {
         int high_y = max(p1.y, max(p2.y, p3.y));
 
         int x, y;
-        double s1, s2, s3;
+        int s1, s2, s3;
         double s = (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
 
         for (x = low_x; x <= high_x; x++) {
@@ -48,15 +48,15 @@ public abstract class Triangle {
                 s3 = (x - p2.x)*(p1.y - p2.y) - (y - p2.y)*(p1.x - p2.x);
 
                 if (s1 >= 0 && s2 >= 0 && s3 >= 0) {
-                    q1 = s1 / s;
-                    q2 = s2 / s;
-                    q3 = 1 - q1 - q2;
+                    w1 = s1 / s;
+                    w2 = s2 / s;
+                    w3 = 1 - w1 - w2;
 
-                    zRec = q1 * p1.zRec + q2 * p2.zRec + q3 * p3.zRec;
+                    zRec = w1 * p1.zRec + w2 * p2.zRec + w3 * p3.zRec;
 
                     if (zRec > scene.zBuffer[x][y]) {
                         scene.zBuffer[x][y] = zRec;
-                        scene.canvas.setRGB(x, y, interpolate(scene).getRGBhex());
+                        scene.frameBuffer.setRGB(x, y, interpolate(scene).getRGBhex());
                     }
                 }
             }

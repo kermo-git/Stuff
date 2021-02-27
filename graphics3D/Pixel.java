@@ -4,9 +4,9 @@ public class Pixel {
     int x, y;
     double zRec;
 
-    public Pixel(int screenX, int screenY, double zReciprocal) {
+    public Pixel(int x, int y, double zReciprocal) {
+        this.x = x;
+        this.y = y;
         this.zRec = zReciprocal;
-        this.x = screenX;
-        this.y = screenY;
     }
 }

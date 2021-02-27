@@ -4,18 +4,30 @@ public class Camera {
     Matrix cameraToWorld, worldToCamera;
     Vector location;
 
-    double halfViewPortWidth, halfViewPortHeight;
-    int screenWidth, screenHeight;
+    double pixelSize, halfPixelSize;
+    double halfImageWidth, halfImageHeight;
+    double imageWidth, imageHeight;
+    int numPixelsX, numPixelsY;
 
 
-    public Camera(int screenWidth, int screenHeight, double FOVdegrees) {
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
+    public Camera(int numPixelsX, int numPixelsY, double FOVdegrees) {
+        this.numPixelsX = 2 * numPixelsX;
+        this.numPixelsY = 2 * numPixelsY;
 
         double halfFOVRadians = Math.toRadians(FOVdegrees / 2);
 
-        halfViewPortWidth = Math.tan(halfFOVRadians);
-        halfViewPortHeight = halfViewPortWidth * screenHeight / screenWidth;
+        halfImageWidth = Math.tan(halfFOVRadians);
+        halfImageHeight = halfImageWidth * numPixelsY / numPixelsX;
+
+        imageWidth = 2 * halfImageWidth;
+        imageHeight = 2 * halfImageHeight;
+
+        pixelSize = 2 * halfImageWidth / numPixelsX;
+        halfPixelSize = halfImageWidth / numPixelsX;
+
+        if (pixelSize != (2 * halfImageHeight / numPixelsY)) {
+            throw new RuntimeException();
+        }
     }
 
 
@@ -48,16 +60,16 @@ public class Camera {
         double imageX = result.x / depth;
         double imageY = result.y / depth;
         
-        if (Math.abs(imageX) > halfViewPortWidth ||
-            Math.abs(imageY) > halfViewPortHeight)
+        if (Math.abs(imageX) > halfImageWidth ||
+            Math.abs(imageY) > halfImageHeight)
             return null;
         
-        double normalizedX = (halfViewPortWidth + imageX) / (2 * halfViewPortWidth);
-        double normalizedY = (halfViewPortHeight + imageY) / (2 * halfViewPortHeight);
+        imageX += halfImageWidth;
+        imageY += halfImageHeight;
 
-        int screenX = (int) (normalizedX * screenWidth);
-        int screenY = (int) ((1 - normalizedY) * screenHeight);
+        int pixelX = (int) (numPixelsX * imageX / imageWidth);
+        int pixelY = (int) ((1 - imageY / imageHeight) * numPixelsY);
 
-        return new Pixel(screenX, screenY, 1.0 / depth);
+        return new Pixel(pixelX, pixelY, 1.0 / depth);
     }
 }
