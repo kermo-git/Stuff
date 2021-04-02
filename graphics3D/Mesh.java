@@ -3,10 +3,13 @@ package graphics3D;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
+import graphics3D.noise.*;
+
 enum Shading {
-    FLAT, GOURAUD, PHONG
+    SIMPLE_FLAT, FLAT, GOURAUD, PHONG
 }
 
 public class Mesh {
@@ -23,7 +26,6 @@ public class Mesh {
         for (Vertex v : vertices) {
             matrix.transform(v);
         }
-        calculateNormals();
     }
 
 
@@ -45,6 +47,7 @@ public class Mesh {
 
 
     public void render(Scene3D scene) {
+        calculateNormals();
         for (Vertex vertex : vertices) {
             vertex.color = material.illuminate(scene, vertex, vertex.normal);
             vertex.projection = scene.camera.project(vertex);
@@ -99,6 +102,9 @@ public class Mesh {
 
     public void addTriangle(Vertex v1, Vertex v2, Vertex v3) {
         switch (shading) {
+            case SIMPLE_FLAT:
+                triangles.add(new SimpleFlatTriangle(material, v1, v2, v3));
+                break;
             case FLAT:
                 triangles.add(new FlatTriangle(material, v1, v2, v3));
                 break;
@@ -131,7 +137,7 @@ public class Mesh {
             addTriangle(next_1, prev_2, prev_1);
             addTriangle(next_1, next_2, prev_2);
 
-            prev_1 = next_1; 
+            prev_1 = next_1;
             prev_2 = next_2;
         }
         if (isLoop) {
@@ -194,7 +200,7 @@ public class Mesh {
 
         List<Vertex> circle1 = XZregularPolygon(n, radius);
         Matrix moveDown = Matrix.translate(0, 0.5 * height, 0);
-        Matrix moveUpAndRotate = 
+        Matrix moveUpAndRotate =
             Matrix.translate(0, -0.5 * height, 0).combine(
             Matrix.rotateAroundY(Math.PI / n));
 
@@ -235,7 +241,7 @@ public class Mesh {
         for (int i = 0; i < num_meridians; i++) {
             List<Vertex> meridian = XYregularPolygon(num_corners, radius);
             Matrix rotation = Matrix.rotateAroundY(i * rotation_angle);
-            
+
             for (Vertex v : meridian) {
                 rotation.transform(v);
             }
@@ -257,7 +263,7 @@ public class Mesh {
                 i++;
             }
         }
-        
+
         for (List<Vertex> meridian : meridians) {
             List<Vertex> half_arc = meridian.subList(num_meridians + 1, num_corners);
             Collections.reverse(half_arc);
@@ -289,7 +295,7 @@ public class Mesh {
     public void buildTorus(double innerRadius, double outerRadius, int level_of_detail) {
         double mean_radius = (outerRadius + innerRadius)/2;
         double tube_radius = (outerRadius - innerRadius)/2;
-    
+
         double twist_rotation = Math.PI/level_of_detail;
 
         double triangle_side = 2*tube_radius*Math.tan(twist_rotation);
@@ -318,7 +324,7 @@ public class Mesh {
             for (Vertex v : circle2) {
                 matrix.transform(v);
             }
-            
+
             buildPrismSurface(circle1, circle2);
             circle1 = circle2;
         }
@@ -326,13 +332,13 @@ public class Mesh {
     }
 
     public void buildFunctionPlot(
-        double unitsX, double unitsY, 
-        double unitSize, int density, 
-        Function function) {
+        double unitsX, double unitsY,
+        double unitSize, int density,
+        Noise noise) {
 
         List<Vertex> prev = new ArrayList<>();
         List<Vertex> current = new ArrayList<>();
-        
+
         double step = 1.0 / density;
         double rangeX = unitsX / 2;
         double rangeY = unitsY / 2;
@@ -341,10 +347,10 @@ public class Mesh {
 
         for (x = -rangeX; x < rangeX; x += step) {
             for (y = -rangeY; y < rangeY; y += step) {
-                z = function.f(x, y);
+                z = noise.noise(x, y, 0);
                 Vertex v = new Vertex(
-                    x * unitSize, 
-                    z * unitSize, 
+                    x * unitSize,
+                    z * unitSize,
                     y * unitSize
                 );
                 current.add(v);
@@ -356,5 +362,122 @@ public class Mesh {
             prev = new ArrayList<>(current);
             current = new ArrayList<>();
         }
+    }
+
+
+    public void crumble(Noise noise) {
+        for (Vertex v : vertices) {
+            double value = noise.signedNoise(v.x, v.y, v.z);
+            v.add(0.1 * value, v);
+        }
+    }
+
+
+    private void buildTileXY(List<Vertex> outerRing, boolean posZoffset) {
+        Vertex smallXbigY = outerRing.get(0);
+        Vertex smallXsmallY = outerRing.get(1);
+        Vertex bigXsmallY = outerRing.get(2);
+        Vertex bigXbigY = outerRing.get(3);
+
+        double sideLength = Math.abs(bigXbigY.x - smallXbigY.x);
+        double offset = 0.05 * sideLength;
+        double dir = posZoffset ? offset : -offset;
+
+        List<Vertex> innerRing = Arrays.asList(
+            new Vertex(  smallXbigY.x + offset,   smallXbigY.y - offset,   smallXbigY.z + dir),
+            new Vertex(smallXsmallY.x + offset, smallXsmallY.y + offset, smallXsmallY.z + dir),
+            new Vertex(  bigXsmallY.x - offset,   bigXsmallY.y + offset,   bigXsmallY.z + dir),
+            new Vertex(    bigXbigY.x - offset,     bigXbigY.y - offset,     bigXbigY.z + dir)
+        );
+        vertices.addAll(innerRing);
+
+        buildPrismSurface(outerRing, innerRing);
+        buildRibbon(
+            Arrays.asList(innerRing.get(3), innerRing.get(0)),
+            Arrays.asList(innerRing.get(2), innerRing.get(1))
+        );
+    }
+
+
+    private void buildTileXZ(List<Vertex> outerRing, boolean posYoffset) {
+        Vertex smallXbigZ = outerRing.get(0);
+        Vertex smallXsmallZ = outerRing.get(1);
+        Vertex bigXsmallZ = outerRing.get(2);
+        Vertex bigXbigZ = outerRing.get(3);
+        
+        double sideLength = Math.abs(bigXbigZ.x - smallXbigZ.x);
+        double offset = 0.05 * sideLength;
+        double dir = posYoffset ? offset : -offset;
+
+        List<Vertex> innerRing = Arrays.asList(
+            new Vertex(  smallXbigZ.x + offset,   smallXbigZ.y + dir,   smallXbigZ.z - offset),
+            new Vertex(smallXsmallZ.x + offset, smallXsmallZ.y + dir, smallXsmallZ.z + offset),
+            new Vertex(  bigXsmallZ.x - offset,   bigXsmallZ.y + dir,   bigXsmallZ.z + offset),
+            new Vertex(    bigXbigZ.x - offset,     bigXbigZ.y + dir,     bigXbigZ.z - offset)
+        );
+        vertices.addAll(innerRing);
+
+        buildPrismSurface(outerRing, innerRing);
+        buildRibbon(
+            Arrays.asList(innerRing.get(3), innerRing.get(0)),
+            Arrays.asList(innerRing.get(2), innerRing.get(1))
+        );
+    }
+
+
+    private void buildTileYZ(List<Vertex> outerRing, boolean posXoffset) {
+        Vertex smallYbigZ = outerRing.get(0);
+        Vertex smallYsmallZ = outerRing.get(1);
+        Vertex bigYsmallZ = outerRing.get(2);
+        Vertex bigYbigZ = outerRing.get(3);
+
+        double sideLength = Math.abs(bigYbigZ.x - smallYbigZ.x);
+        double offset = 0.05 * sideLength;
+        double dir = posXoffset ? offset : -offset;
+
+        List<Vertex> innerRing = Arrays.asList(
+            new Vertex(  smallYbigZ.x + dir,   smallYbigZ.y + offset,   smallYbigZ.z - offset),
+            new Vertex(smallYsmallZ.x + dir, smallYsmallZ.y + offset, smallYsmallZ.z + offset),
+            new Vertex(  bigYsmallZ.x + dir,   bigYsmallZ.y - offset,   bigYsmallZ.z + offset),
+            new Vertex(    bigYbigZ.x + dir,     bigYbigZ.y - offset,     bigYbigZ.z - offset)
+        );
+        vertices.addAll(innerRing);
+
+        buildPrismSurface(outerRing, innerRing);
+        buildRibbon(
+            Arrays.asList(innerRing.get(3), innerRing.get(0)),
+            Arrays.asList(innerRing.get(2), innerRing.get(1))
+        );
+    }
+
+
+    public void buildRoom(/*int unitsX, int unitsY, int unitsZ, double unitSize*/) {
+        List<Vertex> verticesXY = Arrays.asList(
+            new Vertex(-1,  1, 1),
+            new Vertex(-1, -1, 1),
+            new Vertex( 1, -1, 1),
+            new Vertex( 1,  1, 1)
+        ); 
+        vertices.addAll(verticesXY);
+
+        List<Vertex> verticesXZ = Arrays.asList(
+            new Vertex(-1, -1,  1),
+            new Vertex(-1, -1, -1),
+            new Vertex( 1, -1, -1),
+            new Vertex( 1, -1,  1)
+        );
+        vertices.addAll(verticesXZ);
+
+        List<Vertex> verticesYZ = Arrays.asList(
+            new Vertex(1, -1,  1),
+            new Vertex(1, -1, -2),
+            new Vertex(1,  1, -2),
+            new Vertex(1,  1,  1)
+        );
+        vertices.addAll(verticesYZ);
+
+        buildTileXY(verticesXY, false);
+        buildTileXZ(verticesXZ, true);
+        buildTileYZ(verticesYZ, false);
     }
 }

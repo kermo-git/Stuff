@@ -124,7 +124,7 @@ class MT19937 {
 
 
 /*
- * A very complicated pseudorandom number generator. It's really over the top.
+ * A very complicated pseudorandom number generator.
  *
  * https://www.iro.umontreal.ca/~lecuyer/myftp/papers/wellrng.pdf
  * https://bitbucket.org/sergiu/random/src/tip/well.hpp

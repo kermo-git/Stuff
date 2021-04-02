@@ -11,15 +11,17 @@ public class PhongTriangle extends Triangle {
     protected Color interpolate(Scene3D scene) {
         double z = 1.0 / zRec;
 
-        surfacePoint = v1.scale(w1 * p1.zRec);
-        surfacePoint.add(v2.scale(w2 * p2.zRec));
-        surfacePoint.add(v3.scale(w3 * p3.zRec));
-        surfacePoint = surfacePoint.scale(z);
+        surfacePoint = new Vector();
+        surfacePoint.add(w1 * p1.zRec, v1);
+        surfacePoint.add(w2 * p2.zRec, v2);
+        surfacePoint.add(w3 * p3.zRec, v3);
+        surfacePoint.scale(z);
 
-        smoothNormal = v1.normal.scale(w1 * p1.zRec);
-        smoothNormal.add(v2.normal.scale(w2 * p2.zRec));
-        smoothNormal.add(v3.normal.scale(w3 * p3.zRec));
-        smoothNormal = smoothNormal.scale(z);
+        smoothNormal = new Vector();
+        smoothNormal.add(w1 * p1.zRec, v1.normal);
+        smoothNormal.add(w2 * p2.zRec, v2.normal);
+        smoothNormal.add(w3 * p3.zRec, v3.normal);
+        smoothNormal.scale(z);
         smoothNormal.normalize();
 
         return material.illuminate(scene, surfacePoint, smoothNormal);

@@ -11,10 +11,10 @@ public abstract class Triangle {
         this.v2 = v2; v2.triangles.add(this);
         this.v3 = v3; v3.triangles.add(this);
     }
-    private static int min(int a, int b) {
+    private static double min(double a, double b) {
         return (a < b) ? a : b;
     }
-    private static int max(int a, int b) {
+    private static double max(double a, double b) {
         return (a > b) ? a : b;
     }
 
@@ -30,33 +30,58 @@ public abstract class Triangle {
         if (p1 == null || p2 == null || p3 == null) {
             return;
         }
-        
-        int low_x = min(p1.x, min(p2.x, p3.x));
-        int high_x = max(p1.x, max(p2.x, p3.x));
-        int low_y = min(p1.y, min(p2.y, p3.y));
-        int high_y = max(p1.y, max(p2.y, p3.y));
+        double[][] zBuffer = scene.zBuffer;
+        if (p1.zRec + 0.05 < zBuffer[(int) p1.pixelX][(int) p1.pixelY] &&
+            p2.zRec + 0.05 < zBuffer[(int) p2.pixelX][(int) p2.pixelY] &&
+            p3.zRec + 0.05 < zBuffer[(int) p3.pixelX][(int) p3.pixelY]) {
+            return;
+        }
+        Color[][] frameBuffer = scene.frameBuffer;
 
+        double p32y = p2.pixelY - p3.pixelY;
+        double p32x = p2.pixelX - p3.pixelX;
+
+        double p13y = p3.pixelY - p1.pixelY;
+        double p13x = p3.pixelX - p1.pixelX;
+
+        double p21y = p1.pixelY - p2.pixelY;
+        double p21x = p1.pixelX - p2.pixelX;
+
+        double s = p13x * p21y - p13y * p21x;
+
+        int low_x = (int) min(p1.pixelX, min(p2.pixelX, p3.pixelX));
+        int high_x = (int) max(p1.pixelX, max(p2.pixelX, p3.pixelX));
+        int low_y = (int) min(p1.pixelY, min(p2.pixelY, p3.pixelY));
+        int high_y = (int) max(p1.pixelY, max(p2.pixelY, p3.pixelY));
+        
         int x, y;
-        int s1, s2, s3;
-        double s = (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
+        double pixelCenterX, pixelCenterY;
+        double s1, s2, s3;
 
         for (x = low_x; x <= high_x; x++) {
             for (y = low_y; y <= high_y; y++) {
 
-                s1 = (x - p3.x)*(p2.y - p3.y) - (y - p3.y)*(p2.x - p3.x);
-                s2 = (x - p1.x)*(p3.y - p1.y) - (y - p1.y)*(p3.x - p1.x);
-                s3 = (x - p2.x)*(p1.y - p2.y) - (y - p2.y)*(p1.x - p2.x);
+                pixelCenterX = x + 0.5;
+                pixelCenterY = y + 0.5;
+                
+                s1 = (pixelCenterX - p3.pixelX) * p32y - 
+                     (pixelCenterY - p3.pixelY) * p32x;
+
+                s2 = (pixelCenterX - p1.pixelX) * p13y - 
+                     (pixelCenterY - p1.pixelY) * p13x;
+
+                s3 = (pixelCenterX - p2.pixelX) * p21y - 
+                     (pixelCenterY - p2.pixelY) * p21x;
 
                 if (s1 >= 0 && s2 >= 0 && s3 >= 0) {
-                    w1 = s1 / s;
-                    w2 = s2 / s;
+                    w1 = Math.abs(s1 / s);
+                    w2 = Math.abs(s2 / s);
                     w3 = 1 - w1 - w2;
-
                     zRec = w1 * p1.zRec + w2 * p2.zRec + w3 * p3.zRec;
-
-                    if (zRec > scene.zBuffer[x][y]) {
-                        scene.zBuffer[x][y] = zRec;
-                        scene.frameBuffer.setRGB(x, y, interpolate(scene).getRGBhex());
+                    
+                    if (zRec > zBuffer[x][y]) {
+                        zBuffer[x][y] = zRec;
+                        frameBuffer[x][y] = interpolate(scene);
                     }
                 }
             }

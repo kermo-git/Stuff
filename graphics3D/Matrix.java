@@ -115,6 +115,24 @@ class Matrix {
         return result;
     }
 
+    /*
+     *    a = - far / (far - near)
+     *    b = - near * far / (far - near)
+     * 
+     *    1  0  0  0
+     *    0  1  0  0
+     *    0  0  a -1
+     *    0  0  b  1
+     */
+    public static Matrix project(double near, double far) {
+        Matrix result = new Matrix();
+
+        result.mat[2][2] = - far / (far - near);
+        result.mat[3][2] = - near * far / (far - near);
+        result.mat[2][3] = -1;
+        return result;
+    }
+
     public Matrix combine(Matrix other) {
         Matrix result = new Matrix();
         double[][] mat1 = this.mat;
@@ -135,7 +153,14 @@ class Matrix {
     }
 
 
-    public Vector getTransformed(Vector vector) {
+    public void transform(Vector vector) {
+        double x = vector.x, y = vector.y, z = vector.z;
+
+        vector.x = x * mat[0][0] + y * mat[1][0] + z * mat[2][0] + mat[3][0];
+        vector.y = x * mat[0][1] + y * mat[1][1] + z * mat[2][1] + mat[3][1];
+        vector.z = x * mat[0][2] + y * mat[1][2] + z * mat[2][2] + mat[3][2];
+    }
+    public Vector getTransformation(Vector vector) {
         double x = vector.x, y = vector.y, z = vector.z;
 
         return new Vector(
@@ -144,12 +169,19 @@ class Matrix {
             x * mat[0][2] + y * mat[1][2] + z * mat[2][2] + mat[3][2]
         );
     }
-    public void transform(Vector vector) {
+    public Vector getProjection(Vector vector) {
         double x = vector.x, y = vector.y, z = vector.z;
 
-        vector.x = x * mat[0][0] + y * mat[1][0] + z * mat[2][0] + mat[3][0];
-        vector.y = x * mat[0][1] + y * mat[1][1] + z * mat[2][1] + mat[3][1];
-        vector.z = x * mat[0][2] + y * mat[1][2] + z * mat[2][2] + mat[3][2];
+        Vector result = new Vector(
+            x * mat[0][0] + y * mat[1][0] + z * mat[2][0] + mat[3][0],
+            x * mat[0][1] + y * mat[1][1] + z * mat[2][1] + mat[3][1],
+            x * mat[0][2] + y * mat[1][2] + z * mat[2][2] + mat[3][2]
+        );
+        double w = x * mat[0][3] + y * mat[1][3] + z * mat[2][3] + mat[3][3];
+        if (w != 1) {
+            result.scale(1 / w);
+        }
+        return result;
     }
 
 

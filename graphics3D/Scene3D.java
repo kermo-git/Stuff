@@ -1,5 +1,7 @@
 package graphics3D;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.awt.image.BufferedImage;
 
@@ -7,25 +9,26 @@ import java.awt.image.BufferedImage;
 public class Scene3D {
     Camera camera;
     double[][] zBuffer;
-    BufferedImage frameBuffer;
+    Color[][] frameBuffer;
 
-    List<LightSource> lights;
-    List<Mesh> objects;
+    List<LightSource> lights = new ArrayList<>();
+    List<Mesh> objects = new ArrayList<>();
 
-    public Scene3D(Camera camera, List<LightSource> lights, List<Mesh> objects) {
-        this.camera = camera;
-        this.lights = lights;
-        this.objects = objects;
+    public Scene3D(int numPixelsX, int numPixelsY, double FOVdegrees) {
+        camera = new Camera(numPixelsX, numPixelsY, FOVdegrees);
+        camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 1));
         clear();
+    }
+    public void addObjects(Mesh ...objects) {
+        this.objects.addAll(Arrays.asList(objects));
+    }
+    public void addLights(LightSource ...lights) {
+        this.lights.addAll(Arrays.asList(lights));
     }
 
     private void clear() {
         zBuffer = new double[camera.numPixelsX][camera.numPixelsY];
-        frameBuffer = new BufferedImage(
-            camera.numPixelsX, 
-            camera.numPixelsY, 
-            BufferedImage.TYPE_INT_RGB
-        );
+        frameBuffer = Color.getArray(camera.numPixelsX, camera.numPixelsY);
     }
 
     private BufferedImage downSample() {
@@ -44,12 +47,14 @@ public class Scene3D {
         for (int x = 0; x < numPixelsX; x += 2) {
             resultY = 0;
             for (int y = 0; y < numPixelsY; y += 2) {
-                color =   new Color(frameBuffer.getRGB(x    , y    ));
-                color.add(new Color(frameBuffer.getRGB(x + 1, y    )));
-                color.add(new Color(frameBuffer.getRGB(x    , y + 1)));
-                color.add(new Color(frameBuffer.getRGB(x + 1, y + 1)));
+                color = new Color();
+                color.add(frameBuffer[x    ][y    ]);
+                color.add(frameBuffer[x + 1][y    ]);
+                color.add(frameBuffer[x    ][y + 1]);
+                color.add(frameBuffer[x + 1][y + 1]);
+                color.scale(0.25);
 
-                result.setRGB(resultX, resultY, new Color(0.25, color).getRGBhex());
+                result.setRGB(resultX, resultY, color.getRGBhex());
                 resultY++;
             }
             resultX++;
@@ -83,19 +88,18 @@ public class Scene3D {
         for (int x = 0; x < zBuffer.length; x++) {
             for (int y = 0; y < zBuffer[0].length; y++) {
                 double norm = (zBuffer[x][y] - min) / diff;
-                int color = new Color(norm, norm, norm).getRGBhex();
-                frameBuffer.setRGB(x, y, color);
+                frameBuffer[x][y] = new Color(norm, norm, norm);
             }
         }
     }
 
     public BufferedImage draw() {
         renderImage();
-        return downSample();
+        return Color.downSampleMatrix(frameBuffer);
     }
 
     public BufferedImage drawZBuffer() {
         renderZBuffer();
-        return downSample();
+        return Color.downSampleMatrix(frameBuffer);
     }
 }

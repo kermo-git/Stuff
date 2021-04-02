@@ -1,12 +1,12 @@
 package graphics3D;
 
 public class Pixel {
-    int x, y;
+    double pixelX, pixelY;
     double zRec;
 
-    public Pixel(int x, int y, double zReciprocal) {
-        this.x = x;
-        this.y = y;
+    public Pixel(double pixelX, double pixelY, double zReciprocal) {
+        this.pixelX = pixelX;
+        this.pixelY = pixelY;
         this.zRec = zReciprocal;
     }
 }

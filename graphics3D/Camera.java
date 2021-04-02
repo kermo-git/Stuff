@@ -4,10 +4,11 @@ public class Camera {
     Matrix cameraToWorld, worldToCamera;
     Vector location;
 
-    double pixelSize, halfPixelSize;
+    int numPixelsX, numPixelsY;
     double halfImageWidth, halfImageHeight;
     double imageWidth, imageHeight;
-    int numPixelsX, numPixelsY;
+    double numPixelsX_imageWidth_ratio;
+    double numPixelsY_imageHeight_ratio;
 
 
     public Camera(int numPixelsX, int numPixelsY, double FOVdegrees) {
@@ -22,12 +23,8 @@ public class Camera {
         imageWidth = 2 * halfImageWidth;
         imageHeight = 2 * halfImageHeight;
 
-        pixelSize = 2 * halfImageWidth / numPixelsX;
-        halfPixelSize = halfImageWidth / numPixelsX;
-
-        if (pixelSize != (2 * halfImageHeight / numPixelsY)) {
-            throw new RuntimeException();
-        }
+        numPixelsX_imageWidth_ratio = this.numPixelsX / imageWidth;
+        numPixelsY_imageHeight_ratio = this.numPixelsY / imageHeight;
     }
 
 
@@ -52,7 +49,7 @@ public class Camera {
 
 
     public Pixel project(Vector v) {
-        Vector result = worldToCamera.getTransformed(v);
+        Vector result = worldToCamera.getTransformation(v);
         if (result.z > 0)
             return null;
 
@@ -67,8 +64,8 @@ public class Camera {
         imageX += halfImageWidth;
         imageY += halfImageHeight;
 
-        int pixelX = (int) (numPixelsX * imageX / imageWidth);
-        int pixelY = (int) ((1 - imageY / imageHeight) * numPixelsY);
+        double pixelX = numPixelsX_imageWidth_ratio * imageX;
+        double pixelY = numPixelsY - numPixelsY_imageHeight_ratio * imageY;
 
         return new Pixel(pixelX, pixelY, 1.0 / depth);
     }
