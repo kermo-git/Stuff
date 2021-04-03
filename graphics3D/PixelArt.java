@@ -59,6 +59,6 @@ public class PixelArt {
                 result[x][y] = color;
             }
         }
-        return Color.matrixToImage(result);
+        return Color.colorMatToImg(result);
     }
 }

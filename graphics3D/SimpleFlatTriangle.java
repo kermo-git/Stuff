@@ -5,7 +5,7 @@ public class SimpleFlatTriangle extends Triangle {
         super(material, v1, v2, v3);
     }
     @Override
-    protected Color interpolate(Scene3D scene) {
+    protected Color doColorCalculation() {
         return v1.color;
     }
 }

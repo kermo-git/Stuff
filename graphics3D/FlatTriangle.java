@@ -8,13 +8,13 @@ public class FlatTriangle extends Triangle {
     Vector surfacePoint;
 
     @Override
-    protected Color interpolate(Scene3D scene) {
+    protected Color doColorCalculation() {
         surfacePoint = new Vector();
         surfacePoint.add(w1 * p1.zRec, v1);
         surfacePoint.add(w2 * p2.zRec, v2);
         surfacePoint.add(w3 * p3.zRec, v3);
         surfacePoint.scale(1.0 / zRec);
         
-        return material.illuminate(scene, surfacePoint, normal);
+        return material.illuminate(surfacePoint, normal);
     }
 }

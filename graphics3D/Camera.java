@@ -6,25 +6,21 @@ public class Camera {
 
     int numPixelsX, numPixelsY;
     double halfImageWidth, halfImageHeight;
-    double imageWidth, imageHeight;
     double numPixelsX_imageWidth_ratio;
     double numPixelsY_imageHeight_ratio;
 
 
     public Camera(int numPixelsX, int numPixelsY, double FOVdegrees) {
-        this.numPixelsX = 2 * numPixelsX;
-        this.numPixelsY = 2 * numPixelsY;
+        this.numPixelsX = numPixelsX;
+        this.numPixelsY = numPixelsY;
 
         double halfFOVRadians = Math.toRadians(FOVdegrees / 2);
 
         halfImageWidth = Math.tan(halfFOVRadians);
         halfImageHeight = halfImageWidth * numPixelsY / numPixelsX;
 
-        imageWidth = 2 * halfImageWidth;
-        imageHeight = 2 * halfImageHeight;
-
-        numPixelsX_imageWidth_ratio = this.numPixelsX / imageWidth;
-        numPixelsY_imageHeight_ratio = this.numPixelsY / imageHeight;
+        numPixelsX_imageWidth_ratio = this.numPixelsX / (2 * halfImageWidth);
+        numPixelsY_imageHeight_ratio = this.numPixelsY / (2 * halfImageHeight);
     }
 
 

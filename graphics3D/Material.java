@@ -16,7 +16,7 @@ public class Material {
     public Material(Color color, double shininess) {
         diffuse = color;
         ambient = new Color(color);
-        ambient.scale(0.5);
+        ambient.scale(0.1);
         specular = new Color(0xFFFFFF);
         this.shininess = shininess;
     }
@@ -24,20 +24,22 @@ public class Material {
     // https://www.cs.brandeis.edu/~cs155/Lecture_16.pdf
     // https://en.wikipedia.org/wiki/Phong_reflection_model
     
-    public Color illuminate(Scene3D scene, Vector point, Vector normal) {
+    public Color illuminate(Vector point, Vector normal) {
         Color result = new Color();
-        result.add(1, ambient, LightSource.ambient);
+        result.add(1, ambient, Config.ambient);
 
         Vector lightVec, viewVec, reflectedVec;
-        viewVec = new Vector(point, scene.camera.location);
+        viewVec = new Vector(point, Scene3D.camera.location);
         viewVec.normalize();
 
         double diffuseIntensity, specularIntensity;
 
-        for (LightSource light : scene.lights) {
+        for (LightSource light : Scene3D.lights) {
+            if (!light.isIlluminating(point)) {
+                continue;
+            }
             lightVec = new Vector(point, light.location);
             lightVec.normalize();
-
             diffuseIntensity = lightVec.dot(normal);
             
             if (diffuseIntensity > 0) {

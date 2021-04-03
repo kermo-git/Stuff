@@ -21,22 +21,21 @@ public abstract class Triangle {
     protected Pixel p1, p2, p3;
     protected double w1, w2, w3, zRec;
 
-    protected abstract Color interpolate(Scene3D scene);
+    protected abstract Color doColorCalculation();
 
-    public void render(Scene3D scene) {
+    public void render(double[][] depthBuffer, boolean calculateColor) {
         p1 = v1.projection;
         p2 = v2.projection;
         p3 = v3.projection;
+        
         if (p1 == null || p2 == null || p3 == null) {
             return;
         }
-        double[][] zBuffer = scene.zBuffer;
-        if (p1.zRec + 0.05 < zBuffer[(int) p1.pixelX][(int) p1.pixelY] &&
-            p2.zRec + 0.05 < zBuffer[(int) p2.pixelX][(int) p2.pixelY] &&
-            p3.zRec + 0.05 < zBuffer[(int) p3.pixelX][(int) p3.pixelY]) {
+        if (p1.zRec + Config.zBufferBias < depthBuffer[(int) p1.pixelX][(int) p1.pixelY] &&
+            p2.zRec + Config.zBufferBias < depthBuffer[(int) p2.pixelX][(int) p2.pixelY] &&
+            p3.zRec + Config.zBufferBias < depthBuffer[(int) p3.pixelX][(int) p3.pixelY]) {
             return;
         }
-        Color[][] frameBuffer = scene.frameBuffer;
 
         double p32y = p2.pixelY - p3.pixelY;
         double p32x = p2.pixelX - p3.pixelX;
@@ -79,9 +78,11 @@ public abstract class Triangle {
                     w3 = 1 - w1 - w2;
                     zRec = w1 * p1.zRec + w2 * p2.zRec + w3 * p3.zRec;
                     
-                    if (zRec > zBuffer[x][y]) {
-                        zBuffer[x][y] = zRec;
-                        frameBuffer[x][y] = interpolate(scene);
+                    if (zRec > depthBuffer[x][y]) {
+                        depthBuffer[x][y] = zRec;
+                        if (calculateColor) {
+                            Scene3D.frameBuffer[x][y] = doColorCalculation();
+                        }
                     }
                 }
             }

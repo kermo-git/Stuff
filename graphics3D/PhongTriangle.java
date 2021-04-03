@@ -8,7 +8,7 @@ public class PhongTriangle extends Triangle {
     Vector surfacePoint, smoothNormal;
 
     @Override
-    protected Color interpolate(Scene3D scene) {
+    protected Color doColorCalculation() {
         double z = 1.0 / zRec;
 
         surfacePoint = new Vector();
@@ -24,6 +24,6 @@ public class PhongTriangle extends Triangle {
         smoothNormal.scale(z);
         smoothNormal.normalize();
 
-        return material.illuminate(scene, surfacePoint, smoothNormal);
+        return material.illuminate(surfacePoint, smoothNormal);
     }
 }

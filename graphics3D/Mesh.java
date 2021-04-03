@@ -46,18 +46,6 @@ public class Mesh {
     }
 
 
-    public void render(Scene3D scene) {
-        calculateNormals();
-        for (Vertex vertex : vertices) {
-            vertex.color = material.illuminate(scene, vertex, vertex.normal);
-            vertex.projection = scene.camera.project(vertex);
-        }
-        for (Triangle triangle : triangles) {
-            triangle.render(scene);
-        }
-    }
-
-
     private List<Vertex> XYregularPolygon(int n, double radius) {
         List<Vertex> result = new ArrayList<>();
         double alpha = (2 * Math.PI) / n;
@@ -361,14 +349,6 @@ public class Mesh {
             }
             prev = new ArrayList<>(current);
             current = new ArrayList<>();
-        }
-    }
-
-
-    public void crumble(Noise noise) {
-        for (Vertex v : vertices) {
-            double value = noise.signedNoise(v.x, v.y, v.z);
-            v.add(0.1 * value, v);
         }
     }
 

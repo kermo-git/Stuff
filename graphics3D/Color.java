@@ -41,7 +41,19 @@ public class Color extends Vector {
     }
 
 
-    public static BufferedImage downSampleMatrix(Color[][] matrix) {
+    public static Color[][] getArray(int numPixelsX, int numPixelsY) {
+        Color[][] result = new Color[numPixelsX][numPixelsY];
+
+        for (int x = 0; x < numPixelsX; x++) {
+            for (int y = 0; y < numPixelsY; y++) {
+                result[x][y] = new Color();
+            }
+        }
+        return result;
+    }
+
+
+    public static BufferedImage colorMatToReducedImg(Color[][] matrix) {
         int numPixelsX = matrix.length;
         int numPixelsY = matrix[0].length;
 
@@ -73,7 +85,7 @@ public class Color extends Vector {
     }
 
 
-    public static BufferedImage matrixToImage(Color[][] matrix) {
+    public static BufferedImage colorMatToImg(Color[][] matrix) {
         int numPixelsX = matrix.length;
         int numPixelsY = matrix[0].length;
 
@@ -92,26 +104,22 @@ public class Color extends Vector {
     }
 
 
-    public static Color[][] getArray(int numPixelsX, int numPixelsY) {
-        Color[][] result = new Color[numPixelsX][numPixelsY];
+    public static BufferedImage matToGreyScaleImg(double[][] matrix) {
+        int numPixelsX = matrix.length;
+        int numPixelsY = matrix[0].length;
 
-        for (int x = 0; x < numPixelsX; x++) {
-            for (int y = 0; y < numPixelsY; y++) {
-                result[x][y] = new Color();
-            }
-        }
-        return result;
-    }
-
-
-    public static void normalize(double[][] matrix) {
+        BufferedImage result = new BufferedImage(
+            numPixelsX, 
+            numPixelsY, 
+            BufferedImage.TYPE_INT_RGB
+        );
         int x, y;
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
         double value;
 
-        for (x = 0; x < matrix.length; x++) {
-            for (y = 0; y < matrix[0].length; y++) {
+        for (x = 0; x < numPixelsX; x++) {
+            for (y = 0; y < numPixelsY; y++) {
                 value = matrix[x][y];
                 if (value > max) {
                     max = value;
@@ -122,10 +130,61 @@ public class Color extends Vector {
             }
         }
         double diff = max - min;
-        for (x = 0; x < matrix.length; x++) {
-            for (y = 0; y < matrix[0].length; y++) {
-                matrix[x][y] = (matrix[x][y] - min) / diff;
+        for (x = 0; x < numPixelsX; x++) {
+            for (y = 0; y < numPixelsY; y++) {
+                double norm = (matrix[x][y] - min) / diff;
+                result.setRGB(x, y, new Color(norm, norm, norm).getRGBhex());
             }
         }
+        return result;
+    }
+
+
+    public static BufferedImage matToReducedGreyScaleImg(double[][] matrix) {
+        int doublePixelsX = matrix.length;
+        int doublePixelsY = matrix[0].length;
+
+        int numPixelsX = doublePixelsX / 2;
+        int numPixelsY = doublePixelsY / 2;
+
+        BufferedImage result = new BufferedImage(
+            numPixelsX, 
+            numPixelsY, 
+            BufferedImage.TYPE_INT_RGB
+        );
+        double[][] reducedMatrix = new double[numPixelsX][numPixelsY];
+
+        int x, y;
+        double min = Double.MAX_VALUE;
+        double max = Double.MIN_VALUE;
+        double value;
+
+        for (x = 0; x < doublePixelsX; x += 2) {
+            for (y = 0; y < doublePixelsY; y += 2) {
+                value = (
+                    matrix[x    ][y    ] + 
+                    matrix[x    ][y + 1] +
+                    matrix[x + 1][y    ] + 
+                    matrix[x + 1][y + 1]
+                ) * 0.25;
+
+                if (value > max) {
+                    max = value;
+                }
+                if (value < min) {
+                    min = value;
+                }
+                reducedMatrix[x / 2][y / 2] = value;
+            }
+        }
+        double diff = max - min;
+
+        for (x = 0; x < numPixelsX; x++) {
+            for (y = 0; y < numPixelsY; y++) {
+                double norm = (reducedMatrix[x][y] - min) / diff;
+                result.setRGB(x, y, new Color(norm, norm, norm).getRGBhex());
+            }
+        }
+        return result;
     }
 }

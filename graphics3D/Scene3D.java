@@ -7,99 +7,80 @@ import java.awt.image.BufferedImage;
 
 
 public class Scene3D {
-    Camera camera;
-    double[][] zBuffer;
-    Color[][] frameBuffer;
+    public static Camera camera = (Config.antiAliasing) ?
+        new Camera(2 * Config.screenSizeX, 2 * Config.screenSizeY, Config.cameraFOV) :
+        new Camera(Config.screenSizeX, Config.screenSizeY, Config.cameraFOV);
 
-    List<LightSource> lights = new ArrayList<>();
-    List<Mesh> objects = new ArrayList<>();
+    public static double[][] zBuffer = new double[camera.numPixelsX][camera.numPixelsY];
+    public static Color[][] frameBuffer = Color.getArray(camera.numPixelsX, camera.numPixelsY);
 
-    public Scene3D(int numPixelsX, int numPixelsY, double FOVdegrees) {
-        camera = new Camera(numPixelsX, numPixelsY, FOVdegrees);
-        camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 1));
-        clear();
+    public static List<LightSource> lights = new ArrayList<>();
+    public static List<Mesh> objects = new ArrayList<>();
+    
+    public static void addObjects(Mesh ...newObjects) {
+        objects.addAll(Arrays.asList(newObjects));
     }
-    public void addObjects(Mesh ...objects) {
-        this.objects.addAll(Arrays.asList(objects));
-    }
-    public void addLights(LightSource ...lights) {
-        this.lights.addAll(Arrays.asList(lights));
+    public static void addLights(LightSource ...newLights) {
+        lights.addAll(Arrays.asList(newLights));
     }
 
-    private void clear() {
-        zBuffer = new double[camera.numPixelsX][camera.numPixelsY];
-        frameBuffer = Color.getArray(camera.numPixelsX, camera.numPixelsY);
-    }
 
-    private BufferedImage downSample() {
-        int numPixelsX = camera.numPixelsX;
-        int numPixelsY = camera.numPixelsY;
-
-        BufferedImage result = new BufferedImage(
-            camera.numPixelsX / 2, 
-            camera.numPixelsY / 2, 
-            BufferedImage.TYPE_INT_RGB
-        );
-
-        Color color;
-        int resultX = 0, resultY = 0;
-
-        for (int x = 0; x < numPixelsX; x += 2) {
-            resultY = 0;
-            for (int y = 0; y < numPixelsY; y += 2) {
-                color = new Color();
-                color.add(frameBuffer[x    ][y    ]);
-                color.add(frameBuffer[x + 1][y    ]);
-                color.add(frameBuffer[x    ][y + 1]);
-                color.add(frameBuffer[x + 1][y + 1]);
-                color.scale(0.25);
-
-                result.setRGB(resultX, resultY, color.getRGBhex());
-                resultY++;
+    public static BufferedImage draw() {
+        for (LightSource light : lights) {
+            for (Mesh object : objects) {
+                for (Vertex v : object.vertices) {
+                    v.projection = light.camera.project(v);
+                }
+                for (Triangle t : object.triangles) {
+                    t.render(light.shadowBuffer, false);
+                }
             }
-            resultX++;
         }
-        return result;
-    }
-
-    public void renderImage() {
-        clear();
         for (Mesh object : objects) {
-            object.render(this);
-        }
-    }
+            object.calculateNormals();
 
-    public void renderZBuffer() {
-        renderImage();
-        double max = 0, min = Double.MAX_VALUE;
-
-        for (int x = 0; x < zBuffer.length; x++) {
-            for (int y = 0; y < zBuffer[0].length; y++) {
-                double value = zBuffer[x][y];
-                if (value > max) {
-                    max = value;
-                }
-                if (value < min) {
-                    min = value;
-                }
+            for (Vertex vertex : object.vertices) {
+                vertex.color = object.material.illuminate(vertex, vertex.normal);
+                vertex.projection = camera.project(vertex);
+            }
+            for (Triangle triangle : object.triangles) {
+                triangle.render(zBuffer, true);
             }
         }
-        double diff = max - min;
-        for (int x = 0; x < zBuffer.length; x++) {
-            for (int y = 0; y < zBuffer[0].length; y++) {
-                double norm = (zBuffer[x][y] - min) / diff;
-                frameBuffer[x][y] = new Color(norm, norm, norm);
+        if (Config.antiAliasing) {
+            return Color.colorMatToReducedImg(frameBuffer);
+        }
+        return Color.colorMatToImg(frameBuffer);
+    }
+
+
+    public static BufferedImage drawZBuffer() {
+        for (Mesh object : objects) {
+            for (Triangle triangle : object.triangles) {
+                triangle.render(zBuffer, false);
             }
         }
+        if (Config.antiAliasing) {
+            return Color.matToReducedGreyScaleImg(zBuffer);
+        }
+        return Color.matToGreyScaleImg(zBuffer);
     }
 
-    public BufferedImage draw() {
-        renderImage();
-        return Color.downSampleMatrix(frameBuffer);
-    }
 
-    public BufferedImage drawZBuffer() {
-        renderZBuffer();
-        return Color.downSampleMatrix(frameBuffer);
+    public static BufferedImage drawShadowBuffer(int lightIndex) {
+        LightSource light = lights.get(lightIndex);
+
+        for (Mesh object : objects) {
+            for (Vertex v : object.vertices) {
+                v.projection = light.camera.project(v);
+            }
+            for (Triangle t : object.triangles) {
+                t.render(light.shadowBuffer, false);
+            }
+        }
+        if (Config.antiAliasing) {
+            return Color.matToReducedGreyScaleImg(light.shadowBuffer);
+        }
+        return Color.matToGreyScaleImg(light.shadowBuffer);
     }
 }

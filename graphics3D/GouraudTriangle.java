@@ -6,7 +6,7 @@ public class GouraudTriangle extends Triangle {
     }
 
     @Override
-    protected Color interpolate(Scene3D scene) {
+    protected Color doColorCalculation() {
         Color c = new Color();
         c.add(w1 * p1.zRec, v1.color);
         c.add(w2 * p2.zRec, v2.color);

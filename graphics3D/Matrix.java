@@ -116,20 +116,28 @@ class Matrix {
     }
 
     /*
-     *    a = - far / (far - near)
-     *    b = - near * far / (far - near)
+     *    a = 1 / tan(FOV_X / 2)
+     *    b = 1 / tan(FOV_Y / 2)
+     *    c = - far / (far - near)
+     *    d = - near * far / (far - near)
      * 
-     *    1  0  0  0
-     *    0  1  0  0
-     *    0  0  a -1
-     *    0  0  b  1
+     *    a  0  0  0
+     *    0  b  0  0
+     *    0  0  c -1
+     *    0  0  d  0
      */
-    public static Matrix project(double near, double far) {
+    public static Matrix project(double near, double far, double FOVdegreesX, double FOVdegreesY) {
         Matrix result = new Matrix();
 
+        result.mat[0][0] = 1 / Math.tan(Math.toRadians(FOVdegreesX / 2));        
+        result.mat[1][1] = 1 / Math.tan(Math.toRadians(FOVdegreesY / 2));
+        
         result.mat[2][2] = - far / (far - near);
         result.mat[3][2] = - near * far / (far - near);
+
         result.mat[2][3] = -1;
+        result.mat[3][3] = 0;
+        
         return result;
     }
 
@@ -178,9 +186,7 @@ class Matrix {
             x * mat[0][2] + y * mat[1][2] + z * mat[2][2] + mat[3][2]
         );
         double w = x * mat[0][3] + y * mat[1][3] + z * mat[2][3] + mat[3][3];
-        if (w != 1) {
-            result.scale(1 / w);
-        }
+        result.scale(1 / w);
         return result;
     }
 

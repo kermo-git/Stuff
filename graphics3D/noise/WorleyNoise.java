@@ -50,10 +50,6 @@ public class WorleyNoise extends Noise {
         }
         return globalCoordinate % cubeSide;
     }
-
-    private double min(double a, double b) {
-        return (a < b) ? a : b;
-    }
     
     @Override
     public double noise(double x, double y, double z) {
