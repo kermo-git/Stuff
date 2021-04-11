@@ -9,15 +9,14 @@ public class GraphicsDisplay extends JPanel {
 
     @Override
     public void paint(Graphics g) {
-        g.drawImage(Scene3D.draw(), 0, 0, this);
+        SceneBuilder.buildRayTracingScene();
+        g.drawImage(Scene3D.renderRayTracing(), 0, 0, this);
     }
 
-    public static void main(String[] args) {
-        SceneBuilder.buildScene();
-        
+    public static void main(String[] args) {        
         JFrame frame = new JFrame();
         frame.setTitle("3D Shapes");
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setSize(Config.screenSizeX, Config.screenSizeY);
         frame.add(new GraphicsDisplay());
         frame.setVisible(true);
     }

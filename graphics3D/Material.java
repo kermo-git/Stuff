@@ -1,56 +1,106 @@
 package graphics3D;
 
 
+enum RayTracingType {
+    DIFFUSE, MIRROR, TRANSPARENT
+}
 public class Material {
-    Color ambient, diffuse, specular;
-    double shininess, refractionIndex;
+    Color ambient, color, specular;
+    double shininess;
 
-    public Material() {}
-    public Material(Color ambient, Color diffuse, Color specular, double shininess) {
-        this.ambient = ambient;
-        this.diffuse = diffuse;
-        this.specular = specular;
-        this.shininess = shininess;
+    RayTracingType type = RayTracingType.DIFFUSE;
+    double refractionIndex;
+
+    public static Material phong(Color ambient, Color diffuse, Color specular, double shininess) {
+        Material material = new Material();
+        material.ambient = ambient;
+        material.color = diffuse;
+        material.specular = specular;
+        material.shininess = shininess;
+        return material;
     }
-
-    public Material(Color color, double shininess) {
-        diffuse = color;
-        ambient = new Color(color);
-        ambient.scale(0.1);
-        specular = new Color(0xFFFFFF);
-        this.shininess = shininess;
+    public static Material phong(Color color, double shininess) {
+        return Material.phong(color.getScaled(0.1), color, new Color(0xFFFFFF), shininess);
+    }
+    public static Material mirror(Color color) {
+        Material result = Material.phong(color, 0.25*128);
+        result.type = RayTracingType.MIRROR;
+        return result;
+    }
+    public static Material transparent(Color color, double refractionIndex) {
+        Material result = Material.phong(color, 0.25*128);
+        result.type = RayTracingType.TRANSPARENT;
+        result.refractionIndex = refractionIndex;
+        return result;
     }
 
     // https://www.cs.brandeis.edu/~cs155/Lecture_16.pdf
     // https://en.wikipedia.org/wiki/Phong_reflection_model
     
-    public Color illuminate(Vector point, Vector normal) {
+    public Color getRasterizationPhongColor(Vector viewPoint, Vector surfacePoint, Vector normal) {
         Color result = new Color();
-        result.add(1, ambient, Config.ambient);
+        result.add(1, ambient, Config.sceneAmbientColor);
 
-        Vector lightVec, viewVec, reflectedVec;
-        viewVec = new Vector(point, Scene3D.camera.location);
-        viewVec.normalize();
+        Vector lightVector, viewVector, reflectionVector;
+        viewVector = new Vector(surfacePoint, viewPoint);
+        viewVector.normalize();
 
         double diffuseIntensity, specularIntensity;
 
         for (LightSource light : Scene3D.lights) {
-            if (!light.isIlluminating(point)) {
+            if (!light.isIlluminating(surfacePoint)) {
                 continue;
             }
-            lightVec = new Vector(point, light.location);
-            lightVec.normalize();
-            diffuseIntensity = lightVec.dot(normal);
+            lightVector = new Vector(surfacePoint, light.location);
+            lightVector.normalize();
+            diffuseIntensity = lightVector.dot(normal);
             
             if (diffuseIntensity > 0) {
-                result.add(diffuseIntensity, diffuse, light.diffuse);
+                result.add(diffuseIntensity, color, light.color);
                 
-                reflectedVec = lightVec.getReflection(normal);
-                specularIntensity = reflectedVec.dot(viewVec);
+                reflectionVector = lightVector.getReflection(normal);
+                specularIntensity = reflectionVector.dot(viewVector);
 
                 if (specularIntensity > 0) {
                     specularIntensity = Math.pow(specularIntensity, shininess);
-                    result.add(specularIntensity, specular, light.specular);
+                    result.add(specularIntensity, specular, light.color);
+                }
+            }
+        }
+        return result;
+    }
+
+    public Color getRayTracingPhongColor(Vector viewPoint, Vector surfacePoint, Vector normal) {
+        Color result = new Color();
+        result.add(1, ambient, Config.sceneAmbientColor);
+
+        Vector lightVector, viewVector, reflectionVector;
+        viewVector = new Vector(surfacePoint, viewPoint);
+        viewVector.normalize();
+
+        double diffuseIntensity, specularIntensity;
+
+        lightLoop:
+        for (LightSource light : Scene3D.lights) {
+            lightVector = new Vector(surfacePoint, light.location);
+            lightVector.normalize();
+
+            for (Primitive object : Scene3D.primitives) {
+                if (object.getIntersectionDistance(surfacePoint, lightVector) > 0) {
+                    continue lightLoop;
+                }
+            }
+            diffuseIntensity = lightVector.dot(normal);
+            
+            if (diffuseIntensity > 0) {
+                result.add(diffuseIntensity, color, light.color);
+                
+                reflectionVector = lightVector.getReflection(normal);
+                specularIntensity = reflectionVector.dot(viewVector);
+
+                if (specularIntensity > 0) {
+                    specularIntensity = Math.pow(specularIntensity, shininess);
+                    result.add(specularIntensity, specular, light.color);
                 }
             }
         }
@@ -60,7 +110,7 @@ public class Material {
     // http://devernay.free.fr/cours/opengl/materials.html
 
     public static Material EMERALD() {
-        return new Material(
+        return Material.phong(
             new Color(0.0215, 0.1745, 0.0215),
             new Color(0.07568, 0.61424, 0.07568),
             new Color(0.633, 0.727811, 0.633),
@@ -68,7 +118,7 @@ public class Material {
         );
     }
     public static Material JADE() {
-        return new Material(
+        return Material.phong(
             new Color(0.135, 0.2225, 0.1575),
             new Color(0.54, 0.89, 0.63),
             new Color(0.316228, 0.316228, 0.316228),
@@ -76,7 +126,7 @@ public class Material {
         );
     }
     public static Material OBSIDIAN() {
-        return new Material(
+        return Material.phong(
             new Color(0.05375, 0.05, 0.06625),
             new Color(0.18275, 0.17, 0.22525),
             new Color(0.332741, 0.328634, 0.346435),
@@ -84,7 +134,7 @@ public class Material {
         );
     }
     public static Material PEARL() {
-        return new Material(
+        return Material.phong(
             new Color(0.25, 0.20725, 0.20725),
             new Color(1, 0.829, 0.829),
             new Color(0.296648, 0.296648, 0.296648),
@@ -92,7 +142,7 @@ public class Material {
         );
     }
     public static Material RUBY() {
-        return new Material(
+        return Material.phong(
             new Color(0.1745, 0.01175, 0.01175),
             new Color(0.61424, 0.04136, 0.04136),
             new Color(0.727811, 0.626959, 0.626959),
@@ -100,7 +150,7 @@ public class Material {
         );
     }
     public static Material COPPER() {
-        return new Material(
+        return Material.phong(
             new Color(0.19125, 0.0735, 0.0225),
             new Color(0.7038, 0.27048, 0.0828),
             new Color(0.256777, 0.137622, 0.086014),
@@ -108,7 +158,7 @@ public class Material {
         );
     }
     public static Material GOLD() {
-        return new Material(
+        return Material.phong(
             new Color(0.24725, 0.1995, 0.0745),
             new Color(0.75164, 0.60648, 0.22648),
             new Color(0.628281, 0.137622, 0.366065),
@@ -116,7 +166,7 @@ public class Material {
         );
     }
     public static Material SILVER() {
-        return new Material(
+        return Material.phong(
             new Color(0.19225, 0.19225, 0.19225),
             new Color(0.50754, 0.50754, 0.50754),
             new Color(0.508273, 0.508273, 0.508273),
@@ -124,7 +174,7 @@ public class Material {
         );
     }
     public static Material BRONZE() {
-        return new Material(
+        return Material.phong(
             new Color(0.2125, 0.1275, 0.054),
             new Color(0.714, 0.4284, 0.18144),
             new Color(0.393548, 0.271906, 0.166721),
@@ -132,7 +182,7 @@ public class Material {
         );
     }
     public static Material CYAN_PLASTIC() {
-        return new Material(
+        return Material.phong(
             new Color(0.0, 0.1, 0.06),
             new Color(0.0, 0.50980392, 0.50980392),
             new Color(0.50196078, 0.50196078, 0.50196078),
@@ -140,7 +190,7 @@ public class Material {
         );
     }
     public static Material GREEN_PLASTIC() {
-        return new Material(
+        return Material.phong(
             new Color(0.0, 0.0, 0.0),
             new Color(0.1, 0.35, 0.1),
             new Color(0.45, 0.55, 0.45),
@@ -148,7 +198,7 @@ public class Material {
         );
     }
     public static Material RED_PLASTIC() {
-        return new Material(
+        return Material.phong(
             new Color(0.0, 0.0, 0.0),
             new Color(0.5, 0.0, 0.0),
             new Color(0.7, 0.6, 0.6),
@@ -156,7 +206,7 @@ public class Material {
         );
     }
     public static Material YELLOW_PLASTIC() {
-        return new Material(
+        return Material.phong(
             new Color(0.0, 0.0, 0.0),
             new Color(0.5, 0.5, 0.0),
             new Color(0.6, 0.6, 0.5),
@@ -164,7 +214,7 @@ public class Material {
         );
     }
     public static Material CYAN_RUBBER() {
-        return new Material(
+        return Material.phong(
             new Color(0.0, 0.05, 0.05),
             new Color(0.4, 0.5, 0.5),
             new Color(0.04, 0.7, 0.7),
@@ -172,7 +222,7 @@ public class Material {
         );
     }
     public static Material GREEN_RUBBER() {
-        return new Material(
+        return Material.phong(
             new Color(0.0, 0.05, 0.0),
             new Color(0.4, 0.5, 0.4),
             new Color(0.04, 0.7, 0.04),
@@ -180,7 +230,7 @@ public class Material {
         );
     }
     public static Material RED_RUBBER() {
-        return new Material(
+        return Material.phong(
             new Color(0.05, 0.0, 0.0),
             new Color(0.5, 0.4, 0.4),
             new Color(0.7, 0.04, 0.04),
@@ -188,7 +238,7 @@ public class Material {
         );
     }
     public static Material YELLOW_RUBBER() {
-        return new Material(
+        return Material.phong(
             new Color(0.05, 0.05, 0.0),
             new Color(0.5, 0.5, 0.4),
             new Color(0.7, 0.7, 0.04),

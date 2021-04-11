@@ -26,7 +26,7 @@ public class Camera {
 
     public void lookAt(Vector from, Vector to) {
         location = from;
-        Vector forward = new Vector(to, from);
+        Vector forward = new Vector(from, to);
         forward.normalize();
 
         Vector posYAxis = new Vector(0, 1, 0);
@@ -46,10 +46,10 @@ public class Camera {
 
     public Pixel project(Vector v) {
         Vector result = worldToCamera.getTransformation(v);
-        if (result.z > 0)
+        if (result.z < 0)
             return null;
 
-        double depth = -result.z;
+        double depth = result.z;
         double imageX = result.x / depth;
         double imageY = result.y / depth;
         
@@ -64,5 +64,20 @@ public class Camera {
         double pixelY = numPixelsY - numPixelsY_imageHeight_ratio * imageY;
 
         return new Pixel(pixelX, pixelY, 1.0 / depth);
+    }
+
+
+    public Vector generateRay(int pixelX, int pixelY) {
+        Vector start = new Vector();
+        Vector end = new Vector(
+            2 * halfImageWidth * ((pixelX + 0.5) / numPixelsX) - halfImageWidth, 
+            2 * halfImageHeight * (1 - ((pixelY + 0.5) / numPixelsY)) - halfImageHeight, 
+            1
+        );
+        end.normalize();
+        
+        cameraToWorld.transform(start);
+        cameraToWorld.transform(end);
+        return new Vector(start, end);
     }
 }

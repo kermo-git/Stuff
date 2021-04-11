@@ -29,6 +29,10 @@ public class Vector {
         }
         return false;
     }
+    @Override
+    public String toString() {
+        return "<" + x + ", " + y+ ", " + z + ">";
+    }
 
 
     public void normalize() {
@@ -57,6 +61,13 @@ public class Vector {
         y *= scalar;
         z *= scalar;
     }
+    public Vector getScaled(double scalar) {
+        return new Vector(
+            x * scalar,
+            y * scalar,
+            z * scalar
+        );
+    }
 
     
     public double length() {
@@ -72,6 +83,8 @@ public class Vector {
             x * v.y - y * v.x
         );
     }
+
+    
     public Vector getReflection(Vector normal) {
         double dot = this.dot(normal);
         Vector reflection = new Vector();

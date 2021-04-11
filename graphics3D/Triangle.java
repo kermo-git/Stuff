@@ -1,9 +1,8 @@
 package graphics3D;
 
-public abstract class Triangle {
-    Material material;
-    Vertex v1, v2, v3;
+public class Triangle extends Primitive {
     Vector normal;
+    Vertex v1, v2, v3;
 
     public Triangle(Material material, Vertex v1, Vertex v2, Vertex v3) {
         this.material = material;
@@ -18,15 +17,10 @@ public abstract class Triangle {
         return (a > b) ? a : b;
     }
 
-    protected Pixel p1, p2, p3;
-    protected double w1, w2, w3, zRec;
-
-    protected abstract Color doColorCalculation();
-
-    public void render(double[][] depthBuffer, boolean calculateColor) {
-        p1 = v1.projection;
-        p2 = v2.projection;
-        p3 = v3.projection;
+    public void rasterize(double[][] depthBuffer, boolean calculateColor) {
+        Pixel p1 = v1.projection;
+        Pixel p2 = v2.projection;
+        Pixel p3 = v3.projection;
         
         if (p1 == null || p2 == null || p3 == null) {
             return;
@@ -57,6 +51,8 @@ public abstract class Triangle {
         double pixelCenterX, pixelCenterY;
         double s1, s2, s3;
 
+        double w1, w2, w3, zRec;
+
         for (x = low_x; x <= high_x; x++) {
             for (y = low_y; y <= high_y; y++) {
 
@@ -72,7 +68,7 @@ public abstract class Triangle {
                 s3 = (pixelCenterX - p2.pixelX) * p21y - 
                      (pixelCenterY - p2.pixelY) * p21x;
 
-                if (s1 >= 0 && s2 >= 0 && s3 >= 0) {
+                if (s1 < 0 && s2 < 0 && s3 < 0) {
                     w1 = Math.abs(s1 / s);
                     w2 = Math.abs(s2 / s);
                     w3 = 1 - w1 - w2;
@@ -81,11 +77,64 @@ public abstract class Triangle {
                     if (zRec > depthBuffer[x][y]) {
                         depthBuffer[x][y] = zRec;
                         if (calculateColor) {
-                            Scene3D.frameBuffer[x][y] = doColorCalculation();
+                            Scene3D.frameBuffer[x][y] = doColorCalculation(w1, w2, w3, zRec);
                         }
                     }
                 }
             }
         }
+    }
+
+
+    protected Color doColorCalculation(double w1, double w2, double w3, double zRec) {
+        Vector surfacePoint = new Vector();
+        surfacePoint.add(w1 * v1.projection.zRec, v1);
+        surfacePoint.add(w2 * v2.projection.zRec, v2);
+        surfacePoint.add(w3 * v3.projection.zRec, v3);
+        surfacePoint.scale(1.0 / zRec);
+        
+        return material.getRasterizationPhongColor(Scene3D.camera.location, surfacePoint, normal); 
+    };
+
+
+    @Override
+    public Vector getNormal(Vector surfacePoint) {
+        return this.normal;
+    }
+    
+    double distance, w1, w2, w3;
+
+    // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
+    @Override
+    public double getIntersectionDistance(Vector origin, Vector direction) {
+        Vector o_v1 = new Vector(origin, v1);
+        Vector v2_v1 = new Vector(v2, v1);
+        Vector v3_v1 = new Vector(v3, v1);
+
+        Vector n = v2_v1.cross(v3_v1);
+        double M  = direction.dot(n);
+        if (M < 0) {
+            return -1;
+        }
+        double Mx = o_v1.dot(n);
+        distance = Mx / M;
+        if (distance < 0) {
+            return -1;
+        }
+        double My = direction.dot(o_v1.cross(v3_v1));
+        w2 = My / M;
+        if (w2 < 0 || w2 > 1) {
+            return -1;
+        }
+        double Mz = direction.dot(v2_v1.cross(o_v1));
+        w3 = Mz / M;
+        if (w3 < 0 || w3 > 1) {
+            return -1;
+        }
+        w1 = 1 - w2 - w3;
+        if (w1 < 0) {
+            return -1;
+        }
+        return distance;
     }
 }

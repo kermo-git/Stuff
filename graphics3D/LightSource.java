@@ -1,32 +1,32 @@
 package graphics3D;
 
 public class LightSource {
-    Vector location;
-    double FOVdegrees;
+    Vector location, target;
 
     double[][] shadowBuffer;
     Camera camera;
 
-    Color diffuse, specular;
-    public static Color ambient = new Color(1, 1, 1);
+    Color color;
 
-    public LightSource(
-        Vector location, Vector target, 
-        Color diffuse, Color specular
-    ) {
+    public LightSource(Vector location, Vector target, Color color) {
         this.location = location;
-        this.diffuse = diffuse;
-        this.specular = specular;
+        this.target = target;
+        this.color = color;
+    }
 
+    public LightSource(Vector location, Color diffuse) {
+        this(location, new Vector(), diffuse);
+    }
+
+    public void initShadowBuffer() {
         int numPixels = Config.shadowResolution;
-
         shadowBuffer = new double[numPixels][numPixels];
-        camera = new Camera(numPixels, numPixels, Config.lightFOV);
+        camera = new Camera(numPixels, numPixels, Config.shadowMapFOV);
         camera.lookAt(location, target);
     }
 
     public boolean isIlluminating(Vector point) {
-        if (!Config.renderShadows) {
+        if (!Config.shadowMapping) {
             return true;
         }
         Pixel p = camera.project(point);

@@ -9,7 +9,7 @@ import java.util.Collections;
 import graphics3D.noise.*;
 
 enum Shading {
-    SIMPLE_FLAT, FLAT, GOURAUD, PHONG
+    FLAT, GOURAUD, SMOOTH
 }
 
 public class Mesh {
@@ -29,7 +29,7 @@ public class Mesh {
     }
 
 
-    public void calculateNormals() {
+    public void doNormalCalculations() {
         for (Triangle t : triangles) {
             t.normal = new Vector(t.v1, t.v3).cross(new Vector(t.v1, t.v2));
         }
@@ -90,17 +90,14 @@ public class Mesh {
 
     public void addTriangle(Vertex v1, Vertex v2, Vertex v3) {
         switch (shading) {
-            case SIMPLE_FLAT:
-                triangles.add(new SimpleFlatTriangle(material, v1, v2, v3));
-                break;
             case FLAT:
-                triangles.add(new FlatTriangle(material, v1, v2, v3));
+                triangles.add(new Triangle(material, v1, v2, v3));
                 break;
             case GOURAUD:
                 triangles.add(new GouraudTriangle(material, v1, v2, v3));
                 break;
-            case PHONG:
-                triangles.add(new PhongTriangle(material, v1, v2, v3));
+            case SMOOTH:
+                triangles.add(new SmoothTriangle(material, v1, v2, v3));
                 break;
         }
     }
