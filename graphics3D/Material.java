@@ -1,8 +1,9 @@
 package graphics3D;
 
+import graphics3D.shapes.Shape;
 
 enum RayTracingType {
-    DIFFUSE, MIRROR, TRANSPARENT
+    DIFFUSE, MIRROR, TRANSPARENT, LUMINOUS
 }
 public class Material {
     Color ambient, color, specular;
@@ -31,6 +32,11 @@ public class Material {
         Material result = Material.phong(color, 0.25*128);
         result.type = RayTracingType.TRANSPARENT;
         result.refractionIndex = refractionIndex;
+        return result;
+    }
+    public static Material lightsource(Color color) {
+        Material result = Material.phong(color, 0.25*128);
+        result.type = RayTracingType.LUMINOUS;
         return result;
     }
 
@@ -85,8 +91,8 @@ public class Material {
             lightVector = new Vector(surfacePoint, light.location);
             lightVector.normalize();
 
-            for (Primitive object : Scene3D.primitives) {
-                if (object.getIntersectionDistance(surfacePoint, lightVector) > 0) {
+            for (Shape object : Scene3D.primitives) {
+                if (object.getIntersection(surfacePoint, lightVector) != null) {
                     continue lightLoop;
                 }
             }

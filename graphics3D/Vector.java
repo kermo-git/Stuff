@@ -1,7 +1,7 @@
 package graphics3D;
 
 public class Vector {
-    double x = 0, y = 0, z = 0;
+    public double x = 0, y = 0, z = 0;
 
     public Vector() {}
     public Vector(double x, double y, double z) {

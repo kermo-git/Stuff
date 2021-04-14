@@ -1,4 +1,4 @@
-package graphics3D;
+package graphics3D.shapes;
 
 import java.util.Iterator;
 import java.util.List;
@@ -6,45 +6,65 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import graphics3D.noise.*;
+import graphics3D.noise.Noise;
+import graphics3D.Material;
+import graphics3D.Vector;
+import graphics3D.RayIntersection;
+import graphics3D.Matrix;
 
-enum Shading {
-    FLAT, GOURAUD, SMOOTH
-}
+public class TriangleMesh extends Shape {
+    public List<Triangle> triangles = new ArrayList<>();
+    public List<Vertex> vertices = new ArrayList<>();
+    boolean smoothShading;
 
-public class Mesh {
-    List<Triangle> triangles = new ArrayList<>();
-    List<Vertex> vertices = new ArrayList<>();
-    Material material;
-    Shading shading;
-
-    public Mesh(Material material, Shading shading) {
+    public TriangleMesh(Material material, boolean shading) {
         this.material = material;
-        this.shading = shading;
+        this.smoothShading = shading;
     }
-    public void transform(Matrix matrix) {
-        for (Vertex v : vertices) {
-            matrix.transform(v);
+    public TriangleMesh(Material material) {
+        this(material, false);
+    }
+
+    @Override
+    public void transform(Matrix rotation, Matrix translation) {
+        Matrix transformation = rotation.combine(translation);
+
+        for (Vertex vertex : vertices) {
+            transformation.transform(vertex);
+            rotation.transform(vertex.normal);
+        }
+        for (Triangle triangle : triangles) {
+            rotation.transform(triangle.normal);
         }
     }
 
-
-    public void doNormalCalculations() {
-        for (Triangle t : triangles) {
-            t.normal = new Vector(t.v1, t.v3).cross(new Vector(t.v1, t.v2));
+    @Override
+    public void transform(Matrix translation) {
+        for (Vertex vertex : vertices) {
+            translation.transform(vertex);
         }
+    }
+
+    @Override
+    public RayIntersection getIntersection(Vector rayOrigin, Vector rayDirection) {
+        double minDistance = Double.MAX_VALUE;
+        RayIntersection result = null, tmp;
+
+        for (Triangle triangle : triangles) {
+            tmp = triangle.getIntersection(rayDirection, rayDirection);
+            if (tmp != null && tmp.distance < minDistance) {
+                minDistance = tmp.distance;
+                result = tmp;
+            };
+        }
+        return result;
+    }
+
+    public void normalizeVertexNormals() {
         for (Vertex v : vertices) {
-            v.normal = new Vector();
-            for (Triangle t : v.triangles) {
-                v.normal.add(t.normal);
-            }
             v.normal.normalize();
         }
-        for (Triangle t : triangles) {
-            t.normal.normalize();
-        }
     }
-
 
     private List<Vertex> XYregularPolygon(int n, double radius) {
         List<Vertex> result = new ArrayList<>();
@@ -89,16 +109,10 @@ public class Mesh {
 
 
     public void addTriangle(Vertex v1, Vertex v2, Vertex v3) {
-        switch (shading) {
-            case FLAT:
-                triangles.add(new Triangle(material, v1, v2, v3));
-                break;
-            case GOURAUD:
-                triangles.add(new GouraudTriangle(material, v1, v2, v3));
-                break;
-            case SMOOTH:
-                triangles.add(new SmoothTriangle(material, v1, v2, v3));
-                break;
+        if (smoothShading) {
+            triangles.add(new SmoothTriangle(material, v1, v2, v3));
+        } else {
+            triangles.add(new Triangle(material, v1, v2, v3));
         }
     }
 
@@ -176,6 +190,7 @@ public class Mesh {
 
         Collections.reverse(circle1);
         buildPyramidSurface(apex1, circle1);
+        normalizeVertexNormals();
     }
 
 
@@ -203,6 +218,7 @@ public class Mesh {
 
         Collections.reverse(circle2);
         buildPyramidSurface(apex2, circle2);
+        normalizeVertexNormals();
     }
 
 
@@ -212,6 +228,7 @@ public class Mesh {
 
         Collections.reverse(circle);
         buildPyramidSurface(new Vertex(0, 0.5*length, 0), circle);
+        normalizeVertexNormals();
     }
 
 
@@ -274,6 +291,7 @@ public class Mesh {
             circle1 = circle2;
         }
         buildPyramidSurface(north_pole, circle1);
+        normalizeVertexNormals();
     }
 
 
@@ -314,6 +332,7 @@ public class Mesh {
             circle1 = circle2;
         }
         buildPrismSurface(circle2, first_circle);
+        normalizeVertexNormals();
     }
 
     public void buildFunctionPlot(
@@ -347,6 +366,7 @@ public class Mesh {
             prev = new ArrayList<>(current);
             current = new ArrayList<>();
         }
+        normalizeVertexNormals();
     }
 
 
@@ -456,5 +476,6 @@ public class Mesh {
         buildTileXY(verticesXY, false);
         buildTileXZ(verticesXZ, true);
         buildTileYZ(verticesYZ, false);
+        normalizeVertexNormals();
     }
 }

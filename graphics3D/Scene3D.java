@@ -3,7 +3,13 @@ package graphics3D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import java.awt.image.BufferedImage;
+
+import graphics3D.shapes.TriangleMesh;
+import graphics3D.shapes.Shape;
+import graphics3D.shapes.Triangle;
+import graphics3D.shapes.Vertex;
 
 
 public class Scene3D {
@@ -13,8 +19,8 @@ public class Scene3D {
     public static Color[][] frameBuffer;
 
     public static List<LightSource> lights;
-    public static List<Mesh> objects;
-    public static List<Primitive> primitives;
+    public static List<TriangleMesh> triangleMeshes;
+    public static List<Shape> primitives;
 
     public static void clearScene() {
         camera = (Config.antiAliasing) ?
@@ -22,17 +28,20 @@ public class Scene3D {
             new Camera(Config.screenSizeX, Config.screenSizeY, Config.cameraFOV);
 
         lights = new ArrayList<>();
-        objects = new ArrayList<>();
+        triangleMeshes = new ArrayList<>();
         primitives = new ArrayList<>();
     }
     static { clearScene(); }
 
 
-    public static void addObjects(Mesh ...newObjects) {
-        for (Mesh object : newObjects) {
-            primitives.addAll(object.triangles);
+    public static void addTriangleMeshObjects(TriangleMesh ...newObjects) {
+        for (TriangleMesh mesh : newObjects) {
+            primitives.addAll(mesh.triangles);
         }
-        objects.addAll(Arrays.asList(newObjects));
+        triangleMeshes.addAll(Arrays.asList(newObjects));
+    }
+    public static void addObjects(Shape ...newObjects) {
+        primitives.addAll(Arrays.asList(newObjects));
     }
     public static void addLights(LightSource ...newLights) {
         lights.addAll(Arrays.asList(newLights));
@@ -47,7 +56,7 @@ public class Scene3D {
             for (LightSource light : lights) {
                 light.initShadowBuffer();
     
-                for (Mesh object : objects) {
+                for (TriangleMesh object : triangleMeshes) {
                     for (Vertex vertex : object.vertices) {
                         vertex.projection = light.camera.project(vertex);
                     }
@@ -57,9 +66,7 @@ public class Scene3D {
                 }
             }
         }
-        for (Mesh object : objects) {
-            object.doNormalCalculations();
-
+        for (TriangleMesh object : triangleMeshes) {
             for (Vertex vertex : object.vertices) {
                 vertex.color = object.material.getRasterizationPhongColor(camera.location, vertex, vertex.normal);
                 vertex.projection = camera.project(vertex);
@@ -78,7 +85,7 @@ public class Scene3D {
     public static BufferedImage renderZBuffer() {
         zBuffer = new double[camera.numPixelsX][camera.numPixelsY];
 
-        for (Mesh object : objects) {
+        for (TriangleMesh object : triangleMeshes) {
             for (Vertex vertex : object.vertices) {
                 vertex.projection = camera.project(vertex);
             }
@@ -97,7 +104,7 @@ public class Scene3D {
         LightSource light = lights.get(lightIndex);
         light.initShadowBuffer();
 
-        for (Mesh object : objects) {
+        for (TriangleMesh object : triangleMeshes) {
             for (Vertex v : object.vertices) {
                 v.projection = light.camera.project(v);
             }
@@ -115,24 +122,24 @@ public class Scene3D {
     public static BufferedImage renderRayCastingZBuffer() {
         zBuffer = new double[camera.numPixelsX][camera.numPixelsY];
 
-        for (Mesh object : objects) {
-            object.doNormalCalculations();
+        for (TriangleMesh object : triangleMeshes) {
+            object.normalizeVertexNormals();
         }
         for (int x = 0; x < camera.numPixelsX; x++) {
             for (int y = 0; y < camera.numPixelsY; y++) {
                 Vector ray = camera.generateRay(x, y);
-                double distance = Double.MAX_VALUE;
+                double minDistance = Double.MAX_VALUE;
         
-                for (Mesh object : objects) {
+                for (TriangleMesh object : triangleMeshes) {
                     for (Triangle triangle : object.triangles) {
-                        double t = triangle.getIntersectionDistance(camera.location, ray);
-                        if (t > 0 && t < distance) {
-                            distance = t;
+                        RayIntersection hit = triangle.getIntersection(camera.location, ray);
+                        if (hit != null && hit.distance < minDistance) {
+                            minDistance = hit.distance;
                         }
                     }
                 }
-                if (distance < Double.MAX_VALUE) {
-                    zBuffer[x][y] = distance;
+                if (minDistance < Double.MAX_VALUE) {
+                    zBuffer[x][y] = minDistance;
                 }
             }
         }
@@ -146,8 +153,8 @@ public class Scene3D {
     public static BufferedImage renderRayTracing() {
         frameBuffer = Color.getArray(camera.numPixelsX, camera.numPixelsY);
 
-        for (Mesh object : objects) {
-            object.doNormalCalculations();
+        for (TriangleMesh object : triangleMeshes) {
+            object.normalizeVertexNormals();
         }
         Color color;
         for (int x = 0; x < camera.numPixelsX; x++) {
@@ -176,28 +183,25 @@ public class Scene3D {
 
 
     private static Color castRay(Vector origin, Vector direction, int depth) {
-        double hitDistance = Double.MAX_VALUE;
-        Primitive hitObject = null;
-        Vector hitPoint = null;
-        Vector hitNormal = null;
+        double minDistance = Double.MAX_VALUE;
+        RayIntersection hit = null;
 
-        for (Primitive object : primitives) {
-            double distance = object.getIntersectionDistance(origin, direction);
-            if (distance > 0 && distance < hitDistance) {
-                hitObject = object;
-                hitDistance = distance;
+        for (Shape object : primitives) {
+            RayIntersection tmpHit = object.getIntersection(origin, direction);
+            if (tmpHit != null && tmpHit.distance < minDistance) {
+                minDistance = tmpHit.distance;
+                hit = tmpHit;
             }
         }
-        if (hitObject == null) {
+        if (hit == null) {
             return null;
         }
-        hitPoint = new Vector(origin);
-        hitPoint.add(hitDistance, direction);
-        hitNormal = hitObject.getNormal(hitPoint);
+        Material material = hit.material;
+        Vector hitNormal = hit.normal;
+        Vector hitPoint = hit.location;
         hitPoint.add(Config.rayHitPointBias, hitNormal);
 
         Vector oppositeDirection = direction.getScaled(-1);
-        Material material = hitObject.material;
         
         if (hitNormal.dot(oppositeDirection) <= 0 &&
           !(material.type == RayTracingType.TRANSPARENT)) {

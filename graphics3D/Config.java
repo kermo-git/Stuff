@@ -8,7 +8,7 @@ public class Config {
     public static int screenSizeY = 300; // tk.getScreenSize().height;
     public static boolean antiAliasing = false;
 
-    public static boolean shadowMapping = false;
+    public static boolean shadowMapping = true;
     public static int shadowResolution = antiAliasing ? 4 * screenSizeX : 2 * screenSizeX;
     
     public static double 

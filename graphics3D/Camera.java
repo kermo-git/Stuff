@@ -1,10 +1,10 @@
 package graphics3D;
 
 public class Camera {
-    Matrix cameraToWorld, worldToCamera;
-    Vector location;
+    public Matrix cameraToWorld, worldToCamera;
+    public Vector location;
 
-    int numPixelsX, numPixelsY;
+    public int numPixelsX, numPixelsY;
     double halfImageWidth, halfImageHeight;
     double numPixelsX_imageWidth_ratio;
     double numPixelsY_imageHeight_ratio;

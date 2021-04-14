@@ -1,8 +1,7 @@
 package graphics3D;
 
 public class Pixel {
-    double pixelX, pixelY;
-    double zRec;
+    public double pixelX, pixelY, zRec;
 
     public Pixel(double pixelX, double pixelY, double zReciprocal) {
         this.pixelX = pixelX;

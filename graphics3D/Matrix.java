@@ -1,6 +1,6 @@
 package graphics3D;
 
-class Matrix {
+public class Matrix {
     private final double[][] mat = {
         {1, 0, 0, 0},
         {0, 1, 0, 0},
