@@ -1,6 +1,6 @@
 package graphics3D;
 
-public class LightSource {
+public class Light {
     Vector location, target;
 
     double[][] shadowBuffer;
@@ -8,13 +8,13 @@ public class LightSource {
 
     Color color;
 
-    public LightSource(Vector location, Vector target, Color color) {
+    public Light(Vector location, Vector target, Color color) {
         this.location = location;
         this.target = target;
         this.color = color;
     }
 
-    public LightSource(Vector location, Color diffuse) {
+    public Light(Vector location, Color diffuse) {
         this(location, new Vector(), diffuse);
     }
 

@@ -70,6 +70,20 @@ public class Vector {
     }
 
     
+    public void filter(Vector filter) {
+        x *= filter.x;
+        y *= filter.y;
+        z *= filter.z;
+    }
+    public Vector getFiltered(Vector filter) {
+        return new Vector(
+            x * filter.x,
+            y * filter.y,
+            z * filter.z
+        );
+    }
+
+    
     public double length() {
         return Math.sqrt(x * x + y * y + z * z);
     }

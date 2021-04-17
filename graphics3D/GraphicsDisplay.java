@@ -9,7 +9,7 @@ public class GraphicsDisplay extends JPanel {
 
     @Override
     public void paint(Graphics g) {
-        SceneBuilder.buildRayTracingScene();
+        SceneBuilder.buildInsideTunnelScene();
         g.drawImage(Scene3D.renderRayTracing(), 0, 0, this);
     }
 

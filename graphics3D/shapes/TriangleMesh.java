@@ -34,7 +34,8 @@ public class TriangleMesh extends Shape {
             rotation.transform(vertex.normal);
         }
         for (Triangle triangle : triangles) {
-            rotation.transform(triangle.normal);
+            rotation.transform(triangle.outNormal);
+            triangle.D = -triangle.outNormal.dot(triangle.v1);
         }
     }
 
@@ -42,6 +43,9 @@ public class TriangleMesh extends Shape {
     public void transform(Matrix translation) {
         for (Vertex vertex : vertices) {
             translation.transform(vertex);
+        }
+        for (Triangle triangle : triangles) {
+            triangle.D = -triangle.outNormal.dot(triangle.v1);
         }
     }
 

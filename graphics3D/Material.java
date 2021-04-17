@@ -3,14 +3,14 @@ package graphics3D;
 import graphics3D.shapes.Shape;
 
 enum RayTracingType {
-    DIFFUSE, MIRROR, TRANSPARENT, LUMINOUS
+    DIFFUSE, MIRROR, TRANSPARENT
 }
 public class Material {
     Color ambient, color, specular;
     double shininess;
 
     RayTracingType type = RayTracingType.DIFFUSE;
-    double refractionIndex;
+    double ior;
 
     public static Material phong(Color ambient, Color diffuse, Color specular, double shininess) {
         Material material = new Material();
@@ -31,12 +31,7 @@ public class Material {
     public static Material transparent(Color color, double refractionIndex) {
         Material result = Material.phong(color, 0.25*128);
         result.type = RayTracingType.TRANSPARENT;
-        result.refractionIndex = refractionIndex;
-        return result;
-    }
-    public static Material lightsource(Color color) {
-        Material result = Material.phong(color, 0.25*128);
-        result.type = RayTracingType.LUMINOUS;
+        result.ior = refractionIndex;
         return result;
     }
 
@@ -53,7 +48,7 @@ public class Material {
 
         double diffuseIntensity, specularIntensity;
 
-        for (LightSource light : Scene3D.lights) {
+        for (Light light : Scene3D.lights) {
             if (!light.isIlluminating(surfacePoint)) {
                 continue;
             }
@@ -84,15 +79,18 @@ public class Material {
         viewVector = new Vector(surfacePoint, viewPoint);
         viewVector.normalize();
 
-        double diffuseIntensity, specularIntensity;
+        RayIntersection intersection = null;
+        double diffuseIntensity, specularIntensity, distanceToLight;
 
         lightLoop:
-        for (LightSource light : Scene3D.lights) {
+        for (Light light : Scene3D.lights) {
             lightVector = new Vector(surfacePoint, light.location);
+            distanceToLight = lightVector.length();
             lightVector.normalize();
 
-            for (Shape object : Scene3D.primitives) {
-                if (object.getIntersection(surfacePoint, lightVector) != null) {
+            for (Shape object : Scene3D.shapes) {
+                intersection = object.getIntersection(surfacePoint, lightVector);
+                if (intersection != null && intersection.distance < distanceToLight) {
                     continue lightLoop;
                 }
             }

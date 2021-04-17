@@ -3,8 +3,9 @@ package graphics3D.shapes;
 import graphics3D.*;
 
 public class Triangle extends Shape {
-    public Vector normal;
+    public Vector outNormal, inNormal;
     public Vertex v1, v2, v3;
+    public double D = 0, sRec = 0;
 
     public Triangle(Material material, Vertex v1, Vertex v2, Vertex v3) {
         this.material = material;
@@ -13,13 +14,16 @@ public class Triangle extends Shape {
         this.v2 = v2; v2.triangles.add(this);
         this.v3 = v3; v3.triangles.add(this);
 
-        normal = new Vector(v1, v3).cross(new Vector(v1, v2));
+        outNormal = new Vector(v1, v3).cross(new Vector(v1, v2));
+        sRec = 1 / outNormal.length();
 
-        v1.normal.add(normal);
-        v2.normal.add(normal);
-        v3.normal.add(normal);
+        v1.normal.add(outNormal);
+        v2.normal.add(outNormal);
+        v3.normal.add(outNormal);
         
-        normal.normalize();
+        outNormal.normalize();  
+        inNormal = outNormal.getScaled(-1);
+        D = -outNormal.dot(v1);  
     }
     private static double min(double a, double b) {
         return (a < b) ? a : b;
@@ -34,13 +38,15 @@ public class Triangle extends Shape {
         fullTransformation.transform(v1);
         fullTransformation.transform(v2);
         fullTransformation.transform(v3);
-        rotation.transform(normal);
+        rotation.transform(outNormal);
+        D = -outNormal.dot(v1);
     }
     @Override
     public void transform(Matrix translation) {
         translation.transform(v1);
         translation.transform(v2);
         translation.transform(v3);
+        D = -outNormal.dot(v1);
     }
 
     public void rasterize(double[][] depthBuffer, boolean calculateColor) {
@@ -119,77 +125,46 @@ public class Triangle extends Shape {
         surfacePoint.add(w3 * v3.projection.zRec, v3);
         surfacePoint.scale(1.0 / zRec);
 
-        return material.getRasterizationPhongColor(Scene3D.camera.location, surfacePoint, normal);
+        return material.getRasterizationPhongColor(Scene3D.camera.location, surfacePoint, outNormal);
     };
-
-    // public double getIntersectionDistance(Vector origin, Vector direction) {
-    //     Vector v12 = new Vector(v1, v2);
-    //     Vector v13 = new Vector(v1, v3);
-    //     Vector vo = new Vector(v1, origin);
-
-    //     double A = vo.x * v13.y - vo.y * v13.x;
-    //     double B = v13.y * direction.x - v13.x * direction.y;
-    //     double C = v12.x * v13.y - v12.y * v13.x;
-
-    //     double D = vo.y * v13.z - vo.z * v13.y;
-    //     double E = v13.z * direction.y - v13.y * direction.z;
-    //     double F = v12.y * v13.z - v12.z * v13.y;
-
-    //     double distance = (C * D - F * A) / (F * B - C * E);
-    //     if (distance < 0) {
-    //         return -1;
-    //     }
-    //     double w2 = (A + B * distance) / C;
-    //     if (w2 < 0 || w2 > 1) {
-    //         return -1;
-    //     }
-    //     double w3 = (vo.y - v12.y * w2 + direction.y * distance) / v13.y;
-    //     if (w3 < 0 || w3 > 1) {
-    //         return -1;
-    //     }
-    //     double w1 = 1 - w2 - w3;
-    //     if (w1 < 0) {
-    //         return -1;
-    //     }
-
-    //     return distance;
-    // }
 
 
     public RayIntersection getIntersection(Vector origin, Vector direction) {
-        Vector o_v1 = new Vector(origin, v1);
-        Vector v2_v1 = new Vector(v2, v1);
-        Vector v3_v1 = new Vector(v3, v1);
-
-        Vector n = v2_v1.cross(v3_v1);
-        double M = direction.dot(n);
-        if (M < 0) {
+        double normalDotDirection = outNormal.dot(direction);
+        if (normalDotDirection == 0) {
             return null;
         }
-        double Mx = o_v1.dot(n);
-        double distance = Mx / M;
+        double distance = -(outNormal.dot(origin) + D) / normalDotDirection;
         if (distance < 0) {
             return null;
         }
-        double My = direction.dot(o_v1.cross(v3_v1));
-        double w2 = My / M;
-        if (w2 < 0 || w2 > 1) {
-            return null;
-        }
-        double Mz = direction.dot(v2_v1.cross(o_v1));
-        double w3 = Mz / M;
-        if (w3 < 0 || w3 > 1) {
-            return null;
-        }
-        double w1 = 1 - w2 - w3;
-        if (w1 < 0) {
-            return null;
-        }
-        Vector location = new Vector(
+        Vector p = new Vector(
             origin.x + distance * direction.x,
             origin.y + distance * direction.y,
             origin.z + distance * direction.z
         );
-        return new RayIntersection(distance, location, normal, material);
+        Vector edge = new Vector(v1, v2);
+        Vector v_p = new Vector(v1, p);
+
+        if (edge.cross(v_p).dot(outNormal) >= 0)
+            return null;
+
+        edge = new Vector(v2, v3);
+        v_p = new Vector(v2, p);
+
+        if (edge.cross(v_p).dot(outNormal) >= 0)
+            return null;
+
+        edge = new Vector(v3, v1);
+        v_p = new Vector(v3, p);
+
+        if (edge.cross(v_p).dot(outNormal) >= 0)
+            return null;
+
+        if (normalDotDirection > 0) {
+            return new RayIntersection(distance, p, inNormal, material);
+        } else {
+            return new RayIntersection(distance, p, outNormal, material);
+        }
     }
 }
