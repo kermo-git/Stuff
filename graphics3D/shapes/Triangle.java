@@ -1,6 +1,7 @@
 package graphics3D.shapes;
 
 import graphics3D.*;
+import graphics3D.materials.Material;
 
 public class Triangle extends Shape {
     public Vector outNormal, inNormal;
@@ -23,13 +24,7 @@ public class Triangle extends Shape {
         
         outNormal.normalize();  
         inNormal = outNormal.getScaled(-1);
-        D = -outNormal.dot(v1);  
-    }
-    private static double min(double a, double b) {
-        return (a < b) ? a : b;
-    }
-    private static double max(double a, double b) {
-        return (a > b) ? a : b;
+        D = outNormal.dot(v1);  
     }
 
     @Override
@@ -39,17 +34,18 @@ public class Triangle extends Shape {
         fullTransformation.transform(v2);
         fullTransformation.transform(v3);
         rotation.transform(outNormal);
-        D = -outNormal.dot(v1);
+        inNormal = outNormal.getScaled(-1);
+        D = outNormal.dot(v1);
     }
     @Override
     public void transform(Matrix translation) {
         translation.transform(v1);
         translation.transform(v2);
         translation.transform(v3);
-        D = -outNormal.dot(v1);
+        D = outNormal.dot(v1);
     }
 
-    public void rasterize(double[][] depthBuffer, boolean calculateColor) {
+    public void rasterize(double[][] depthMap, boolean calculateColor) {
         Pixel p1 = v1.projection;
         Pixel p2 = v2.projection;
         Pixel p3 = v3.projection;
@@ -57,9 +53,9 @@ public class Triangle extends Shape {
         if (p1 == null || p2 == null || p3 == null) {
             return;
         }
-        if (p1.zRec + Config.zBufferBias < depthBuffer[(int) p1.pixelX][(int) p1.pixelY] &&
-            p2.zRec + Config.zBufferBias < depthBuffer[(int) p2.pixelX][(int) p2.pixelY] &&
-            p3.zRec + Config.zBufferBias < depthBuffer[(int) p3.pixelX][(int) p3.pixelY]) {
+        if (p1.zRec + Config.depthMapBias < depthMap[(int) p1.pixelX][(int) p1.pixelY] &&
+            p2.zRec + Config.depthMapBias < depthMap[(int) p2.pixelX][(int) p2.pixelY] &&
+            p3.zRec + Config.depthMapBias < depthMap[(int) p3.pixelX][(int) p3.pixelY]) {
             return;
         }
 
@@ -100,14 +96,18 @@ public class Triangle extends Shape {
                 s3 = (pixelCenterX - p2.pixelX) * p21y -
                      (pixelCenterY - p2.pixelY) * p21x;
 
+                // TODO: if the triangle is facing away from the camera,
+                // then the condition should be s1 > 0 && s2 > 0 && s3 > 0
+                // and the normal should be reversed for shading calculations.
+                
                 if (s1 < 0 && s2 < 0 && s3 < 0) {
                     w1 = Math.abs(s1 / s);
                     w2 = Math.abs(s2 / s);
                     w3 = 1 - w1 - w2;
                     zRec = w1 * p1.zRec + w2 * p2.zRec + w3 * p3.zRec;
 
-                    if (zRec > depthBuffer[x][y]) {
-                        depthBuffer[x][y] = zRec;
+                    if (zRec > depthMap[x][y]) {
+                        depthMap[x][y] = zRec;
                         if (calculateColor) {
                             Scene3D.frameBuffer[x][y] = doColorCalculation(w1, w2, w3, zRec);
                         }
@@ -125,23 +125,31 @@ public class Triangle extends Shape {
         surfacePoint.add(w3 * v3.projection.zRec, v3);
         surfacePoint.scale(1.0 / zRec);
 
-        return material.getRasterizationPhongColor(Scene3D.camera.location, surfacePoint, outNormal);
+        Vector viewVector = new Vector(Scene3D.camera.location, surfacePoint);
+        viewVector.normalize();
+
+        return material.shade(
+            viewVector, 
+            surfacePoint, 
+            outNormal, 
+            false, 0
+        );
     };
 
 
-    public RayIntersection getIntersection(Vector origin, Vector direction) {
-        double normalDotDirection = outNormal.dot(direction);
+    public RayIntersection getIntersection(Vector rayOrigin, Vector rayDirection) {
+        double normalDotDirection = outNormal.dot(rayDirection);
         if (normalDotDirection == 0) {
             return null;
         }
-        double distance = -(outNormal.dot(origin) + D) / normalDotDirection;
+        double distance = (D - outNormal.dot(rayOrigin)) / normalDotDirection;
         if (distance < 0) {
             return null;
         }
         Vector p = new Vector(
-            origin.x + distance * direction.x,
-            origin.y + distance * direction.y,
-            origin.z + distance * direction.z
+            rayOrigin.x + distance * rayDirection.x,
+            rayOrigin.y + distance * rayDirection.y,
+            rayOrigin.z + distance * rayDirection.z
         );
         Vector edge = new Vector(v1, v2);
         Vector v_p = new Vector(v1, p);
