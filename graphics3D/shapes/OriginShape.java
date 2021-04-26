@@ -38,21 +38,26 @@ public abstract class OriginShape extends Shape {
     
             result = getTransformedIntersection(transformedOrigin, transFormedDirection);
     
-            fullTransformation.transform(result.location);
-            rotation.transform(result.normal);
-
+            if (result != null) {
+                fullTransformation.transform(result.hitPoint);
+                rotation.transform(result.normal);
+            }
             return result;
         }
         else if (fullTransformation != null) {
             Vector transformedOrigin = fullTransformationInv.getTransformation(rayOrigin);
             result = getTransformedIntersection(transformedOrigin, rayDirection);
-            fullTransformation.transform(result.location);
+
+            if (result != null)
+                fullTransformation.transform(result.hitPoint);
             return result;
         }
         else if (rotation != null) {
             Vector transFormedDirection = rotationInv.getTransformation(rayDirection);
             result = getTransformedIntersection(rayOrigin, transFormedDirection);
-            rotation.transform(result.normal);
+            
+            if (result != null)
+                rotation.transform(result.normal);
             return result;
         }
         return getTransformedIntersection(rayOrigin, rayDirection);

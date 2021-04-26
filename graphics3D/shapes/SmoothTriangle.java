@@ -1,7 +1,7 @@
 package graphics3D.shapes;
 
 import graphics3D.Color;
-import graphics3D.Material;
+import graphics3D.materials.Material;
 import graphics3D.Vector;
 import graphics3D.RayIntersection;
 import graphics3D.Scene3D;
@@ -31,24 +31,32 @@ public class SmoothTriangle extends Triangle {
         smoothNormal.scale(z);
         smoothNormal.normalize();
 
-        return material.getRasterizationPhongColor(Scene3D.camera.location, surfacePoint, smoothNormal);
+        Vector viewVector = new Vector(Scene3D.camera.location, surfacePoint);
+        viewVector.normalize();
+
+        return material.shade(
+            viewVector, 
+            surfacePoint, 
+            smoothNormal, 
+            false, 0
+        );
     }
 
     @Override
-    public RayIntersection getIntersection(Vector origin, Vector direction) {
-        double normalDotDirection = outNormal.dot(direction);
+    public RayIntersection getIntersection(Vector rayOrigin, Vector rayDirection) {
+        double normalDotDirection = outNormal.dot(rayDirection);
 
         if (normalDotDirection == 0)
             return null;
         
-        double distance = -(outNormal.dot(origin) + D) / normalDotDirection;
+        double distance = (D - outNormal.dot(rayOrigin)) / normalDotDirection;
         if (distance < 0)
             return null;
 
         Vector p = new Vector(
-            origin.x + distance * direction.x,
-            origin.y + distance * direction.y,
-            origin.z + distance * direction.z
+            rayOrigin.x + distance * rayDirection.x,
+            rayOrigin.y + distance * rayDirection.y,
+            rayOrigin.z + distance * rayDirection.z
         );
 
         Vector edge = new Vector(v1, v2);

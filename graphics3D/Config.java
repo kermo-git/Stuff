@@ -1,24 +1,30 @@
 package graphics3D;
-import java.awt.Toolkit;
+// import java.awt.Toolkit;
 
 public class Config {
-    private static Toolkit tk = Toolkit.getDefaultToolkit();
+    public static enum ShadowType {
+        NO_SHADOWS, SHADOW_MAPPING, SHADOW_RAYS
+    }
+    // GENERAL
         
-    public static int screenSizeX = 300; // tk.getScreenSize().width;
-    public static int screenSizeY = 300; // tk.getScreenSize().height;
-    public static boolean antiAliasing = false;
+    public static final int screenSizeX = 600; // Toolkit.getDefaultToolkit().getScreenSize().width;
+    public static final int screenSizeY = 600; // Toolkit.getDefaultToolkit().getScreenSize().height;
+    public static final boolean antiAliasing = false;
+    public static final double cameraFOV = 70;
 
-    public static boolean shadowMapping = true;
-    public static int shadowResolution = antiAliasing ? 4 * screenSizeX : 2 * screenSizeX;
-    
-    public static double 
+    public static final boolean initialRasterization = false; 
+    public static final ShadowType shadowType = ShadowType.SHADOW_RAYS;
+
+    // RASTERIZATION
+
+    public static final int shadowMapResolution = antiAliasing ? 4 * screenSizeX : 2 * screenSizeX;
+    public static final double 
+        depthMapBias = 0.001,
         shadowBufferBias = 0.001,
-        rayHitPointBias = 0.001,
-        zBufferBias = 0.001,
-        cameraFOV = 70,
         shadowMapFOV = 120;
 
-    public static Color sceneAmbientColor = new Color(1, 1, 1);
+    // RAY TRACING
 
-    public static int rayTracingMaxDepth = 5;
+    public static final int rayTracingMaxDepth = 5;
+    public static final double rayHitPointBias = 0.001;
 }

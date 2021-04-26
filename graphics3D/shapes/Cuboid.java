@@ -1,6 +1,6 @@
 package graphics3D.shapes;
 
-import graphics3D.Material;
+import graphics3D.materials.Material;
 import graphics3D.Vector;
 import graphics3D.RayIntersection;
 

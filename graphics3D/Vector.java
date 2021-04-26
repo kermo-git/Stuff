@@ -99,14 +99,24 @@ public class Vector {
     }
 
     
-    public Vector getReflection(Vector normal) {
-        double dot = this.dot(normal);
-        Vector reflection = new Vector();
-        reflection.add(2 * dot, normal);
-        reflection.add(-1, this);
-        return reflection;
+    public Vector getOppositeLightReflection(Vector normal) {
+        double dot = 2 * this.dot(normal);
+
+        return new Vector(
+            dot * normal.x - this.x,
+            dot * normal.y - this.y,
+            dot * normal.z - this.z
+        );
     }
-    public Vector getRefraction(Vector normal, double refractionIndex) {
-        return null;
+
+
+    public Vector getLightReflection(Vector normal) {
+        double dot = 2 * this.dot(normal);
+        
+        return new Vector(
+            this.x - dot * normal.x,
+            this.y - dot * normal.y,
+            this.z - dot * normal.z
+        );
     }
 }

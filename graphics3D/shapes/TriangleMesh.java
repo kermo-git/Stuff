@@ -3,11 +3,10 @@ package graphics3D.shapes;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 import graphics3D.noise.Noise;
-import graphics3D.Material;
+import graphics3D.materials.Material;
 import graphics3D.Vector;
 import graphics3D.RayIntersection;
 import graphics3D.Matrix;
@@ -35,7 +34,8 @@ public class TriangleMesh extends Shape {
         }
         for (Triangle triangle : triangles) {
             rotation.transform(triangle.outNormal);
-            triangle.D = -triangle.outNormal.dot(triangle.v1);
+            triangle.inNormal = triangle.outNormal.getScaled(-1);
+            triangle.D = triangle.outNormal.dot(triangle.v1);
         }
     }
 
@@ -45,7 +45,7 @@ public class TriangleMesh extends Shape {
             translation.transform(vertex);
         }
         for (Triangle triangle : triangles) {
-            triangle.D = -triangle.outNormal.dot(triangle.v1);
+            triangle.D = triangle.outNormal.dot(triangle.v1);
         }
     }
 
@@ -55,7 +55,7 @@ public class TriangleMesh extends Shape {
         RayIntersection result = null, tmp;
 
         for (Triangle triangle : triangles) {
-            tmp = triangle.getIntersection(rayDirection, rayDirection);
+            tmp = triangle.getIntersection(rayOrigin, rayDirection);
             if (tmp != null && tmp.distance < minDistance) {
                 minDistance = tmp.distance;
                 result = tmp;
@@ -370,116 +370,6 @@ public class TriangleMesh extends Shape {
             prev = new ArrayList<>(current);
             current = new ArrayList<>();
         }
-        normalizeVertexNormals();
-    }
-
-
-    private void buildTileXY(List<Vertex> outerRing, boolean posZoffset) {
-        Vertex smallXbigY = outerRing.get(0);
-        Vertex smallXsmallY = outerRing.get(1);
-        Vertex bigXsmallY = outerRing.get(2);
-        Vertex bigXbigY = outerRing.get(3);
-
-        double sideLength = Math.abs(bigXbigY.x - smallXbigY.x);
-        double offset = 0.05 * sideLength;
-        double dir = posZoffset ? offset : -offset;
-
-        List<Vertex> innerRing = Arrays.asList(
-            new Vertex(  smallXbigY.x + offset,   smallXbigY.y - offset,   smallXbigY.z + dir),
-            new Vertex(smallXsmallY.x + offset, smallXsmallY.y + offset, smallXsmallY.z + dir),
-            new Vertex(  bigXsmallY.x - offset,   bigXsmallY.y + offset,   bigXsmallY.z + dir),
-            new Vertex(    bigXbigY.x - offset,     bigXbigY.y - offset,     bigXbigY.z + dir)
-        );
-        vertices.addAll(innerRing);
-
-        buildPrismSurface(outerRing, innerRing);
-        buildRibbon(
-            Arrays.asList(innerRing.get(3), innerRing.get(0)),
-            Arrays.asList(innerRing.get(2), innerRing.get(1))
-        );
-    }
-
-
-    private void buildTileXZ(List<Vertex> outerRing, boolean posYoffset) {
-        Vertex smallXbigZ = outerRing.get(0);
-        Vertex smallXsmallZ = outerRing.get(1);
-        Vertex bigXsmallZ = outerRing.get(2);
-        Vertex bigXbigZ = outerRing.get(3);
-        
-        double sideLength = Math.abs(bigXbigZ.x - smallXbigZ.x);
-        double offset = 0.05 * sideLength;
-        double dir = posYoffset ? offset : -offset;
-
-        List<Vertex> innerRing = Arrays.asList(
-            new Vertex(  smallXbigZ.x + offset,   smallXbigZ.y + dir,   smallXbigZ.z - offset),
-            new Vertex(smallXsmallZ.x + offset, smallXsmallZ.y + dir, smallXsmallZ.z + offset),
-            new Vertex(  bigXsmallZ.x - offset,   bigXsmallZ.y + dir,   bigXsmallZ.z + offset),
-            new Vertex(    bigXbigZ.x - offset,     bigXbigZ.y + dir,     bigXbigZ.z - offset)
-        );
-        vertices.addAll(innerRing);
-
-        buildPrismSurface(outerRing, innerRing);
-        buildRibbon(
-            Arrays.asList(innerRing.get(3), innerRing.get(0)),
-            Arrays.asList(innerRing.get(2), innerRing.get(1))
-        );
-    }
-
-
-    private void buildTileYZ(List<Vertex> outerRing, boolean posXoffset) {
-        Vertex smallYbigZ = outerRing.get(0);
-        Vertex smallYsmallZ = outerRing.get(1);
-        Vertex bigYsmallZ = outerRing.get(2);
-        Vertex bigYbigZ = outerRing.get(3);
-
-        double sideLength = Math.abs(bigYbigZ.x - smallYbigZ.x);
-        double offset = 0.05 * sideLength;
-        double dir = posXoffset ? offset : -offset;
-
-        List<Vertex> innerRing = Arrays.asList(
-            new Vertex(  smallYbigZ.x + dir,   smallYbigZ.y + offset,   smallYbigZ.z - offset),
-            new Vertex(smallYsmallZ.x + dir, smallYsmallZ.y + offset, smallYsmallZ.z + offset),
-            new Vertex(  bigYsmallZ.x + dir,   bigYsmallZ.y - offset,   bigYsmallZ.z + offset),
-            new Vertex(    bigYbigZ.x + dir,     bigYbigZ.y - offset,     bigYbigZ.z - offset)
-        );
-        vertices.addAll(innerRing);
-
-        buildPrismSurface(outerRing, innerRing);
-        buildRibbon(
-            Arrays.asList(innerRing.get(3), innerRing.get(0)),
-            Arrays.asList(innerRing.get(2), innerRing.get(1))
-        );
-    }
-
-
-    public void buildRoom(/*int unitsX, int unitsY, int unitsZ, double unitSize*/) {
-        List<Vertex> verticesXY = Arrays.asList(
-            new Vertex(-1,  1, 1),
-            new Vertex(-1, -1, 1),
-            new Vertex( 1, -1, 1),
-            new Vertex( 1,  1, 1)
-        ); 
-        vertices.addAll(verticesXY);
-
-        List<Vertex> verticesXZ = Arrays.asList(
-            new Vertex(-1, -1,  1),
-            new Vertex(-1, -1, -1),
-            new Vertex( 1, -1, -1),
-            new Vertex( 1, -1,  1)
-        );
-        vertices.addAll(verticesXZ);
-
-        List<Vertex> verticesYZ = Arrays.asList(
-            new Vertex(1, -1,  1),
-            new Vertex(1, -1, -2),
-            new Vertex(1,  1, -2),
-            new Vertex(1,  1,  1)
-        );
-        vertices.addAll(verticesYZ);
-
-        buildTileXY(verticesXY, false);
-        buildTileXZ(verticesXZ, true);
-        buildTileYZ(verticesYZ, false);
         normalizeVertexNormals();
     }
 }

@@ -1,12 +1,12 @@
 package graphics3D;
 
 public class Light {
-    Vector location, target;
+    public Vector location, target;
 
-    double[][] shadowBuffer;
+    double[][] shadowMap;
     Camera camera;
 
-    Color color;
+    public Color color;
 
     public Light(Vector location, Vector target, Color color) {
         this.location = location;
@@ -19,20 +19,17 @@ public class Light {
     }
 
     public void initShadowBuffer() {
-        int numPixels = Config.shadowResolution;
-        shadowBuffer = new double[numPixels][numPixels];
+        int numPixels = Config.shadowMapResolution;
+        shadowMap = new double[numPixels][numPixels];
         camera = new Camera(numPixels, numPixels, Config.shadowMapFOV);
         camera.lookAt(location, target);
     }
 
     public boolean isIlluminating(Vector point) {
-        if (!Config.shadowMapping) {
-            return true;
-        }
         Pixel p = camera.project(point);
 
         if (p != null) {
-            double bufferValue = shadowBuffer[(int) p.pixelX][(int) p.pixelY];
+            double bufferValue = shadowMap[(int) p.pixelX][(int) p.pixelY];
             return p.zRec + Config.shadowBufferBias > bufferValue;
         }
         return true;
