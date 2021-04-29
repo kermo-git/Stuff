@@ -1,6 +1,6 @@
-package graphics3D;
+package graphics3D.raytracing;
 
-import graphics3D.materials.Material;
+import graphics3D.utils.Vector;
 
 public class RayIntersection {
     public double distance;

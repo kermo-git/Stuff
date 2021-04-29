@@ -1,4 +1,9 @@
-package graphics3D;
+package graphics3D.rasterization;
+
+import graphics3D.utils.Camera;
+import graphics3D.utils.Color;
+import graphics3D.utils.Pixel;
+import graphics3D.utils.Vector;
 
 public class Light {
     public Vector location, target;
@@ -14,14 +19,10 @@ public class Light {
         this.color = color;
     }
 
-    public Light(Vector location, Color diffuse) {
-        this(location, new Vector(), diffuse);
-    }
-
     public void initShadowBuffer() {
-        int numPixels = Config.shadowMapResolution;
+        int numPixels = Config.SHADOW_RESOLUTION;
         shadowMap = new double[numPixels][numPixels];
-        camera = new Camera(numPixels, numPixels, Config.shadowMapFOV);
+        camera = new Camera(numPixels, numPixels, Config.SHADOWMAP_FOV);
         camera.lookAt(location, target);
     }
 
@@ -30,7 +31,7 @@ public class Light {
 
         if (p != null) {
             double bufferValue = shadowMap[(int) p.pixelX][(int) p.pixelY];
-            return p.zRec + Config.shadowBufferBias > bufferValue;
+            return p.zRec + Config.SHADOWMAP_BIAS > bufferValue;
         }
         return true;
     }

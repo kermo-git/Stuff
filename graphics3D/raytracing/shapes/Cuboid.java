@@ -1,8 +1,8 @@
-package graphics3D.shapes;
+package graphics3D.raytracing.shapes;
 
-import graphics3D.materials.Material;
-import graphics3D.Vector;
-import graphics3D.RayIntersection;
+import graphics3D.raytracing.Material;
+import graphics3D.raytracing.RayIntersection;
+import graphics3D.utils.Vector;
 
 public class Cuboid extends OriginShape {
     public double sizeX, sizeY, sizeZ;
@@ -14,7 +14,7 @@ public class Cuboid extends OriginShape {
         this.sizeZ = sizeZ;
     }
     @Override
-    public RayIntersection getTransformedIntersection(
+    public RayIntersection getIntersectionAtOrigin(
         Vector transformedOrigin, 
         Vector transformedDirection
     ) {

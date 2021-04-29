@@ -1,13 +1,31 @@
-package graphics3D.materials;
+package graphics3D.raytracing;
 
-import graphics3D.*;
-import graphics3D.shapes.Shape;
+import graphics3D.raytracing.shapes.RayTracingObject;
+import graphics3D.utils.Color;
+import graphics3D.utils.Vector;
 
 public class PhongMaterial extends Material {
-    Color ambient, diffuse, specular;
-    double shininess;
+    Color ambient = new Color(0x222222);
+    Color diffuse = new Color(0xFFFFFF);
+    Color specular = new Color(0xFFFFFF);
 
-    double reflectivity = 0, ior;
+    double shininess = 0.25 * 128;
+    double reflectivity = 0;
+    double ior = 1.3;
+
+    public PhongMaterial() {}
+    public PhongMaterial(
+        Color ambient, Color diffuse, Color specular, 
+        double shininess, double reflectivity, double ior) {
+
+        this.ambient = ambient;
+        this.diffuse = diffuse;
+        this.specular = specular;
+
+        this.shininess = shininess;
+        this.reflectivity = reflectivity;
+        this.ior = ior;
+    }
 
     public PhongMaterial(Color ambient, Color diffuse, Color specular, double shininess) {
         this.ambient = ambient;
@@ -16,66 +34,63 @@ public class PhongMaterial extends Material {
         this.shininess = shininess;
     }
 
-    public PhongMaterial(Color color, double reflectivity, double ior, boolean metallic) {
+    public PhongMaterial(Color color, double reflectivity, double ior) {
         ambient = new Color(color);
         ambient.scale(0.05);
         diffuse = color;
-        this.specular = metallic ? color : new Color(0xFFFFFF);
-        shininess = 0.25 * 128;
         this.reflectivity = reflectivity;
         this.ior = ior;
     }
 
+    public PhongMaterial(Color color) {
+        ambient = new Color(color);
+        ambient.scale(0.05);
+        diffuse = color;
+    }
+
     @Override
     public Color shade(Vector viewVector, Vector surfacePoint, Vector normal, boolean inside, int recursionDepth) {
-        Color phongColor = new Color(ambient);
+        Color result = new Color(ambient);
 
         Vector lightVector, reflectionVector;
 
         double diffuseIntensity, specularIntensity;
 
         lightLoop:
-        for (Light light : Scene3D.lights) {
+        for (Light light : Scene.lights) {
             lightVector = new Vector(light.location, surfacePoint);
-            double distanceToLight = lightVector.length() - Config.rayHitPointBias;
+            double distanceToLight = lightVector.length() - Config.RAY_HIT_BIAS;
             lightVector.normalize();
 
-            switch (Config.shadowType) {
-                case SHADOW_MAPPING:
-                    if (!light.isIlluminating(surfacePoint))
-                        continue lightLoop;
-                    break;
-                case SHADOW_RAYS:
-                    RayIntersection intersection = null;
+            if (Config.SHADOWS) {
+                RayIntersection intersection = null;
 
-                    for (Shape object : Scene3D.shapes) {
-                        intersection = object.getIntersection(light.location, lightVector);
-                        if (intersection != null && intersection.distance < distanceToLight) {
-                            continue lightLoop;
-                        }
+                for (RayTracingObject object : Scene.shapes) {
+                    intersection = object.getIntersection(light.location, lightVector);
+                    if (intersection != null && intersection.distance < distanceToLight) {
+                        continue lightLoop;
                     }
-                    break;
-                case NO_SHADOWS:
+                }
             }
             diffuseIntensity = -lightVector.dot(normal);
             
             if (diffuseIntensity > 0) {
-                phongColor.add(diffuseIntensity, diffuse, light.color);
+                result.add(diffuseIntensity, diffuse, light.color);
                 
                 reflectionVector = lightVector.getLightReflection(normal);
                 specularIntensity = -reflectionVector.dot(viewVector);
 
                 if (specularIntensity > 0) {
                     specularIntensity = Math.pow(specularIntensity, shininess);
-                    phongColor.add(specularIntensity, specular, light.color);
+                    result.add(specularIntensity, specular, light.color);
                 }
             }
         }
-        if (reflectivity > 0) {
+        if (Config.REFLECTIONS) {
             Vector reflectionOrigin = new Vector(surfacePoint);
-            reflectionOrigin.add(Config.rayHitPointBias, normal);
+            reflectionOrigin.add(Config.RAY_HIT_BIAS, normal);
     
-            Color reflectionColor = Scene3D.castRay(
+            Color reflectionColor = Scene.castRay(
                 reflectionOrigin, 
                 getReflectedRay(viewVector, normal),
                 inside,
@@ -87,10 +102,10 @@ public class PhongMaterial extends Material {
             double reflectionRatio = reflectivity + (1 - reflectivity) * schlick(1, ior, cos);
             
             reflectionColor.scale(reflectionRatio);
-            phongColor.scale(1 - reflectionRatio);
-            phongColor.add(reflectionColor);
+            result.scale(1 - reflectionRatio);
+            result.add(reflectionColor);
         }
-        return phongColor;
+        return result;
     }
 
     // http://devernay.free.fr/cours/opengl/materials.html

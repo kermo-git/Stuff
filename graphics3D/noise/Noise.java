@@ -1,10 +1,12 @@
 package graphics3D.noise;
 
-public abstract class Noise {
+public class Noise {
     /**
      * @return {@code double} between -1 and 1
      */
-    public abstract double signedNoise(double x, double y, double z);
+    public double signedNoise(double x, double y, double z) {
+        return -1;
+    };
 
     public double noise(double x, double y, double z) {
         return 0.5 + 0.5 * signedNoise(x, y, z);

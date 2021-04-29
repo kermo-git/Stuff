@@ -5,13 +5,15 @@ import java.awt.Graphics;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import graphics3D.raytracing.*;
+
 public class GraphicsDisplay extends JPanel {
     private static final long serialVersionUID = 1L;
     private static BufferedImage image;
 
     static {
-        SceneBuilder.buildRayTracingScene();
-        image = Scene3D.render();
+        SceneBuilder.buildScene();
+        image = Scene.render();
     }
 
     @Override
@@ -21,8 +23,8 @@ public class GraphicsDisplay extends JPanel {
 
     public static void main(String[] args) {        
         JFrame frame = new JFrame();
-        frame.setTitle("3D Shapes");
-        frame.setSize(Config.screenSizeX, Config.screenSizeY);
+        frame.setTitle("3D Graphics");
+        frame.setSize(Config.SCREENSIZE_X, Config.SCREENSIZE_Y);
         frame.add(new GraphicsDisplay());
         frame.setVisible(true);
     }

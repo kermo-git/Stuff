@@ -1,14 +1,16 @@
-package graphics3D.materials;
+package graphics3D.raytracing;
 
-import graphics3D.Vector;
-import graphics3D.Color;
+import graphics3D.utils.Color;
+import graphics3D.utils.Vector;
 
-public abstract class Material {
+public class Material {
 
-    public abstract Color shade(
+    public Color shade(
         Vector viewVector, Vector surfacePoint, Vector normal, 
         boolean inside, int recursionDepth
-    );
+    ) {
+        return new Color();
+    };
 
     public static Vector getReflectedRay(Vector ray, Vector normal) {
         double dot = 2 * ray.dot(normal);
