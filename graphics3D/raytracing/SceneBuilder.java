@@ -2,32 +2,52 @@ package graphics3D.raytracing;
 
 import graphics3D.raytracing.shapes.*;
 import graphics3D.utils.Color;
-import graphics3D.utils.Matrix;
 import graphics3D.utils.Vector;
 
 public class SceneBuilder {
+    public static void buildSingleObject() {
+        Scene.clearScene();
+        Scene.camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 1));
+
+        Scene.addLights(
+            new Light(
+                new Vector(0, 0, 0),
+                new Color(0xFFFFFF)
+            )
+        );
+        Scene.addShapes(
+            new Sphere(
+                PhongMaterial.COPPER(), 
+                new Vector(0, 0, 20), 5
+            )
+        );
+    }
     public static void buildScene() {
         Scene.clearScene();
         Scene.camera.lookAt(new Vector(0, 15, 1), new Vector(0, 15, 2));
 
-        Light light = new Light(
-            new Vector(-14, 29, 1),
-            new Color(0xFFFFFF)
+        Scene.addLights(
+            new Light(
+                new Vector(-14, 29, 1),
+                new Color(0xFFFFFF)
+            )
         );
+        Scene.addShapes(
+            new Cone(PhongMaterial.EMERALD(), 15, 7).translate(7, 0, 30),
 
-        RayTracingObject floor = new Plane(PhongMaterial.CYAN_PLASTIC());
-        RayTracingObject ceiling = new Plane(PhongMaterial.CYAN_PLASTIC(), new Vector(0, 30, 0), new Vector(0, 1, 0));
+            new Sphere(new GlassMaterial(), new Vector(-5, 15, 23), 5),
 
-        RayTracingObject leftWall = new Plane(PhongMaterial.GOLD(), new Vector(-15, 0, 0), new Vector(1, 0, 0));
-        RayTracingObject rightWall = new Plane(PhongMaterial.GOLD(), new Vector(15, 0, 0), new Vector(1, 0, 0));
+            new Cylinder(PhongMaterial.COPPER(), 20, 6)
+            .rotate(-0.49 * Math.PI, -0.2 * Math.PI, 0)
+            .translate(4, 22, 40),
 
-        RayTracingObject frontWall = new Plane(PhongMaterial.GOLD(), new Vector(0, 0, 50), new Vector(0, 0, 1));
-        RayTracingObject backWall = new Plane(PhongMaterial.GOLD(), new Vector(0, 0, 0), new Vector(0, 0, 1));
-
-        RayTracingObject cylinder = new Cylinder(new GlassMaterial(new Color(0x55BB55)), 9, 5);
-        cylinder.transform(Matrix.rotateAroundX(-0.15 * Math.PI), Matrix.translate(-5, 13, 20));
-        
-        Scene.addLights(light);
-        Scene.addShapes(cylinder, floor, ceiling, leftWall, rightWall, frontWall, backWall);
+            new Box(
+                PhongMaterial.SILVER(), 
+                PhongMaterial.CYAN_PLASTIC(), 
+                PhongMaterial.SILVER(),
+                30, 30, 50
+            )
+            .translate(0, 15, 25)
+        );
     }
 }

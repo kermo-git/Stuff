@@ -18,32 +18,38 @@ public class TriangleMesh {
         this.material = material;
     }
 
+    /* * * * * * * * * *
+     * TRANSFORMATIONS *
+     * * * * * * * * * */
 
-    public void transform(Matrix rotation, Matrix translation) {
-        Matrix transformation = rotation.combine(translation);
-
+    public TriangleMesh rotate(double rotX, double rotY, double rotZ) {
+        Matrix rotation = 
+            Matrix.rotateAroundX(rotX).combine(
+            Matrix.rotateAroundY(rotY)).combine(
+            Matrix.rotateAroundZ(rotZ));
+        
         for (Vertex vertex : vertices) {
-            transformation.transform(vertex);
+            rotation.transform(vertex);
             rotation.transform(vertex.normal);
         }
         for (Triangle triangle : triangles) {
             rotation.transform(triangle.normal);
         }
+        return this;
     }
 
+    public TriangleMesh translate(double x, double y, double z) {
+        Matrix translation = Matrix.translate(x, y, z);
 
-    public void transform(Matrix translation) {
         for (Vertex vertex : vertices) {
             translation.transform(vertex);
         }
+        return this;
     }
 
-
-    public void normalizeVertexNormals() {
-        for (Vertex v : vertices) {
-            v.normal.normalize();
-        }
-    }
+    /* * * * * * * * * * * * * * * * * * * * * * * * * *
+     * HELPER METHODS FOR CONSTRUCTING A TRIANGLE MESH *
+     * * * * * * * * * * * * * * * * * * * * * * * * * */
 
     private List<Vertex> XYregularPolygon(int n, double radius) {
         List<Vertex> result = new ArrayList<>();
@@ -143,7 +149,19 @@ public class TriangleMesh {
     }
 
 
-    public void buildPrism(int n, double height, double radius) {
+    public void normalizeVertexNormals() {
+        for (Vertex v : vertices) {
+            v.normal.normalize();
+        }
+    }
+
+
+    /* * * * * * * * * * * * * * *
+     * BUILDING DIFFERENT SHAPES *
+     * * * * * * * * * * * * * * */
+
+
+    public TriangleMesh buildPrism(int n, double height, double radius) {
         Vertex apex1 = new Vertex(0, 0.5*height, 0);
         Vertex apex2 = new Vertex(0, -0.5*height, 0);
 
@@ -166,10 +184,12 @@ public class TriangleMesh {
         Collections.reverse(circle1);
         buildPyramidSurface(apex1, circle1);
         normalizeVertexNormals();
+
+        return this;
     }
 
 
-    public void buildAntiPrism(int n, double height, double radius) {
+    public TriangleMesh buildAntiPrism(int n, double height, double radius) {
         Vertex apex1 = new Vertex(0, -0.5*height, 0);
         Vertex apex2 = new Vertex(0, 0.5*height, 0);
 
@@ -194,20 +214,24 @@ public class TriangleMesh {
         Collections.reverse(circle2);
         buildPyramidSurface(apex2, circle2);
         normalizeVertexNormals();
+
+        return this;
     }
 
 
-    public void buildBipyramid(int n, double length, double baseRadius) {
+    public TriangleMesh buildBipyramid(int n, double length, double baseRadius) {
         List<Vertex> circle = XZregularPolygon(n, baseRadius);
         buildPyramidSurface(new Vertex(0, -0.5*length, 0), circle);
 
         Collections.reverse(circle);
         buildPyramidSurface(new Vertex(0, 0.5*length, 0), circle);
         normalizeVertexNormals();
+
+        return this;
     }
 
 
-    public void buildSphere(double radius, int num_meridians) {
+    public TriangleMesh buildSphere(double radius, int num_meridians) {
         int num_parallels = num_meridians - 1;
         int num_corners = 2*num_meridians;
 
@@ -267,10 +291,12 @@ public class TriangleMesh {
         }
         buildPyramidSurface(north_pole, circle1);
         normalizeVertexNormals();
+
+        return this;
     }
 
 
-    public void buildTorus(double innerRadius, double outerRadius, int level_of_detail) {
+    public TriangleMesh buildTorus(double innerRadius, double outerRadius, int level_of_detail) {
         double mean_radius = (outerRadius + innerRadius)/2;
         double tube_radius = (outerRadius - innerRadius)/2;
 
@@ -308,9 +334,11 @@ public class TriangleMesh {
         }
         buildPrismSurface(circle2, first_circle);
         normalizeVertexNormals();
+
+        return this;
     }
 
-    public void buildFunctionPlot(
+    public TriangleMesh buildFunctionPlot(
         double unitsX, double unitsY,
         double unitSize, int density,
         Noise noise) {
@@ -342,5 +370,7 @@ public class TriangleMesh {
             current = new ArrayList<>();
         }
         normalizeVertexNormals();
+
+        return this;
     }
 }

@@ -4,7 +4,7 @@ import graphics3D.raytracing.Material;
 import graphics3D.raytracing.RayIntersection;
 import graphics3D.utils.Vector;
 
-public class InfiniteCylinder extends OriginShape {
+public class InfiniteCylinder extends OriginRayTracingObject {
     private double radiusSquared, radiusRec;
 
     public InfiniteCylinder(Material material, double radius) {
@@ -20,7 +20,6 @@ public class InfiniteCylinder extends OriginShape {
         double c = o.x * o.x + o.z * o.z - radiusSquared;
 
         double distance = 0;
-        boolean inside = false;
         solveQuadraticEquasion(a, b, c);
 
         if (lowX != lowX) {
@@ -30,7 +29,6 @@ public class InfiniteCylinder extends OriginShape {
             return null;
         }
         if (lowX < 0) {
-            inside = true;
             distance = highX;
         } else {
             distance = lowX;
@@ -42,13 +40,9 @@ public class InfiniteCylinder extends OriginShape {
         );
         Vector normal = new Vector();
 
-        if (inside) {
-            normal.x = -hitPoint.x * radiusRec;
-            normal.z = -hitPoint.z * radiusRec;
-        } else {
-            normal.x = hitPoint.x * radiusRec;
-            normal.z = hitPoint.z * radiusRec;
-        }
+        normal.x = hitPoint.x * radiusRec;
+        normal.z = hitPoint.z * radiusRec;
+
         return new RayIntersection(distance, hitPoint, normal, material);
     }
 }

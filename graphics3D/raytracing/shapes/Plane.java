@@ -23,18 +23,26 @@ public class Plane extends RayTracingObject {
     }
 
     @Override
-    public void transform(Matrix rotation, Matrix translation) {
+    public RayTracingObject rotate(double rotX, double rotY, double rotZ) {
+        Matrix rotation = 
+            Matrix.rotateAroundX(rotX).combine(
+            Matrix.rotateAroundY(rotY)).combine(
+            Matrix.rotateAroundZ(rotZ));
+
         rotation.transform(normal);
         rotation.transform(point);
-        translation.transform(point);
         oppositeNormal = normal.getScaled(-1);
         planeBias = point.dot(normal);
+
+        return this;
     }
 
     @Override
-    public void transform(Matrix translation) {
+    public RayTracingObject translate(double x, double y, double z) {
+        Matrix translation = Matrix.translate(x, y, z);
         translation.transform(point);
         planeBias = point.dot(normal);
+        return this;
     }
 
     @Override
@@ -47,15 +55,7 @@ public class Plane extends RayTracingObject {
         if (distance < 0) {
             return null;
         }
-        Vector hitPoint = new Vector(
-            rayOrigin.x + distance * rayDirection.x,
-            rayOrigin.y + distance * rayDirection.y,
-            rayOrigin.z + distance * rayDirection.z
-        );
-        if (normalDotDirection > 0) {
-            return new RayIntersection(distance, hitPoint, oppositeNormal, material);
-        } else {
-            return new RayIntersection(distance, hitPoint, normal, material);
-        }
+        Vector hitPoint = getPointOnRay(rayOrigin, rayDirection, distance);
+        return new RayIntersection(distance, hitPoint, oppositeNormal, material);
     }
 }

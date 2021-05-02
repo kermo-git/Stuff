@@ -50,6 +50,9 @@ public class PhongMaterial extends Material {
 
     @Override
     public Color shade(Vector viewVector, Vector surfacePoint, Vector normal, boolean inside, int recursionDepth) {
+        if (viewVector.dot(normal) > 0) {
+            normal = normal.getScaled(-1);
+        }
         Color result = new Color(ambient);
 
         Vector lightVector, reflectionVector;
@@ -77,7 +80,7 @@ public class PhongMaterial extends Material {
             if (diffuseIntensity > 0) {
                 result.add(diffuseIntensity, diffuse, light.color);
                 
-                reflectionVector = lightVector.getLightReflection(normal);
+                reflectionVector = getReflectedRay(lightVector, normal);
                 specularIntensity = -reflectionVector.dot(viewVector);
 
                 if (specularIntensity > 0) {

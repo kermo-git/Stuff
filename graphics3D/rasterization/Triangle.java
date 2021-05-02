@@ -1,7 +1,6 @@
 package graphics3D.rasterization;
 
 import graphics3D.utils.Color;
-import graphics3D.utils.Matrix;
 import graphics3D.utils.Pixel;
 import graphics3D.utils.Vector;
 
@@ -31,26 +30,14 @@ public class Triangle {
     }
 
 
-    public void transform(Matrix rotation, Matrix translation) {
-        Matrix fullTransformation = rotation.combine(translation);
-        fullTransformation.transform(v1);
-        fullTransformation.transform(v2);
-        fullTransformation.transform(v3);
-        rotation.transform(normal);
-    }
-    public void transform(Matrix translation) {
-        translation.transform(v1);
-        translation.transform(v2);
-        translation.transform(v3);
-    }
-
-
-    protected static double min(double a, double b) {
+    private static double min(double a, double b) {
         return (a < b) ? a : b;
     }
-    protected static double max(double a, double b) {
+    private static double max(double a, double b) {
         return (a > b) ? a : b;
     }
+
+
     public void rasterize(double[][] depthMap, Color[][] frameBuffer) {
         Pixel p1 = v1.projection;
         Pixel p2 = v2.projection;

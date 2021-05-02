@@ -8,7 +8,7 @@ public class Config {
     public static final int SCREENSIZE_Y = TOOLKIT.getScreenSize().height;
 
     public static final double CAMERA_FOV = 70;
-    public static final boolean ANTI_ALIASING = true;
+    public static final boolean ANTI_ALIASING = false;
 
     public static final boolean SPECULAR_HIGHLIGHTS = true;
     public static final boolean SHADOWS = true;
@@ -16,6 +16,6 @@ public class Config {
     
     public static final double 
         DEPTHMAP_BIAS = 0.001,
-        SHADOWMAP_BIAS = 0.005,
+        SHADOWMAP_BIAS = 0.001,
         SHADOWMAP_FOV = 120;
 }

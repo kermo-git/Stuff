@@ -27,6 +27,9 @@ public class GlassMaterial extends Material {
 
     @Override
     public Color shade(Vector viewVector, Vector surfacePoint, Vector normal, boolean inside, int recursionDepth) {
+        if (viewVector.dot(normal) > 0) {
+            normal = normal.getScaled(-1);
+        }
         Color reflectionColor = new Color();
 
         if (Config.REFLECTIONS) {

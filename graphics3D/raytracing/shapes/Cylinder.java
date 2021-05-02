@@ -4,7 +4,7 @@ import graphics3D.raytracing.Material;
 import graphics3D.raytracing.RayIntersection;
 import graphics3D.utils.Vector;
 
-public class Cylinder extends OriginShape {
+public class Cylinder extends OriginRayTracingObject {
     private double radiusSquared, radiusRec;
     private double minY, maxY;
 
@@ -16,14 +16,6 @@ public class Cylinder extends OriginShape {
 
         maxY = height * 0.5;
         minY = -height * 0.5;
-    }
-
-    private static Vector getPointOnRay(Vector origin, Vector direction, double distance) {
-        return new Vector(
-            origin.x + distance * direction.x,
-            origin.y + distance * direction.y,
-            origin.z + distance * direction.z
-        );
     }
     
     @Override
@@ -62,12 +54,12 @@ public class Cylinder extends OriginShape {
         else if (under && nearSideHitY < minY && farSideHitY > minY) {
             distance = (minY - o.y) / d.y;
             hitPoint = getPointOnRay(o, d, distance);
-            normal = new Vector(0, -1, 0);
+            normal = new Vector(0, 1, 0);
         }
         else if (inside && nearSideHitY < maxY && farSideHitY > maxY) {
             distance = (maxY - o.y) / d.y;
             hitPoint = getPointOnRay(o, d, distance);
-            normal = new Vector(0, -1, 0);
+            normal = new Vector(0, 1, 0);
         }
         else if (!inside && nearSideHitY >= minY && nearSideHitY <= maxY) {
             distance = lowX;
@@ -84,9 +76,9 @@ public class Cylinder extends OriginShape {
             hitPoint = getPointOnRay(o, d, distance);
 
             normal = new Vector(
-                -hitPoint.x * radiusRec,
+                hitPoint.x * radiusRec,
                 0,
-                -hitPoint.z * radiusRec
+                hitPoint.z * radiusRec
             );
         }
         else {

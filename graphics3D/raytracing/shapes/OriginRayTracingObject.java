@@ -4,28 +4,45 @@ import graphics3D.raytracing.RayIntersection;
 import graphics3D.utils.Matrix;
 import graphics3D.utils.Vector;
 
-public abstract class OriginShape extends RayTracingObject {
-    protected abstract RayIntersection getIntersectionAtOrigin(
-        Vector transformedOrigin, 
-        Vector transFormedDirection
-    );
+public abstract class OriginRayTracingObject extends RayTracingObject {
+    protected abstract RayIntersection getIntersectionAtOrigin(Vector o, Vector d);
 
     public Matrix rotation, rotationInv;
     public Matrix fullTransformation, fullTransformationInv;
-    
-    @Override
-    public void transform(Matrix rotation, Matrix translation) {
-        this.rotation = rotation;
-        fullTransformation = rotation.combine(translation);
 
+    @Override
+    public RayTracingObject rotate(double rotX, double rotY, double rotZ) {
+        Matrix newRotation = 
+            Matrix.rotateAroundX(rotX).combine(
+            Matrix.rotateAroundY(rotY)).combine(
+            Matrix.rotateAroundZ(rotZ));
+        
+        if (rotation != null) {
+            rotation = rotation.combine(newRotation);
+        } else {
+            rotation = newRotation;
+        }
+        if (fullTransformation != null) {
+            fullTransformation = fullTransformation.combine(newRotation);
+        } else {
+            fullTransformation = newRotation;
+        }
         rotationInv = rotation.inverse();
         fullTransformationInv = fullTransformation.inverse();
+        return this;
     }
 
     @Override
-    public void transform(Matrix translation) {
-        fullTransformation = translation;
+    public RayTracingObject translate(double x, double y, double z) {
+        Matrix newTranslation = Matrix.translate(x, y, z);
+
+        if (fullTransformation != null) {
+            fullTransformation = fullTransformation.combine(newTranslation);
+        } else {
+            fullTransformation = newTranslation;
+        }
         fullTransformationInv = fullTransformation.inverse();
+        return this;
     }
 
     @Override

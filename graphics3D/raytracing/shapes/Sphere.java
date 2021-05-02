@@ -2,7 +2,6 @@ package graphics3D.raytracing.shapes;
 
 import graphics3D.raytracing.Material;
 import graphics3D.raytracing.RayIntersection;
-import graphics3D.utils.Matrix;
 import graphics3D.utils.Vector;
 
 public class Sphere extends RayTracingObject {
@@ -17,14 +16,19 @@ public class Sphere extends RayTracingObject {
     }
 
     @Override
-    public void transform(Matrix rotation, Matrix translation) {
-        transform(translation);
+    public RayTracingObject rotate(double rotX, double rotY, double rotZ) {
+        return this;
     }
 
     @Override
-    public void transform(Matrix translation) {
-        translation.transform(center);
+    public RayTracingObject translate(double x, double y, double z) {
+        center = new Vector(center);
+        center.x += x;
+        center.y += y;
+        center.z += z;
+        
         equasionConst = center.dot(center) - radius * radius;
+        return this;
     }
 
     @Override
@@ -41,23 +45,15 @@ public class Sphere extends RayTracingObject {
                 
             return null;
         }
-        if (lowX <= 0) {
-            Vector hitPoint = new Vector(
-                rayOrigin.x + highX * rayDirection.x,
-                rayOrigin.y + highX * rayDirection.y,
-                rayOrigin.z + highX * rayDirection.z
-            );
-            Vector normal = new Vector(hitPoint, center);
-            normal.normalize();
-            return new RayIntersection(highX, hitPoint, normal, material);
-        }
+        double distance = (lowX <= 0) ? highX : lowX;
+        
         Vector location = new Vector(
-            rayOrigin.x + lowX * rayDirection.x,
-            rayOrigin.y + lowX * rayDirection.y,
-            rayOrigin.z + lowX * rayDirection.z
+            rayOrigin.x + distance * rayDirection.x,
+            rayOrigin.y + distance * rayDirection.y,
+            rayOrigin.z + distance * rayDirection.z
         );
         Vector normal = new Vector(center, location);
         normal.normalize();
-        return new RayIntersection(lowX, location, normal, material);
+        return new RayIntersection(distance, location, normal, material);
     }
 }
