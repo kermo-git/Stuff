@@ -5,10 +5,12 @@ import graphics3D.utils.Matrix;
 import graphics3D.utils.Vector;
 
 public abstract class OriginRayTracingObject extends RayTracingObject {
-    protected abstract RayIntersection getIntersectionAtOrigin(Vector o, Vector d);
+    protected abstract RayIntersection getIntersectionAtObjectSpace(Vector o, Vector d);
 
-    public Matrix rotation, rotationInv;
-    public Matrix fullTransformation, fullTransformationInv;
+    private Matrix rotation = new Matrix();
+    private Matrix rotationInv = new Matrix();
+    private Matrix fullTransformation = new Matrix();
+    private Matrix fullTransformationInv = new Matrix();
 
     @Override
     public RayTracingObject rotate(double rotX, double rotY, double rotZ) {
@@ -17,67 +19,35 @@ public abstract class OriginRayTracingObject extends RayTracingObject {
             Matrix.rotateAroundY(rotY)).combine(
             Matrix.rotateAroundZ(rotZ));
         
-        if (rotation != null) {
-            rotation = rotation.combine(newRotation);
-        } else {
-            rotation = newRotation;
-        }
-        if (fullTransformation != null) {
-            fullTransformation = fullTransformation.combine(newRotation);
-        } else {
-            fullTransformation = newRotation;
-        }
+        rotation = rotation.combine(newRotation);
+        fullTransformation = fullTransformation.combine(newRotation);
+
         rotationInv = rotation.inverse();
         fullTransformationInv = fullTransformation.inverse();
+        
         return this;
     }
 
     @Override
     public RayTracingObject translate(double x, double y, double z) {
-        Matrix newTranslation = Matrix.translate(x, y, z);
-
-        if (fullTransformation != null) {
-            fullTransformation = fullTransformation.combine(newTranslation);
-        } else {
-            fullTransformation = newTranslation;
-        }
+        fullTransformation = fullTransformation.combine(Matrix.translate(x, y, z));
         fullTransformationInv = fullTransformation.inverse();
         return this;
     }
 
     @Override
     public RayIntersection getIntersection(Vector rayOrigin, Vector rayDirection) {
-        RayIntersection result = null;
+        Vector transformedOrigin = fullTransformationInv.getTransformation(rayOrigin);
+        Vector transFormedDirection = rotationInv.getTransformation(rayDirection);
 
-        if (rotation != null && fullTransformation != null) {
-            Vector transformedOrigin = fullTransformationInv.getTransformation(rayOrigin);
-            Vector transFormedDirection = rotationInv.getTransformation(rayDirection);
-    
-            result = getIntersectionAtOrigin(transformedOrigin, transFormedDirection);
-    
-            if (result != null) {
-                fullTransformation.transform(result.hitPoint);
-                rotation.transform(result.normal);
-            }
-            return result;
+        RayIntersection result = getIntersectionAtObjectSpace(
+            transformedOrigin, 
+            transFormedDirection
+        );
+        if (result != null) {
+            fullTransformation.transform(result.hitPoint);
+            rotation.transform(result.normal);
         }
-        else if (fullTransformation != null) {
-            Vector transformedOrigin = fullTransformationInv.getTransformation(rayOrigin);
-            result = getIntersectionAtOrigin(transformedOrigin, rayDirection);
-
-            if (result != null)
-                fullTransformation.transform(result.hitPoint);
-            return result;
-        }
-        else if (rotation != null) {
-            Vector transFormedDirection = rotationInv.getTransformation(rayDirection);
-            result = getIntersectionAtOrigin(rayOrigin, transFormedDirection);
-            
-            if (result != null)
-                rotation.transform(result.normal);
-            return result;
-        }
-        return getIntersectionAtOrigin(rayOrigin, rayDirection);
-    }
-    
+        return result;
+    }   
 }
