@@ -68,7 +68,7 @@ public class PhongMaterial extends Material {
             if (Config.SHADOWS) {
                 RayIntersection intersection = null;
 
-                for (RayTracingObject object : Scene.shapes) {
+                for (RayTracingObject object : Scene.objects) {
                     intersection = object.getIntersection(light.location, lightVector);
                     if (intersection != null && intersection.distance < distanceToLight) {
                         continue lightLoop;

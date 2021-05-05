@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import graphics3D.raytracing.*;
+import graphics3D.raymarching.*;
 
 public class GraphicsDisplay extends JPanel {
     private static final long serialVersionUID = 1L;

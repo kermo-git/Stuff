@@ -14,7 +14,7 @@ public class InfiniteCylinder extends OriginRayTracingObject {
     }
     
     @Override
-    public RayIntersection getIntersectionAtOrigin(Vector o, Vector d) {
+    public RayIntersection getIntersectionAtObjectSpace(Vector o, Vector d) {
         double a = d.x * d.x + d.z * d.z;
         double b = 2 * (o.x * d.x + o.z * d.z);
         double c = o.x * o.x + o.z * o.z - radiusSquared;

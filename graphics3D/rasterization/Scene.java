@@ -15,7 +15,7 @@ public class Scene {
     public static Color[][] frameBuffer;
 
     public static List<Light> lights;
-    public static List<TriangleMesh> triangleMeshes;
+    public static List<TriangleMesh> objects;
 
     public static void clearScene() {
         camera = (Config.ANTI_ALIASING) ?
@@ -23,12 +23,12 @@ public class Scene {
             new Camera(Config.SCREENSIZE_X, Config.SCREENSIZE_Y, Config.CAMERA_FOV);
 
         lights = new ArrayList<>();
-        triangleMeshes = new ArrayList<>();
+        objects = new ArrayList<>();
     }
     static { clearScene(); }
 
-    public static void addTriangleMeshes(TriangleMesh ...newTriangleMeshes) {
-        triangleMeshes.addAll(Arrays.asList(newTriangleMeshes));
+    public static void addObjects(TriangleMesh ...newTriangleMeshes) {
+        objects.addAll(Arrays.asList(newTriangleMeshes));
     }
     public static void addLights(Light ...newLights) {
         lights.addAll(Arrays.asList(newLights));
@@ -38,11 +38,11 @@ public class Scene {
     public static BufferedImage renderDepthMap() {
         depthMap = new double[camera.numPixelsX][camera.numPixelsY];
 
-        for (TriangleMesh object : triangleMeshes) {
-            for (Vertex vertex : object.vertices) {
+        for (TriangleMesh obj : objects) {
+            for (Vertex vertex : obj.vertices) {
                 vertex.projection = camera.project(vertex);
             }
-            for (Triangle triangle : object.triangles) {
+            for (Triangle triangle : obj.triangles) {
                 triangle.rasterize(depthMap, null);
             }
         }
@@ -62,11 +62,11 @@ public class Scene {
             for (Light light : lights) {
                 light.initShadowBuffer();
     
-                for (TriangleMesh object : triangleMeshes) {
-                    for (Vertex vertex : object.vertices) {
+                for (TriangleMesh obj : objects) {
+                    for (Vertex vertex : obj.vertices) {
                         vertex.projection = light.camera.project(vertex);
                     }
-                    for (Triangle triangle : object.triangles) {
+                    for (Triangle triangle : obj.triangles) {
                         triangle.rasterize(light.shadowMap, null);
                     }
                 }
@@ -74,11 +74,11 @@ public class Scene {
         }
         depthMap = new double[camera.numPixelsX][camera.numPixelsY];
 
-        for (TriangleMesh object : triangleMeshes) {
-            for (Vertex vertex : object.vertices) {
+        for (TriangleMesh obj : objects) {
+            for (Vertex vertex : obj.vertices) {
                 vertex.projection = camera.project(vertex);
             }
-            for (Triangle triangle : object.triangles) {
+            for (Triangle triangle : obj.triangles) {
                 triangle.rasterize(depthMap, frameBuffer);
             }
         }

@@ -28,7 +28,7 @@ public class Box extends OriginRayTracingObject {
     }
 
     @Override
-    public RayIntersection getIntersectionAtOrigin(Vector o, Vector d) {
+    public RayIntersection getIntersectionAtObjectSpace(Vector o, Vector d) {
         double tmp, t;
         Vector normal = null;
         Material _material = null;

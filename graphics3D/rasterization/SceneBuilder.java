@@ -16,7 +16,7 @@ public class SceneBuilder {
                 new Color(0xFFFFFF)
             )
         );
-        Scene.addTriangleMeshes(
+        Scene.addObjects(
             new TriangleMesh(Material.JADE())
                 .buildTorus(1.5, 3, 20)
                 .rotate(-0.1 * Math.PI, 0, 0)
@@ -41,7 +41,7 @@ public class SceneBuilder {
                 new Color(0x66FF66)
             )
         );
-        Scene.addTriangleMeshes(
+        Scene.addObjects(
             new SmoothMesh(Material.SILVER())
                 .buildFunctionPlot(50, 50, 1, 20, new PerlinNoise())
                 .rotate(0.8 * Math.PI, 0, 0)

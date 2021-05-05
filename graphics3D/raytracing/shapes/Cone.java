@@ -19,7 +19,7 @@ public class Cone extends OriginRayTracingObject {
         normalTan = radius / height;
     }
     @Override
-    public RayIntersection getIntersectionAtOrigin(Vector o, Vector d) {
+    public RayIntersection getIntersectionAtObjectSpace(Vector o, Vector d) {
         double a = 
             + d.x * d.x 
             + d.z * d.z 

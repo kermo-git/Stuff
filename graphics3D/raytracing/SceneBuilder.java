@@ -15,7 +15,7 @@ public class SceneBuilder {
                 new Color(0xFFFFFF)
             )
         );
-        Scene.addShapes(
+        Scene.addObjects(
             new Sphere(
                 PhongMaterial.COPPER(), 
                 new Vector(0, 0, 20), 5
@@ -32,7 +32,7 @@ public class SceneBuilder {
                 new Color(0xFFFFFF)
             )
         );
-        Scene.addShapes(
+        Scene.addObjects(
             new Cone(PhongMaterial.EMERALD(), 15, 7).translate(7, 0, 30),
 
             new Sphere(new GlassMaterial(), new Vector(-5, 15, 23), 5),

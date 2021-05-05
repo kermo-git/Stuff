@@ -16,7 +16,7 @@ public class Scene {
     public static Color[][] frameBuffer;
 
     public static List<Light> lights;
-    public static List<RayTracingObject> shapes;
+    public static List<RayTracingObject> objects;
 
 
     public static void clearScene() {
@@ -25,12 +25,12 @@ public class Scene {
             new Camera(Config.SCREENSIZE_X, Config.SCREENSIZE_Y, Config.CAMERA_FOV);
 
         lights = new ArrayList<>();
-        shapes = new ArrayList<>();
+        objects = new ArrayList<>();
     }
     static { clearScene(); }
 
-    public static void addShapes(RayTracingObject ...newShapes) {
-        shapes.addAll(Arrays.asList(newShapes));
+    public static void addObjects(RayTracingObject ...newShapes) {
+        objects.addAll(Arrays.asList(newShapes));
     }
     public static void addLights(Light ...newLights) {
         lights.addAll(Arrays.asList(newLights));
@@ -49,8 +49,8 @@ public class Scene {
                 ray = camera.generateRay(x, y);
                 minDistance = Double.MAX_VALUE;
         
-                for (RayTracingObject object : shapes) {
-                    RayIntersection hit = object.getIntersection(camera.location, ray);
+                for (RayTracingObject obj : objects) {
+                    RayIntersection hit = obj.getIntersection(camera.location, ray);
                     if (hit != null && hit.distance < minDistance) {
                         minDistance = hit.distance;
                     }
@@ -103,7 +103,7 @@ public class Scene {
         double minDistance = Double.MAX_VALUE;
         RayIntersection hit = null;
 
-        for (RayTracingObject object : shapes) {
+        for (RayTracingObject object : objects) {
             RayIntersection tmpHit = object.getIntersection(origin, direction);
             if (tmpHit != null && tmpHit.distance < minDistance) {
                 minDistance = tmpHit.distance;

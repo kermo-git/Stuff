@@ -18,6 +18,8 @@ public class Plane extends RayTracingObject {
         this.material = material;
         this.point = point;
         this.normal = normal;
+        
+        normal.normalize();
         oppositeNormal = normal.getScaled(-1);
         planeBias = point.dot(normal);
     }
@@ -31,6 +33,8 @@ public class Plane extends RayTracingObject {
 
         rotation.transform(normal);
         rotation.transform(point);
+
+        normal.normalize();
         oppositeNormal = normal.getScaled(-1);
         planeBias = point.dot(normal);
 
@@ -51,7 +55,7 @@ public class Plane extends RayTracingObject {
         if (normalDotDirection == 0) {
             return null;
         }
-        double distance = (planeBias -  normal.dot(rayOrigin)) / normalDotDirection;
+        double distance = (planeBias - normal.dot(rayOrigin)) / normalDotDirection;
         if (distance < 0) {
             return null;
         }
