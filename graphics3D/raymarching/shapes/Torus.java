@@ -1,13 +1,11 @@
 package graphics3D.raymarching.shapes;
 
-import graphics3D.raymarching.Material;
 import graphics3D.utils.Vector;
 
-public class Torus extends OriginRayMarchingObject {
+public class Torus extends TransformableObject {
     private double mainRadius, tubeRadius;
 
-    public Torus(Material material, double mainRadius, double tubeRadius) {
-        this.material = material;
+    public Torus(double mainRadius, double tubeRadius) {
         this.mainRadius = mainRadius;
         this.tubeRadius = tubeRadius;
     }

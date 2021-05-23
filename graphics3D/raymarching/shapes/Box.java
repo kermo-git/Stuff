@@ -1,17 +1,11 @@
 package graphics3D.raymarching.shapes;
 
-import graphics3D.raymarching.Material;
 import graphics3D.utils.Vector;
 
-public class Box extends OriginRayMarchingObject {
+public class Box extends TransformableObject {
     private double sx, sy, sz;
 
-    public Box(Material material, double cubeSide) {
-        this(material, cubeSide, cubeSide, cubeSide);
-    }
-
-    public Box(Material material, double sizeX, double sizeY, double sizeZ) {
-        this.material = material;
+    public Box(double sizeX, double sizeY, double sizeZ) {
         sx = 0.5 * sizeX;
         sy = 0.5 * sizeY;
         sz = 0.5 * sizeZ;

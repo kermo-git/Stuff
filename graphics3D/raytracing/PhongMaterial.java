@@ -18,9 +18,9 @@ public class PhongMaterial extends Material {
         Color ambient, Color diffuse, Color specular, 
         double shininess, double reflectivity, double ior) {
 
-        this.ambient = ambient;
-        this.diffuse = diffuse;
-        this.specular = specular;
+        this.ambient = new Color(ambient);
+        this.diffuse = new Color(diffuse);
+        this.specular = new Color(specular);
 
         this.shininess = shininess;
         this.reflectivity = reflectivity;
@@ -28,16 +28,16 @@ public class PhongMaterial extends Material {
     }
 
     public PhongMaterial(Color ambient, Color diffuse, Color specular, double shininess) {
-        this.ambient = ambient;
-        this.diffuse = diffuse;
-        this.specular = specular;
+        this.ambient = new Color(ambient);
+        this.diffuse = new Color(diffuse);
+        this.specular = new Color(specular);
         this.shininess = shininess;
     }
 
     public PhongMaterial(Color color, double reflectivity, double ior) {
         ambient = new Color(color);
         ambient.scale(0.05);
-        diffuse = color;
+        diffuse = new Color(color);
         this.reflectivity = reflectivity;
         this.ior = ior;
     }
@@ -45,7 +45,7 @@ public class PhongMaterial extends Material {
     public PhongMaterial(Color color) {
         ambient = new Color(color);
         ambient.scale(0.05);
-        diffuse = color;
+        diffuse = new Color(color);
     }
 
     @Override

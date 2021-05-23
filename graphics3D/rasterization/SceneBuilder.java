@@ -19,7 +19,7 @@ public class SceneBuilder {
         Scene.addObjects(
             new TriangleMesh(Material.JADE())
                 .buildTorus(1.5, 3, 20)
-                .rotate(-0.1 * Math.PI, 0, 0)
+                .rotate(-18, 0, 0)
                 .translate(0, 0, 7)
         );
     }
@@ -44,23 +44,23 @@ public class SceneBuilder {
         Scene.addObjects(
             new SmoothMesh(Material.SILVER())
                 .buildFunctionPlot(50, 50, 1, 20, new PerlinNoise())
-                .rotate(0.8 * Math.PI, 0, 0)
+                .rotate(144, 0, 0)
                 .translate(0, 0, 12), 
 
             new SmoothMesh(Material.SILVER())
                 .buildTorus(1, 2, 20)
-                .rotate(-0.12 * Math.PI, 0, 0)
+                .rotate(-21.6, 0, 0)
                 .translate(0, 0, 7), 
 
             new SmoothMesh(Material.SILVER())
                 .buildSphere(1.5, 20)
-                .rotate(-0.12 * Math.PI, 0, 0)
+                .rotate(-21.6, 0, 0)
                 .translate(4, 2, 12), 
 
             new TriangleMesh(Material.SILVER())
                 .buildAntiPrism(7, 4, 1)
-                .rotate(0, 0, 0.5 * Math.PI)
-                .rotate(0, 0.1 * Math.PI, 0)
+                .rotate(0, 0, 90)
+                .rotate(0, 18, 0)
                 .translate(-5, 2, 12)
         );
     }

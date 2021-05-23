@@ -63,6 +63,20 @@ public class Matrix {
         result.mat[2][2] = scalar;
         return result;
     }
+    
+    public static Matrix rotateDeg(double degX, double degY, double degZ) {
+        double radX = Math.toRadians(degX);
+        double radY = Math.toRadians(degY);
+        double radZ = Math.toRadians(degZ);
+        return rotateRad(radX, radY, radZ);
+    }
+
+    public static Matrix rotateRad(double radX, double radY, double radZ) {
+        return 
+            rotateAroundX(radX).combine(
+            rotateAroundY(radY)).combine(
+            rotateAroundZ(radZ));
+    }
     /*
      *  1   0   0  0
      *  0  cos sin 0

@@ -4,7 +4,7 @@ public class Config {
     public static final int SCREENSIZE_X = 600;
     public static final int SCREENSIZE_Y = 600;
     public static final double CAMERA_FOV = 70;
-    public static final boolean ANTI_ALIASING = true;
+    public static final boolean ANTI_ALIASING = false;
 
     public static final boolean SHADOWS = true;
     public static final boolean REFLECTIONS = true;

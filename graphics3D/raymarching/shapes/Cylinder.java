@@ -1,14 +1,12 @@
 package graphics3D.raymarching.shapes;
 
-import graphics3D.raymarching.Material;
 import graphics3D.utils.Vector;
 
-public class Cylinder extends OriginRayMarchingObject {
+public class Cylinder extends TransformableObject {
     private double radius;
     private double halfHeight;
 
-    public Cylinder(Material material, double height, double radius) {
-        this.material = material;
+    public Cylinder(double height, double radius) {
         this.radius = radius;
         halfHeight = 0.5 * height;
     }
@@ -24,12 +22,14 @@ public class Cylinder extends OriginRayMarchingObject {
         if (inInfiniteCylinder && betweenCaps) {
             return capDistance > cylinderDistance ? capDistance : cylinderDistance;
         }
-        if (betweenCaps) {
+        else if (betweenCaps) {
             return cylinderDistance;
         }
-        if (inInfiniteCylinder) {
+        else if (inInfiniteCylinder) {
             return capDistance;
         }
-        return Math.sqrt(capDistance * capDistance + cylinderDistance * cylinderDistance);
+        else {
+            return  Math.sqrt(capDistance * capDistance + cylinderDistance * cylinderDistance);
+        }
     }
 }

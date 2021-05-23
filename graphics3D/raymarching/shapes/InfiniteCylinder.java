@@ -1,13 +1,11 @@
 package graphics3D.raymarching.shapes;
 
-import graphics3D.raymarching.Material;
 import graphics3D.utils.Vector;
 
-public class InfiniteCylinder extends OriginRayMarchingObject {
+public class InfiniteCylinder extends TransformableObject {
     private double radius;
 
-    public InfiniteCylinder(Material material, double radius) {
-        this.material = material;
+    public InfiniteCylinder(double radius) {
         this.radius = radius;
     }
 

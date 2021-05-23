@@ -13,14 +13,14 @@ public class GlassMaterial extends Material {
         this.ior = ior;
     }
     public GlassMaterial(Color color) {
-        this.color = color;
+        this.color = new Color(color);
     }
     public GlassMaterial(Color color, double ior) {
-        this.color = color;
+        this.color = new Color(color);
         this.ior = ior;
     }
     public GlassMaterial(Color color, double ior, double reflectivity) {
-        this.color = color;
+        this.color = new Color(color);
         this.ior = ior;
         this.reflectivity = reflectivity;
     }

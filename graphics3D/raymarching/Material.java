@@ -1,29 +1,20 @@
 package graphics3D.raymarching;
 
-import graphics3D.raymarching.shapes.RayMarchingObject;
 import graphics3D.utils.Color;
 import graphics3D.utils.Vector;
 
-public class Material {
-    Color ambient = new Color(0x222222);
-    Color diffuse = new Color(0xFFFFFF);
-    Color specular = new Color(0xFFFFFF);
-    double shininess = 0.25 * 128;
+public abstract class Material {
+    public abstract Color shade(
+        Vector viewVector, Vector surfacePoint, Vector normal, int depth
+    );
 
-    
-    public Material() {}
-    public Material(Color ambient, Color diffuse, Color specular, double shininess) {
-        this.ambient = new Color(ambient);
-        this.diffuse = new Color(diffuse);
-        this.specular = new Color(specular);
-        this.shininess = shininess;
+    public static Vector getPointOnRay(Vector origin, Vector direction, double distance) {
+        return new Vector(
+            origin.x + distance * direction.x,
+            origin.y + distance * direction.y,
+            origin.z + distance * direction.z
+        );
     }
-    public Material(Color color) {
-        ambient = new Color(color);
-        ambient.scale(0.1);
-        diffuse = new Color(color);
-    }
-
 
     public static Vector getReflectedRay(Vector ray, Vector normal) {
         double dot = 2 * ray.dot(normal);
@@ -35,76 +26,27 @@ public class Material {
         );
     }
 
-    
-    public double getShadowMultiplier(Vector surfacePoint, Vector lightVector, double distanceToLight, double shadowSharpness) {
-        Vector currentPosition = new Vector(surfacePoint);
-
-        double closestPassDist = Double.MAX_VALUE;
-        double travelDist = Config.RAY_HIT_THRESHOLD;
-        double result = 1;
-        
-        while (travelDist < distanceToLight) {
-            currentPosition = Scene.getPointOnRay(surfacePoint, lightVector, travelDist);
-            double currentMinDistance = Double.MAX_VALUE;
-
-            for (RayMarchingObject obj : Scene.objects) {
-                double distance = obj.getSignedDistance(currentPosition);
-    
-                if (Math.abs(distance) <= Config.RAY_HIT_THRESHOLD) {
-                    return 0;
-                }
-                if (distance < currentMinDistance)
-                    currentMinDistance = distance;
-            }
-            if (currentMinDistance < closestPassDist) {
-                closestPassDist = currentMinDistance;
-                double newResult = shadowSharpness * closestPassDist / travelDist;
-                result = newResult < result ? newResult : result;
-            }
-            travelDist += currentMinDistance;
-        }
-        return result;
+    // http://web.cse.ohio-state.edu/~shen.94/681/Site/Slides_files/reflection_refraction.pdf
+    public static double schlick(double n1, double n2, double cos) {
+        double R0 = (n1 - n2) / (n1 + n2);
+        double _cos = 1 - cos;
+        return R0 * R0 + (1 - R0 * R0) * _cos * _cos * _cos * _cos * _cos;
     }
 
+    public static Vector getRefractedRay(Vector ray, Vector normal, double n1, double n2) {
+        double n = n1 / n2;
+        double cos_1 = -ray.dot(normal);
+        double cos_2_sqr = 1 - n * n * (1 - cos_1 * cos_1);
 
-    public Color shade(Vector surfacePoint, Vector normal) {
-        Vector viewVector = new Vector(surfacePoint, Scene.camera.location);
-        viewVector.normalize();
-        
-        Color result = new Color(ambient);
-        Vector lightVector, reflectionVector;
-        double diffuseIntensity, specularIntensity, distanceToLight, shadowMultiplier;
-
-        for (Light light : Scene.lights) {
-            lightVector = new Vector(surfacePoint, light.location);
-            distanceToLight = lightVector.length();
-            lightVector.normalize();
-
-            shadowMultiplier = 1;
-
-            if (Config.SHADOWS) {
-                shadowMultiplier = 
-                    getShadowMultiplier(
-                        surfacePoint, 
-                        lightVector, 
-                        distanceToLight, 
-                        light.shadowSharpness
-                    );
-            }
-            diffuseIntensity = shadowMultiplier * lightVector.dot(normal);
-            
-            if (diffuseIntensity > 0) {
-                result.add(diffuseIntensity, diffuse, light.color);
-
-                reflectionVector = getReflectedRay(lightVector.getScaled(-1), normal);
-                specularIntensity = shadowMultiplier * reflectionVector.dot(viewVector);
-
-                if (specularIntensity > 0) {
-                    specularIntensity = Math.pow(specularIntensity, shininess);
-                    result.add(specularIntensity, specular, light.color);
-                }
-            }
+        if (cos_2_sqr < 0) {
+            return null;
         }
-        return result;
+        double cos_2 = Math.sqrt(cos_2_sqr);
+
+        return new Vector(
+            n * (cos_1 * normal.x + ray.x) - cos_2 * normal.x,
+            n * (cos_1 * normal.y + ray.y) - cos_2 * normal.y,
+            n * (cos_1 * normal.z + ray.z) - cos_2 * normal.z
+        );
     }
 }

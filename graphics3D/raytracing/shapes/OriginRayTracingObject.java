@@ -13,11 +13,8 @@ public abstract class OriginRayTracingObject extends RayTracingObject {
     private Matrix fullTransformationInv = new Matrix();
 
     @Override
-    public RayTracingObject rotate(double rotX, double rotY, double rotZ) {
-        Matrix newRotation = 
-            Matrix.rotateAroundX(rotX).combine(
-            Matrix.rotateAroundY(rotY)).combine(
-            Matrix.rotateAroundZ(rotZ));
+    public RayTracingObject rotate(double degX, double degY, double degZ) {
+        Matrix newRotation = Matrix.rotateDeg(degX, degY, degZ);
         
         rotation = rotation.combine(newRotation);
         fullTransformation = fullTransformation.combine(newRotation);

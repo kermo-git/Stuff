@@ -16,7 +16,7 @@ public class Sphere extends RayTracingObject {
     }
 
     @Override
-    public RayTracingObject rotate(double rotX, double rotY, double rotZ) {
+    public RayTracingObject rotate(double degX, double degY, double degZ) {
         return this;
     }
 

@@ -76,23 +76,20 @@ public class Scene {
         Vector currentPosition;
         double traveledDistance = 0;
 
-        for (int i = 0; i < Config.MAX_STEPS; i++) {
+        while (traveledDistance < Config.MAX_DIST) {
             currentPosition = getPointOnRay(origin, direction, traveledDistance);
             double minDistance = Double.MAX_VALUE;
 
             for (RayMarchingObject obj : objects) {
-                double distance = obj.getSignedDistance(currentPosition);
+                double distance = Math.abs(obj.getSignedDistance(currentPosition));
     
-                if (Math.abs(distance) <= Config.RAY_HIT_THRESHOLD) {
-                    return obj.material.shade(currentPosition, obj.getNormal(currentPosition));
+                if (distance <= Config.RAY_HIT_THRESHOLD) {
+                    return obj.material.shade(direction, currentPosition, obj.getNormal(currentPosition), depth);
                 }
                 if (distance < minDistance)
                     minDistance = distance;
             }
             traveledDistance += minDistance;
-            if (traveledDistance > Config.MAX_DIST) {
-                break;
-            }
         }
         return new Color();
     }

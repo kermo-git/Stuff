@@ -7,7 +7,7 @@ import graphics3D.raytracing.RayIntersection;
 public abstract class RayTracingObject {
     public Material material;
 
-    public abstract RayTracingObject rotate(double rotX, double rotY, double rotZ);
+    public abstract RayTracingObject rotate(double degX, double degY, double degZ);
     public abstract RayTracingObject translate(double x, double y, double z);
     
     public abstract RayIntersection getIntersection(Vector rayOrigin, Vector rayDirection);

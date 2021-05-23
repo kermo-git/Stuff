@@ -25,11 +25,8 @@ public class Plane extends RayTracingObject {
     }
 
     @Override
-    public RayTracingObject rotate(double rotX, double rotY, double rotZ) {
-        Matrix rotation = 
-            Matrix.rotateAroundX(rotX).combine(
-            Matrix.rotateAroundY(rotY)).combine(
-            Matrix.rotateAroundZ(rotZ));
+    public RayTracingObject rotate(double degX, double degZ, double degY) {
+        Matrix rotation = Matrix.rotateDeg(degX, degY, degZ);
 
         rotation.transform(normal);
         rotation.transform(point);

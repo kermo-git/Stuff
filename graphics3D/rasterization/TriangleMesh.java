@@ -22,11 +22,8 @@ public class TriangleMesh {
      * TRANSFORMATIONS *
      * * * * * * * * * */
 
-    public TriangleMesh rotate(double rotX, double rotY, double rotZ) {
-        Matrix rotation = 
-            Matrix.rotateAroundX(rotX).combine(
-            Matrix.rotateAroundY(rotY)).combine(
-            Matrix.rotateAroundZ(rotZ));
+    public TriangleMesh rotate(double degX, double degY, double degZ) {
+        Matrix rotation = Matrix.rotateDeg(degX, degY, degZ);
         
         for (Vertex vertex : vertices) {
             rotation.transform(vertex);

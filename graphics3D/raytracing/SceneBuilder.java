@@ -38,7 +38,7 @@ public class SceneBuilder {
             new Sphere(new GlassMaterial(), new Vector(-5, 15, 23), 5),
 
             new Cylinder(PhongMaterial.COPPER(), 20, 6)
-            .rotate(-0.49 * Math.PI, -0.2 * Math.PI, 0)
+            .rotate(-88.2, -36, 0)
             .translate(4, 22, 40),
 
             new Box(
