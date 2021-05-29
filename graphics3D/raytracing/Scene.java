@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.awt.image.BufferedImage;
 
-import graphics3D.raytracing.shapes.RayTracingObject;
+import graphics3D.raytracing.shapes.RTobject;
 import graphics3D.utils.Camera;
 import graphics3D.utils.Color;
 import graphics3D.utils.Vector;
@@ -16,7 +16,7 @@ public class Scene {
     public static Color[][] frameBuffer;
 
     public static List<Light> lights;
-    public static List<RayTracingObject> objects;
+    public static List<RTobject> objects;
 
 
     public static void clearScene() {
@@ -29,7 +29,7 @@ public class Scene {
     }
     static { clearScene(); }
 
-    public static void addObjects(RayTracingObject ...newShapes) {
+    public static void addObjects(RTobject ...newShapes) {
         objects.addAll(Arrays.asList(newShapes));
     }
     public static void addLights(Light ...newLights) {
@@ -49,8 +49,8 @@ public class Scene {
                 ray = camera.generateRay(x, y);
                 minDistance = Double.MAX_VALUE;
         
-                for (RayTracingObject obj : objects) {
-                    RayIntersection hit = obj.getIntersection(camera.location, ray);
+                for (RTobject obj : objects) {
+                    RayHit hit = obj.getIntersection(camera.location, ray);
                     if (hit != null && hit.distance < minDistance) {
                         minDistance = hit.distance;
                     }
@@ -101,10 +101,10 @@ public class Scene {
             return new Color();
         }
         double minDistance = Double.MAX_VALUE;
-        RayIntersection hit = null;
+        RayHit hit = null;
 
-        for (RayTracingObject object : objects) {
-            RayIntersection tmpHit = object.getIntersection(origin, direction);
+        for (RTobject object : objects) {
+            RayHit tmpHit = object.getIntersection(origin, direction);
             if (tmpHit != null && tmpHit.distance < minDistance) {
                 minDistance = tmpHit.distance;
                 hit = tmpHit;

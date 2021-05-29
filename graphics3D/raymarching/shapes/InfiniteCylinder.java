@@ -2,7 +2,7 @@ package graphics3D.raymarching.shapes;
 
 import graphics3D.utils.Vector;
 
-public class InfiniteCylinder extends TransformableObject {
+public class InfiniteCylinder extends OriginRMObject {
     private double radius;
 
     public InfiniteCylinder(double radius) {

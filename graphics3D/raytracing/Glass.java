@@ -3,26 +3,19 @@ package graphics3D.raytracing;
 import graphics3D.utils.Color;
 import graphics3D.utils.Vector;
 
-public class GlassMaterial extends Material {
+public class Glass extends Material {
     Color color = new Color(0xFFFFFF);
     double ior = 1.5, reflectivity = 0;
 
-    public GlassMaterial() {}
+    public Glass() {}
 
-    public GlassMaterial(double ior) {
-        this.ior = ior;
+    public Glass(int colorHEX) {
+        this.color = new Color(colorHEX);
     }
-    public GlassMaterial(Color color) {
-        this.color = new Color(color);
-    }
-    public GlassMaterial(Color color, double ior) {
-        this.color = new Color(color);
-        this.ior = ior;
-    }
-    public GlassMaterial(Color color, double ior, double reflectivity) {
-        this.color = new Color(color);
+    public Glass withProperties(double ior, double reflectivity) {
         this.ior = ior;
         this.reflectivity = reflectivity;
+        return this;
     }
 
     @Override

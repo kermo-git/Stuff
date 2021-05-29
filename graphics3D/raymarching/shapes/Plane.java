@@ -3,7 +3,7 @@ package graphics3D.raymarching.shapes;
 import graphics3D.utils.Matrix;
 import graphics3D.utils.Vector;
 
-public class Plane extends RayMarchingObject {
+public class Plane extends RMobject {
     private Vector referencePoint = new Vector(0, 0, 0);
     private Vector normal = new Vector(0, 1, 0);
     private double planeBias = 0;
@@ -17,7 +17,7 @@ public class Plane extends RayMarchingObject {
     }
     
     @Override
-    public RayMarchingObject rotate(double degX, double degY, double degZ) {
+    public RMobject rotate(double degX, double degY, double degZ) {
         Matrix rotation = Matrix.rotateDeg(degX, degY, degZ);
         
         rotation.transform(referencePoint);
@@ -29,7 +29,7 @@ public class Plane extends RayMarchingObject {
     }
 
     @Override
-    public RayMarchingObject translate(double x, double y, double z) {
+    public RMobject translate(double x, double y, double z) {
         referencePoint.x += x;
         referencePoint.y += y;
         referencePoint.z += z;
@@ -46,5 +46,4 @@ public class Plane extends RayMarchingObject {
     public Vector getNormal(Vector point) {
         return new Vector(normal);
     }
-    
 }

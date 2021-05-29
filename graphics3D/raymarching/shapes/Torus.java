@@ -2,7 +2,7 @@ package graphics3D.raymarching.shapes;
 
 import graphics3D.utils.Vector;
 
-public class Torus extends TransformableObject {
+public class Torus extends OriginRMObject {
     private double mainRadius, tubeRadius;
 
     public Torus(double mainRadius, double tubeRadius) {

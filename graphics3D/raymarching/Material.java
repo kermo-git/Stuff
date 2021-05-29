@@ -27,6 +27,7 @@ public abstract class Material {
     }
 
     // http://web.cse.ohio-state.edu/~shen.94/681/Site/Slides_files/reflection_refraction.pdf
+    
     public static double schlick(double n1, double n2, double cos) {
         double R0 = (n1 - n2) / (n1 + n2);
         double _cos = 1 - cos;

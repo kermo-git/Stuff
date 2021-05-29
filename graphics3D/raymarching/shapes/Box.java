@@ -2,7 +2,7 @@ package graphics3D.raymarching.shapes;
 
 import graphics3D.utils.Vector;
 
-public class Box extends TransformableObject {
+public class Box extends OriginRMObject {
     private double sx, sy, sz;
 
     public Box(double sizeX, double sizeY, double sizeZ) {

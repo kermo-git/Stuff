@@ -95,7 +95,7 @@ public class TriangleMesh {
     }
 
 
-    public void buildSurface(List<Vertex> row1, List<Vertex> row2, boolean isLoop) {
+    private void buildSurface(List<Vertex> row1, List<Vertex> row2, boolean isLoop) {
         Iterator<Vertex> it1 = row1.iterator();
         Iterator<Vertex> it2 = row2.iterator();
 
@@ -122,10 +122,10 @@ public class TriangleMesh {
             addTriangle(start_1, start_2, prev_2);
         }
     }
-    public void buildPrismSurface(List<Vertex> circle1, List<Vertex> circle2) {
+    private void buildPrismSurface(List<Vertex> circle1, List<Vertex> circle2) {
         buildSurface(circle1, circle2, true);
     }
-    public void buildRibbon(List<Vertex> row1, List<Vertex> row2) {
+    private void buildRibbon(List<Vertex> row1, List<Vertex> row2) {
         buildSurface(row1, row2, false);
     }
 

@@ -1,20 +1,18 @@
 package graphics3D.rasterization;
 
-import graphics3D.utils.Color;
+import java.awt.image.BufferedImage;
+
 import graphics3D.utils.Vector;
 import graphics3D.noise.*;
 
 public class SceneBuilder {
-    public static void buildSingleObjectScene() {
+    
+    public static BufferedImage renderSingleObject() {
         Scene.clearScene();
         Scene.camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 1));
 
         Scene.addLights(
-            new Light(
-                new Vector(-5, 0, 0),
-                new Vector(0, 0, 7),
-                new Color(0xFFFFFF)
-            )
+            new Light(-5, 0, 0).lookAt(0, 0, 7)
         );
         Scene.addObjects(
             new TriangleMesh(Material.JADE())
@@ -22,24 +20,17 @@ public class SceneBuilder {
                 .rotate(-18, 0, 0)
                 .translate(0, 0, 7)
         );
+        return Scene.render();
     }
 
 
-    public static void buildScene() {
+    public static BufferedImage buildScene() {
         Scene.clearScene();
         Scene.camera.lookAt(new Vector(), new Vector(0, 0, 1));
 
         Scene.addLights(
-            new Light(
-                new Vector(-4, -1, 0),
-                new Vector(0, 0, 7), 
-                new Color(0xFF99FF)
-            ),
-            new Light(
-                new Vector(4, 4, 0),
-                new Vector(0, 0, 7), 
-                new Color(0x66FF66)
-            )
+            new Light(new Vector(-4, -1, 0), 0xFF99FF).lookAt(0, 0, 7),
+            new Light(new Vector(4, 4, 0), 0x66FF66).lookAt(0, 0, 7)
         );
         Scene.addObjects(
             new SmoothMesh(Material.SILVER())
@@ -63,5 +54,6 @@ public class SceneBuilder {
                 .rotate(0, 18, 0)
                 .translate(-5, 2, 12)
         );
+        return Scene.render();
     }
 }

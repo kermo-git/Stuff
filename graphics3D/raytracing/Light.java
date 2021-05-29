@@ -8,11 +8,12 @@ public class Light {
     public Color color = new Color(0xFFFFFF);
 
     public Light() {}
-    public Light(Vector location) {
-        this.location = location;
+
+    public Light(double x, double y, double z) {
+        location = new Vector(x, y, z);
     }
-    public Light(Vector location, Color color) {
+    public Light(Vector location, int colorHEX) {
         this.location = location;
-        this.color = color;
+        this.color = new Color(colorHEX);
     }
 }

@@ -12,8 +12,7 @@ public class GraphicsDisplay extends JPanel {
     private static BufferedImage image;
 
     static {
-        SceneBuilder.buildScene();
-        image = Scene.render();
+        image = SceneBuilder.renderObject();
     }
 
     @Override

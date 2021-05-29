@@ -2,12 +2,12 @@ package graphics3D.raymarching.shapes;
 
 import graphics3D.utils.Vector;
 
-public class Repeat extends RayMarchingObject {
-    RayMarchingObject obj;
+public class Repeat extends RMobject {
+    RMobject obj;
     double unitX, unitY, unitZ;
     double halfUnitX, halfUnitY, halfUnitZ;
 
-    public Repeat(RayMarchingObject obj, double unitX, double unitY, double unitZ) {
+    public Repeat(RMobject obj, double unitX, double unitY, double unitZ) {
         this.obj = obj;
 
         this.unitX = unitX;
@@ -20,13 +20,13 @@ public class Repeat extends RayMarchingObject {
     }
 
     @Override
-    public RayMarchingObject rotate(double degX, double degY, double degZ) {
+    public RMobject rotate(double degX, double degY, double degZ) {
         obj.rotate(degX, degY, degZ);
         return this;
     }
 
     @Override
-    public RayMarchingObject translate(double x, double y, double z) {
+    public RMobject translate(double x, double y, double z) {
         obj.translate(x, y, z);
         return this;
     }

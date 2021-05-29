@@ -5,41 +5,41 @@ import graphics3D.raymarching.Material;
 import graphics3D.raymarching.Opaque;
 import graphics3D.utils.Vector;
 
-public abstract class RayMarchingObject {    
+public abstract class RMobject {    
     public abstract double getSignedDistance(Vector point);
-    public abstract RayMarchingObject rotate(double degX, double degY, double degZ);
-    public abstract RayMarchingObject translate(double x, double y, double z);
+    public abstract RMobject rotate(double degX, double degY, double degZ);
+    public abstract RMobject translate(double x, double y, double z);
 
     public Material material = new Opaque();
 
-    public RayMarchingObject setMaterial(Material material) {
+    public RMobject setMaterial(Material material) {
         this.material = material;
         return this;
     }
 
 
-    public static double abs(double a) {
+    static double abs(double a) {
         return (a < 0) ? -a : a;
     }
-    public static double max(double a, double b) {
+    static double max(double a, double b) {
         return (a > b) ? a : b;
     }
-    public static double min(double a, double b) {
+    static double min(double a, double b) {
         return (a < b) ? a : b;
     }
 
     
-    private Vector incrementX(Vector v, double dx) {
+    static Vector incrementX(Vector v, double dx) {
         return new Vector(
             v.x + dx, v.y, v.z
         );
     }
-    private Vector incrementY(Vector v, double dy) {
+    static Vector incrementY(Vector v, double dy) {
         return new Vector(
             v.x, v.y + dy, v.z
         );
     }
-    private Vector incrementZ(Vector v, double dz) {
+    static Vector incrementZ(Vector v, double dz) {
         return new Vector(
             v.x, v.y, v.z + dz
         );

@@ -1,16 +1,14 @@
 package graphics3D.raytracing.shapes;
 
-import graphics3D.raytracing.Material;
-import graphics3D.raytracing.RayIntersection;
+import graphics3D.raytracing.RayHit;
 import graphics3D.utils.Vector;
 
-public class Cone extends OriginRayTracingObject {
+public class Cone extends OriginRTObject {
     private double height;
     private double _2rSqr_div_h, rSqr_div_hSqr, rSqr, normalTan;
     private Vector bottomNormal = new Vector(0, 1, 0);
 
-    public Cone(Material material, double height, double radius) {
-        this.material = material;
+    public Cone(double height, double radius) {
         this.height = height;
 
         rSqr = radius * radius;
@@ -19,7 +17,7 @@ public class Cone extends OriginRayTracingObject {
         normalTan = radius / height;
     }
     @Override
-    public RayIntersection getIntersectionAtObjectSpace(Vector o, Vector d) {
+    public RayHit getIntersectionAtObjectSpace(Vector o, Vector d) {
         double a = 
             + d.x * d.x 
             + d.z * d.z 
@@ -53,7 +51,7 @@ public class Cone extends OriginRayTracingObject {
             double z = hitPoint.z;
 
             if (x * x + z * z <= rSqr) {
-                return new RayIntersection(
+                return new RayHit(
                     distanceToBottomPlane, 
                     hitPoint, 
                     bottomNormal, 
@@ -73,7 +71,7 @@ public class Cone extends OriginRayTracingObject {
             normal.y = normalTan;
             normal.normalize();
 
-            return new RayIntersection(
+            return new RayHit(
                 distanceToConeSurface, 
                 hitPoint, 
                 normal,

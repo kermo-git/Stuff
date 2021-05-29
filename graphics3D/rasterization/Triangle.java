@@ -36,6 +36,9 @@ public class Triangle {
     private static double max(double a, double b) {
         return (a > b) ? a : b;
     }
+    private static double abs(double a) {
+        return (a < 0) ? -a : a;
+    }
 
 
     public void rasterize(double[][] depthMap, Color[][] frameBuffer) {
@@ -94,8 +97,8 @@ public class Triangle {
                 // and the normal should be reversed for shading calculations.
                 
                 if (s1 < 0 && s2 < 0 && s3 < 0) {
-                    w1 = Math.abs(s1 / s);
-                    w2 = Math.abs(s2 / s);
+                    w1 = abs(s1 / s);
+                    w2 = abs(s2 / s);
                     w3 = 1 - w1 - w2;
                     zRec = w1 * p1.zRec + w2 * p2.zRec + w3 * p3.zRec;
 
@@ -118,9 +121,6 @@ public class Triangle {
         surfacePoint.add(w3 * v3.projection.zRec, v3);
         surfacePoint.scale(1.0 / zRec);
 
-        return material.shade(
-            surfacePoint, 
-            normal
-        );
+        return material.shade(surfacePoint, normal);
     };
 }

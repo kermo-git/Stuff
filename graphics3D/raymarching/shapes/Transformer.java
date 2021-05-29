@@ -1,38 +1,42 @@
 package graphics3D.raymarching.shapes;
 
-import graphics3D.noise.Noise;
 import graphics3D.raymarching.Config;
-import graphics3D.utils.Matrix;
 import graphics3D.utils.Vector;
+import graphics3D.utils.Matrix;
+import graphics3D.noise.Noise;
 
-public abstract class TransformableObject extends RayMarchingObject {
-    private Matrix transformation = new Matrix();
-    private Matrix transformationInv = new Matrix();
+public class Transformer extends RMobject {
+    OriginRMObject obj;
+    Matrix fullInv;
+
+    public Transformer(OriginRMObject obj) {
+        this.obj = obj;
+        fullInv = obj.fullInv;
+    }
 
     @Override
-    public RayMarchingObject rotate(double degX, double degY, double degZ) {
-        transformation = transformation.combine(
-            Matrix.rotateDeg(degX, degY, degZ)
-        );
-        transformationInv = transformation.inverse();
+    public RMobject rotate(double degX, double degY, double degZ) {
+        obj.rotate(degX, degY, degZ);
+        fullInv = obj.fullInv;
         return this;
     }
 
     @Override
-    public RayMarchingObject translate(double x, double y, double z) {
-        transformation = transformation.combine(Matrix.translate(x, y, z));
-        transformationInv = transformation.inverse();
+    public RMobject translate(double x, double y, double z) {
+        obj.translate(x, y, z);
+        fullInv = obj.fullInv;
         return this;
     }
+
     private double round = 0;
 
-    public TransformableObject setRound(double round) {
+    public Transformer setRound(double round) {
         this.round = round;
         return this;
     }
     private double twist = -1;
 
-    public TransformableObject setTwist(double twist) {
+    public Transformer setTwist(double twist) {
         this.twist = twist;
         return this;
     }
@@ -41,7 +45,7 @@ public abstract class TransformableObject extends RayMarchingObject {
     double elY = 0;
     double elZ = 0;
 
-    public TransformableObject elongate(double elongationX, double elongationY, double elongationZ) {
+    public Transformer elongate(double elongationX, double elongationY, double elongationZ) {
         elongation = true;
         elX = 0.5 * elongationX;
         elY = 0.5 * elongationY;
@@ -53,7 +57,7 @@ public abstract class TransformableObject extends RayMarchingObject {
     double noiseZoom;
     double noiseAmplifier;
 
-    public TransformableObject crumble(Noise noise, double zoom, double amplifier) {
+    public Transformer crumble(Noise noise, double zoom, double amplifier) {
         this.noise = noise;
         noiseZoom = zoom;
         noiseAmplifier = zoom * amplifier;
@@ -80,7 +84,7 @@ public abstract class TransformableObject extends RayMarchingObject {
 
     @Override
     public double getSignedDistance(Vector point) {
-        Vector _point = transformationInv.getTransformation(point);
+        Vector _point = fullInv.getTransformation(point);
         double multiplier = 1;
         
         if (twist > 0) {
@@ -93,19 +97,18 @@ public abstract class TransformableObject extends RayMarchingObject {
         if (elongation) {
             elongate(_point);
         }
-        double distance = getSignedDistanceAtObjectSpace(_point) - round;
+
+        double distance = obj.getSignedDistanceAtObjectSpace(_point) - round;
 
         if (noise != null) {
             distance += noise.noise(
-                point.x / noiseZoom, 
-                point.y / noiseZoom, 
-                point.z / noiseZoom
+                _point.x / noiseZoom, 
+                _point.y / noiseZoom, 
+                _point.z / noiseZoom
             ) * noiseAmplifier;
 
             multiplier = Config.INACCURACY_MULTIPLIER;
         }
         return distance * multiplier;
     }
-
-    protected abstract double getSignedDistanceAtObjectSpace(Vector point);
 }

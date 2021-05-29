@@ -6,17 +6,17 @@ import graphics3D.utils.Vector;
 public class Glass extends Material {
     Color color = new Color(0xFFFFFF);
     double reflectivity = 0, ior = 1.5;
-    double oppositeReflectivity = 1;
+    double nonReflectivity = 1;
 
     public Glass() {}
     public Glass(int colorHEX) {
         this.color = new Color(colorHEX);
     }
-    public Glass(int colorHEX, double reflectivity, double ior) {
-        this.color = new Color(colorHEX);
+    public Glass withProperties(double ior, double reflectivity) {
         this.reflectivity = reflectivity;
-        oppositeReflectivity = 1 - reflectivity;
+        nonReflectivity = 1 - reflectivity;
         this.ior = ior;
+        return this;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class Glass extends Material {
                 } else {
                     reflectionRatio = schlick(1, ior, iCos);
                 }
-                reflectionRatio = reflectivity + oppositeReflectivity * reflectionRatio;
+                reflectionRatio = reflectivity + nonReflectivity * reflectionRatio;
                 refractionColor.scale(1 - reflectionRatio);
                 result.scale(reflectionRatio);
             }

@@ -2,7 +2,7 @@ package graphics3D.raymarching.shapes;
 
 import graphics3D.utils.Vector;
 
-public class Cylinder extends TransformableObject {
+public class Cylinder extends OriginRMObject {
     private double radius;
     private double halfHeight;
 

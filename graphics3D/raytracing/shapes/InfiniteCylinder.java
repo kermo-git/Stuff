@@ -1,20 +1,18 @@
 package graphics3D.raytracing.shapes;
 
-import graphics3D.raytracing.Material;
-import graphics3D.raytracing.RayIntersection;
+import graphics3D.raytracing.RayHit;
 import graphics3D.utils.Vector;
 
-public class InfiniteCylinder extends OriginRayTracingObject {
+public class InfiniteCylinder extends OriginRTObject {
     private double radiusSquared, radiusRec;
 
-    public InfiniteCylinder(Material material, double radius) {
-        this.material = material;
+    public InfiniteCylinder(double radius) {
         radiusSquared = radius * radius;
         radiusRec = 1 / radius;
     }
     
     @Override
-    public RayIntersection getIntersectionAtObjectSpace(Vector o, Vector d) {
+    public RayHit getIntersectionAtObjectSpace(Vector o, Vector d) {
         double a = d.x * d.x + d.z * d.z;
         double b = 2 * (o.x * d.x + o.z * d.z);
         double c = o.x * o.x + o.z * o.z - radiusSquared;
@@ -43,6 +41,6 @@ public class InfiniteCylinder extends OriginRayTracingObject {
         normal.x = hitPoint.x * radiusRec;
         normal.z = hitPoint.z * radiusRec;
 
-        return new RayIntersection(distance, hitPoint, normal, material);
+        return new RayHit(distance, hitPoint, normal, material);
     }
 }

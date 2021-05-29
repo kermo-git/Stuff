@@ -1,6 +1,6 @@
 package graphics3D.raymarching;
 
-import graphics3D.raymarching.shapes.RayMarchingObject;
+import graphics3D.raymarching.shapes.RMobject;
 import graphics3D.utils.Color;
 import graphics3D.utils.Vector;
 
@@ -10,18 +10,18 @@ public class Opaque extends Material {
     Color specular = new Color(0xFFFFFF);
     double shininess = 0.25 * 128;
 
-    
     public Opaque() {}
-    public Opaque(Color ambient, Color diffuse, Color specular, double shininess) {
-        this.ambient = new Color(ambient);
-        this.diffuse = new Color(diffuse);
-        this.specular = new Color(specular);
+    
+    public Opaque(int colorHEX, double shininess) {
+        this.ambient = new Color(colorHEX);
+        ambient.scale(0.1);
+        this.diffuse = new Color(colorHEX);
         this.shininess = shininess;
     }
-    double reflectivity = 0, ior = 1.5;
+    double reflectivity = 0, ior = 1.3;
     double oppositeReflectivity = 1;
 
-    public Opaque setReflectivity(double reflectivity, double ior) {
+    public Opaque withProperties(double reflectivity, double ior) {
         this.reflectivity = reflectivity;
         oppositeReflectivity = 1 - reflectivity;
         this.ior = ior;
@@ -99,7 +99,7 @@ public class Opaque extends Material {
             currentPosition = getPointOnRay(surfacePoint, lightVector, currentDistance);
             double minDistance = Double.MAX_VALUE;
 
-            for (RayMarchingObject obj : Scene.objects) {
+            for (RMobject obj : Scene.objects) {
                 double distance = Math.abs(obj.getSignedDistance(currentPosition));
     
                 if (distance <= Config.RAY_HIT_THRESHOLD)
@@ -113,6 +113,13 @@ public class Opaque extends Material {
             currentDistance += minDistance;
         }
         return result;
+    }
+
+    private Opaque(Color ambient, Color diffuse, Color specular, double shininess) {
+        this.ambient = new Color(ambient);
+        this.diffuse = new Color(diffuse);
+        this.specular = new Color(specular);
+        this.shininess = shininess;
     }
 
     // http://devernay.free.fr/cours/opengl/materials.html

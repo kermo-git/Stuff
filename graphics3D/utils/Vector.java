@@ -97,26 +97,4 @@ public class Vector {
             x * v.y - y * v.x
         );
     }
-
-    
-    public Vector getOppositeLightReflection(Vector normal) {
-        double dot = 2 * this.dot(normal);
-
-        return new Vector(
-            dot * normal.x - this.x,
-            dot * normal.y - this.y,
-            dot * normal.z - this.z
-        );
-    }
-
-
-    public Vector getLightReflection(Vector normal) {
-        double dot = 2 * this.dot(normal);
-        
-        return new Vector(
-            this.x - dot * normal.x,
-            this.y - dot * normal.y,
-            this.z - dot * normal.z
-        );
-    }
 }

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.awt.image.BufferedImage;
 
-import graphics3D.raymarching.shapes.RayMarchingObject;
+import graphics3D.raymarching.shapes.RMobject;
 import graphics3D.utils.Camera;
 import graphics3D.utils.Color;
 import graphics3D.utils.Vector;
@@ -16,7 +16,7 @@ public class Scene {
     public static Color[][] frameBuffer;
 
     public static List<Light> lights;
-    public static List<RayMarchingObject> objects;
+    public static List<RMobject> objects;
 
 
     public static void clearScene() {
@@ -29,7 +29,7 @@ public class Scene {
     }
     static { clearScene(); }
 
-    public static void addObjects(RayMarchingObject ...newShapes) {
+    public static void addObjects(RMobject ...newShapes) {
         objects.addAll(Arrays.asList(newShapes));
     }
     public static void addLights(Light ...newLights) {
@@ -80,7 +80,7 @@ public class Scene {
             currentPosition = getPointOnRay(origin, direction, traveledDistance);
             double minDistance = Double.MAX_VALUE;
 
-            for (RayMarchingObject obj : objects) {
+            for (RMobject obj : objects) {
                 double distance = Math.abs(obj.getSignedDistance(currentPosition));
     
                 if (distance <= Config.RAY_HIT_THRESHOLD) {

@@ -1,21 +1,17 @@
 package graphics3D.raytracing.shapes;
 
-import graphics3D.raytracing.Material;
-import graphics3D.raytracing.RayIntersection;
+import graphics3D.raytracing.RayHit;
 import graphics3D.utils.Matrix;
 import graphics3D.utils.Vector;
 
-public class Plane extends RayTracingObject {
+public class Plane extends RTobject {
     Vector normal = new Vector(0, 1, 0);
     Vector oppositeNormal = new Vector(0, -1, 0);
     Vector point = new Vector(0, 0, 0);
     double planeBias = 0;
 
-    public Plane(Material material) {
-        this.material = material;
-    }
-    public Plane(Material material, Vector point, Vector normal) {
-        this.material = material;
+    public Plane() {}
+    public Plane(Vector point, Vector normal) {
         this.point = point;
         this.normal = normal;
         
@@ -25,7 +21,7 @@ public class Plane extends RayTracingObject {
     }
 
     @Override
-    public RayTracingObject rotate(double degX, double degZ, double degY) {
+    public RTobject rotate(double degX, double degZ, double degY) {
         Matrix rotation = Matrix.rotateDeg(degX, degY, degZ);
 
         rotation.transform(normal);
@@ -39,7 +35,7 @@ public class Plane extends RayTracingObject {
     }
 
     @Override
-    public RayTracingObject translate(double x, double y, double z) {
+    public RTobject translate(double x, double y, double z) {
         Matrix translation = Matrix.translate(x, y, z);
         translation.transform(point);
         planeBias = point.dot(normal);
@@ -47,7 +43,7 @@ public class Plane extends RayTracingObject {
     }
 
     @Override
-    public RayIntersection getIntersection(Vector rayOrigin, Vector rayDirection) {
+    public RayHit getIntersection(Vector rayOrigin, Vector rayDirection) {
         double normalDotDirection = normal.dot(rayDirection);
         if (normalDotDirection == 0) {
             return null;
@@ -57,6 +53,6 @@ public class Plane extends RayTracingObject {
             return null;
         }
         Vector hitPoint = getPointOnRay(rayOrigin, rayDirection, distance);
-        return new RayIntersection(distance, hitPoint, oppositeNormal, material);
+        return new RayHit(distance, hitPoint, oppositeNormal, material);
     }
 }

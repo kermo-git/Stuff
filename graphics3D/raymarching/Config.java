@@ -12,7 +12,7 @@ public class Config {
     
     public static final double INACCURACY_MULTIPLIER = 0.5;
 
-    public static final double RAY_HIT_BIAS = 0.001;
+    public static final double RAY_HIT_BIAS = 0.005;
     
     public static final boolean SHADOWS = true;
     public static final boolean SOFT_SHADOWS = true;
