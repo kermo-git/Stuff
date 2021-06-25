@@ -7,7 +7,7 @@ import graphics3D.noise.*;
 
 public class SceneBuilder {
     
-    public static BufferedImage renderSingleObject() {
+    public static BufferedImage renderObject() {
         Scene.clearScene();
         Scene.camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 1));
 
@@ -17,14 +17,14 @@ public class SceneBuilder {
         Scene.addObjects(
             new TriangleMesh(Material.JADE())
                 .buildTorus(1.5, 3, 20)
-                .rotate(-18, 0, 0)
+                .rotate(-20, 0, 0)
                 .translate(0, 0, 7)
         );
         return Scene.render();
     }
 
 
-    public static BufferedImage buildScene() {
+    public static BufferedImage renderScene() {
         Scene.clearScene();
         Scene.camera.lookAt(new Vector(), new Vector(0, 0, 1));
 

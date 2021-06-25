@@ -31,9 +31,9 @@ public class SceneBuilder {
 
         Scene.addLights(new Light(-14, 29, 1));
         Scene.addObjects(
-            // new Cone(15, 7) // height = 15, radius = 7
-            // .setMaterial(Opaque.EMERALD())
-            // .translate(7, 0, 30),
+            new Cone(15, 7)
+            .setMaterial(Opaque.EMERALD())
+            .translate(7, 0, 30),
 
             new Sphere(-5, 15, 23, 5)
             .setMaterial(new Glass()),

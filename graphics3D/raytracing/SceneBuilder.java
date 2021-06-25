@@ -6,17 +6,20 @@ import graphics3D.raytracing.shapes.*;
 import graphics3D.utils.Vector;
 
 public class SceneBuilder {
-    public static BufferedImage renderSingleObject() {
+    public static BufferedImage renderObject() {
         Scene.clearScene();
         Scene.camera.lookAt(new Vector(0, 0, 0), new Vector(0, 0, 1));
 
         Scene.addLights(new Light(0, 0, 0));
         Scene.addObjects(
-            new Sphere(0, 0, 20, 5)
+            new Cylinder(20, 5)
             .setMaterial(Opaque.COPPER())
+            .rotate(90, -30, 0)
+            .translate(0, 0, 30)
         );
         return Scene.render();
     }
+
     public static BufferedImage renderScene() {
         Scene.clearScene();
         Scene.camera.lookAt(new Vector(0, 15, 1), new Vector(0, 15, 2));

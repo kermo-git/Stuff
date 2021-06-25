@@ -11,9 +11,6 @@ import graphics3D.utils.Color;
 
 public class Scene {
     public static Camera camera;
-    public static double[][] depthMap;
-    public static Color[][] frameBuffer;
-
     public static List<Light> lights;
     public static List<TriangleMesh> objects;
 
@@ -36,7 +33,7 @@ public class Scene {
 
 
     public static BufferedImage renderDepthMap() {
-        depthMap = new double[camera.numPixelsX][camera.numPixelsY];
+        double[][] depthMap = new double[camera.numPixelsX][camera.numPixelsY];
 
         for (TriangleMesh obj : objects) {
             for (Vertex vertex : obj.vertices) {
@@ -55,7 +52,6 @@ public class Scene {
 
 
     public static BufferedImage render() {
-        frameBuffer = Color.getArray(camera.numPixelsX, camera.numPixelsY);
         long start = System.nanoTime();
         
         if (Config.SHADOWS) {
@@ -72,7 +68,8 @@ public class Scene {
                 }
             }
         }
-        depthMap = new double[camera.numPixelsX][camera.numPixelsY];
+        Color[][] frameBuffer = Color.getArray(camera.numPixelsX, camera.numPixelsY);
+        double[][] depthMap = new double[camera.numPixelsX][camera.numPixelsY];
 
         for (TriangleMesh obj : objects) {
             for (Vertex vertex : obj.vertices) {

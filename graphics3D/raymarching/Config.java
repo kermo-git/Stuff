@@ -15,7 +15,7 @@ public class Config {
     public static final double RAY_HIT_BIAS = 0.005;
     
     public static final boolean SHADOWS = true;
-    public static final boolean SOFT_SHADOWS = true;
+    public static final boolean SOFT_SHADOWS = false;
 
     public static final boolean REFLECTIONS = true;
     public static final int MAX_BOUNCES = 5;
